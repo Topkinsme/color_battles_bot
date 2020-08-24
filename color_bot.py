@@ -700,6 +700,7 @@ async def endgame(ctx):
         role = discord.utils.get(guildd.roles, name="Spectator")
         await userr.add_roles(role)
     await ctx.send("The game has ended!")
+    dump()
     
 @bot.command(aliases=["k"])
 @commands.has_role("Helpers")
