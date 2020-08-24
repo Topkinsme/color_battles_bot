@@ -1,2 +1,3 @@
-# color_battles_bot
-The bot top uses to host Color Battles on his discord server.
+# color_battle_bot
+Ignore _pycache_ , .replit , poetry.lock , pyproject.toml
+These files are from my hosting site
