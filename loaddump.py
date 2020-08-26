@@ -8,6 +8,10 @@ dbpass=str(os.environ.get("dbpass"))
 client = pymongo.MongoClient("mongodb+srv://Topkinsme:"+dbpass+"@top-cluster.x2y8s.mongodb.net/<dbname>?retryWrites=true&w=majority")
 db = client.test
 
+data={}
+gamestate=0
+spamchannel=""
+
 async def load(bot):
       #print("Working boi!")
       global data

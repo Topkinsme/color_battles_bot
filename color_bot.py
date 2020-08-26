@@ -17,9 +17,9 @@ from dhooks import Webhook
 import os
 import pymongo,dns
 import keep_alive
-from cogs.roleinfo import *
-from loaddump import *
-
+from cogs.roleinfo import rolehelp
+#from loaddump import load,dump,data,gamestate
+import loaddump
 
 token = str(os.environ.get("tokeno"))
 dbpass=str(os.environ.get("dbpass"))
@@ -58,7 +58,7 @@ async def on_ready():
       else:
           await bot.change_presence(activity=discord.Game(name=" Colour battles!", type=1))
       print("Working boi!")
-      await spamchannel.send("The bot is online!")
+      await loaddump.spamchannel.send("The bot is online!")
       
 
 
