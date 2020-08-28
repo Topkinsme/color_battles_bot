@@ -97,7 +97,7 @@ async def my_loop():
     earnd=[]
 
 
-@tasks.loop(seconds=10)
+@tasks.loop(minutes=60)
 async def my_looptwo():
     global data
     if int(gamestate)!=3:
@@ -320,6 +320,8 @@ async def reset(ctx):
         role = discord.utils.get(guildd.roles, name="Respawning")
         await userr.remove_roles(role)
         role = discord.utils.get(guildd.roles, name="Alive")
+        await userr.remove_roles(role)
+        role = discord.utils.get(guildd.roles, name="Players")
         await userr.remove_roles(role)
     for user in data['specters']:
         guildd=bot.get_guild(448888674944548874)
@@ -1343,7 +1345,7 @@ async def vault(ctx):
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
   try:
-    money=data['money'][team]
+    money=data['building'][team]['vault']
   except:
     money=0
   await ctx.send("Your team's vault has {}".format(money))
@@ -1440,7 +1442,7 @@ async def buy(ctx,thing,num:int=1):
       data['money'][ath]-=cost
       data['smarket']['inv'][ath]['sun']+=num
       data['smarket']['trades']['sun']+=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, it cost you {}. Check your inventory.".format(cost))
   elif thing == "😏" or thing ==2:
     cost=data['smarket']['stocks']['smirk']*num
     if data['money'][ath]<cost:
@@ -1451,7 +1453,7 @@ async def buy(ctx,thing,num:int=1):
       data['money'][ath]-=cost
       data['smarket']['inv'][ath]['smirk']+=num
       data['smarket']['trades']['smirk']+=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, it cost you {}. Check your inventory.".format(cost))
   elif thing == "😃" or thing ==3:
     cost=data['smarket']['stocks']['smile']*num
     if data['money'][ath]<cost:
@@ -1462,7 +1464,7 @@ async def buy(ctx,thing,num:int=1):
       data['money'][ath]-=cost
       data['smarket']['inv'][ath]['smile']+=num
       data['smarket']['trades']['smile']+=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, it cost you {}. Check your inventory.".format(cost))
   elif thing == "😂" or thing ==4:
     cost=data['smarket']['stocks']['joy']*num
     if data['money'][ath]<cost:
@@ -1473,7 +1475,7 @@ async def buy(ctx,thing,num:int=1):
       data['money'][ath]-=cost
       data['smarket']['inv'][ath]['joy']+=num
       data['smarket']['trades']['joy']+=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, it cost you {}. Check your inventory.".format(cost))
   elif thing == "😔" or thing ==5:
     cost=data['smarket']['stocks']['pens']*num
     if data['money'][ath]<cost:
@@ -1484,7 +1486,7 @@ async def buy(ctx,thing,num:int=1):
       data['money'][ath]-=cost
       data['smarket']['inv'][ath]['pens']+=num
       data['smarket']['trades']['pens']+=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, it cost you {}. Check your inventory.".format(cost))
   else:
     await ctx.send("Invalid stock id.")
   dump()
@@ -1515,7 +1517,7 @@ async def sell(ctx,thing,num:int=1):
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['sun']-=num
       data['smarket']['trades']['sun']-=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, you earned {}. Check your inventory.".format(cost))
   elif thing == "😏" or thing ==2:
     cost=data['smarket']['stocks']['smirk']*num
     if (data['smarket']['inv'][ath]['smirk'] - num)<0:
@@ -1524,7 +1526,7 @@ async def sell(ctx,thing,num:int=1):
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['smirk']-=num
       data['smarket']['trades']['smirk']-=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, you earned {}. Check your inventory.".format(cost))
   elif thing == "😃" or thing ==3:
     cost=data['smarket']['stocks']['smile']*num
     if (data['smarket']['inv'][ath]['smile'] - num)<0:
@@ -1533,7 +1535,7 @@ async def sell(ctx,thing,num:int=1):
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['smile']-=num
       data['smarket']['trades']['smile']-=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, you earned {}. Check your inventory.".format(cost))
   elif thing == "😂" or thing ==4:
     cost=data['smarket']['stocks']['joy']*num
     if (data['smarket']['inv'][ath]['joy'] - num)<0:
@@ -1542,7 +1544,7 @@ async def sell(ctx,thing,num:int=1):
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['joy']-=num
       data['smarket']['trades']['joy']-=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, you earned {}. Check your inventory.".format(cost))
   elif thing == "😔" or thing ==5:
     cost=data['smarket']['stocks']['pens']*num
     if (data['smarket']['inv'][ath]['pens'] - num)<0:
@@ -1551,10 +1553,25 @@ async def sell(ctx,thing,num:int=1):
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['pens']-=num
       data['smarket']['trades']['pens']-=num
-      await ctx.send("Transaction complete. Check your inventory.")
+      await ctx.send("Transaction complete, you earned {}. Check your inventory.".format(cost))
   else:
     await ctx.send("Invalid stock id.")
   dump()
+
+@bot.command(aliases=["pri"])
+@commands.has_role("Alive")
+async def price(ctx):
+  '''Use this to see the price of all stocks.'''
+  if data['smarket']['state']==0:
+    await ctx.send("The market it closed right now.")
+  a=data['smarket']['stocks']['sun']
+  b=data['smarket']['stocks']['smirk']
+  c=data['smarket']['stocks']['smile']
+  d=data['smarket']['stocks']['joy']
+  e=data['smarket']['stocks']['pens']
+  await ctx.send("Cost of :sunglasses: is {} \nCost of :smirk: is {} \nCost of :smiley: is {} \nCost of :joy: is {} \nCost of :pensive: is {} \n".format(a,b,c,d,e))
+
+
 
 @bot.command(aliases=["ri"])
 async def role(ctx,*,role):
@@ -1567,9 +1584,9 @@ async def rolehelp(role,chnl):
     elif role == "warrior" or role =="2":
         await chnl.send("```2.Warrior - \n -Doesn't have any powers. \n -Respawns in 1 in game days.```")
     elif role == "potion master" or role =="3" :
-        await chnl.send("```3.Potion master - \n -Can choose to craft a poison potion (2 days preparation time) which can kill 2 people at once, a protection potion (2 days preparation time) which can be used to protect someone once for 1 attack, or a respawn potion (2 days preparation time) which can used to respawn a person instantly (except the king) and use it on someone or store it for future use. \n -The potion master cannot make multiple potions at once. And potions are not immediate. \n - If a potion master is killed , they will lose all potions stored , and will lose progress on any potion they were crafting. \n -Respawns in 3 days.```")
-    elif role == "wizard" or role =="4" :
-        await chnl.send("```4.Wizard - \n  -Can delay a person's respawn by 1 day. \n   -Respawns in 3 days.```")
+        await chnl.send("```3.Potion master - \n -Can choose to craft a poison potion (2 days preparation time) which can kill 2 people at once, a protection potion (2 days preparation time) which can be used to protect someone once for 1 attack, or a respawn potion (2 days preparation time) which can used to respawn a person instantly (except the king) and use it on someone or store it for future use. \n -The potion master cannot make multiple potions at once. And potions are not immediate. \n - If a potion master is killed , they will lose all potions stored , and will lose progress on any potion they were crafting. \n -Potion making starts as soon as sun sets and will end a few days later when the sun sets and can be used as soon as it's done. Kill potions acts at night end. Respawn and protection potion are instant. \n -Respawns in 3 days.```")
+    elif role == "finisher" or role =="4" :
+        await chnl.send("```4.Finisher - \n  -Can delay a person's respawn by 2 day. \n   - Action is instant. Respawns in 3 days.```")
     elif role == "chief warrior" or role =="5" :
         await chnl.send("```5.Chief Warrior - \n -Chooses who to kill and takes advice from other members of the faction,respawns much quicker at the start and then it  get slower. \n - Respawns in 1 day on the first death , then 2 days after.```")
     elif role == "prince" or role =="6" :
@@ -1578,10 +1595,10 @@ async def rolehelp(role,chnl):
         await chnl.send("```7.Disabler - \n  -Can immobilize a person for a day, making him unable to use any powers. \n -Respawns in 3 days.```")
     elif role == "killer" or role =="8" :
         await chnl.send("```8.Killer - SOLO role \n - Is a solo role , he kills people individually once a day. Wins if he has killed at least 50% of the people in game at least once. \n  -Can't respawn```")
-    elif role == "reviver" or role =="9" :
-        await chnl.send("```9.Reviver - \n  - Can reduce a player's respawn time by 50 % or increase someone's respawn time by 50%. \n  - Respawns in 3 days.```")
+    elif role == "wizard" or role =="9" :
+        await chnl.send("```9.Wizard - \n  - Can reduce a player's respawn time by 1 day or increase someone's respawn time by 1 day. \n  - Action is instant. Respawns in 3 days.```")
     elif role == "camo warrior" or role =="10" :
-        await chnl.send("```10.Camo warrior - \n  -This role cannot be killed when he activates camo mode. Cooldown for this ability is 2 days. \n -Respawns in 2 days.```")
+        await chnl.send("```10.Camo warrior - \n  -This role cannot be killed when he activates camo mode. Cooldown for this ability is 1 days. \n -Respawns in 2 days.```")
     elif role == "seer" or role =="11" :
         await chnl.send("```11. Seer - \n  - Can get the role of a person, by using his ability on a person thrice. Doesn't lose progress if killed or changes target in between.\n  - Respawns in 3 days.```")
     elif role == "guard" or role =="12" :
@@ -1591,7 +1608,7 @@ async def rolehelp(role,chnl):
     elif role == "painter" or role =="14" :
         await chnl.send("```14. Painter - \n  -Can paint a person to make his allegiance appear as something else to checks. \n -Respawns in 2 days.```")
     elif role == "builder" or role =="15" :
-        await chnl.send("```15.Builder -  \n  - Building materials can be found when any opponent is killed. Each person killed by his team gives him 2 pieces. \n  -Once 8 pieces has been acquired , the builder can build a wall. This wall will stop any attacks towards his team for a night. The wall will not get destroyed if the team wasn't attacked \n   -Respawns in 2 day.```")
+        await chnl.send("```15.Builder - \n - Building materials will be awarded to the builder when any opponent dies. Each person killed by his team gives him 2 pieces ,  any non team kills from outside the team gives him 1 piece. \n -The Builder can build a wall with 12 pieces which stops all attacks for 1 night, A fort for 16 pieces which stops all attacks for 2 nights or a trench with 20 parts which kills the first 2 people to attack their team.  Any kills using the trench do not award parts. \n -They can earn parts while dead but can only build when alive. Any structure built lasts as long as it doesn't get destroyed. \n -Respawns in 3 day.```")
     elif role == "double agent" or role =="16" :
         await chnl.send("```16.Double agent - SOLO role - \n - Appears like a warrior to any two factions. He can switch to any one fraction in the game and at that point turns into an regular warrior .If he doesn't switch fast enough , and he gets killed , he cannot respawn  and will lose.```")
     elif role == "strong warrior" or role =="17" :
@@ -1601,103 +1618,117 @@ async def rolehelp(role,chnl):
     elif role == "priest" or role =="19" :
         await chnl.send("```19.Priest- \n  - Can pray for someone (even for people outside their team) every day. Once he has prayed for someone thrice , they will be protected from the next attack. \n   -Respawns in 3 days.```")
     elif role == "curse caster" or role =="20" :
-        await chnl.send("```20.Curse caster- \n   -Can reset the priest's progress of prayers on someone. If someone has a complete protecting , cursing on him twice will remove the protection. Can cast a curse everyday. \n  -Respawns in 2 days.```")
+        await chnl.send("```20.Curse caster- \n   -Can reset the priest's progress of prayers on someone. If someone has a complete protecting , cursing on him twice will remove the protection. Can cast a curse everyday. \n  - Curse casting is immediate. Respawns in 2 days.```")
     elif role == "kidnapper" or role =="21" :
-        await chnl.send("```21.Kidnapper - SOLO role - \n  -Can kidnap a person once every 3 days , after night 1. \n  -Kidnapped people lose access to their chats and loses the ability to perform actions. The kidnapped person also cannot be killed during this duration. The kidnapper gets all the money that the kidnapped person had. The kidnapper is kept anonymous and can send  anonymous messages to the kidnapped person. The team can free the kidnapped person after paying a ransom of 1000c. \n   -Kidnapper cannot respawn. If the kidnapper is killed , then all kidnapped people are released. \n  -The kidnapper wins when he has kidnapped all the kings atleast once.```")
+        await chnl.send("```21.Kidnapper - SOLO role - \n  -Can kidnap a person once every 3 days , after night 1. \n  -Kidnapped people lose access to their chats and loses the ability to perform actions. The kidnapped person also cannot be killed during this duration. The kidnapper gets all the money that the kidnapped person had. The kidnapper is kept anonymous and can send  anonymous messages to the kidnapped person. The team can free the kidnapped person after paying a ransom of 1000c. \n   -Kidnapper cannot respawn. If the kidnapper is killed , then all kidnapped people are released. \n  -The kidnapper wins when he has kidnapped all the kings atleast once. \n -Kidnapping gets done when day starts.```")
     elif role == "item agent" or role =="22" :
-        await chnl.send("```22.Item Agent - SOLO role - \n -Every night he can contact a person and he gives him a choice. \n  -The contacted person can choose to kill a person or to reveal a person's role and color. ( or to ignore him) \n -If the contacted person accepts, The agent will take all his money. \n  -If the Item agent gets 2500c (By trades only.) , he wins. \n -If a person contacted has less than 500c , he will automatically die.```")
+        await chnl.send("```22.Item Agent - SOLO role - \n -Every night he can contact a person and he gives him a choice. \n  -The contacted person can choose to kill a person or to reveal a person's role and color. ( or to ignore him) \n -If the contacted person accepts, The agent will take all his money. \n  -If the Item agent gets 2500c (By trades only.) , he wins. \n -If a person contacted has less than 500c , he will automatically die. \n -The person gets contacted as day begins.```")
     elif role == "life transferrer" or role =="23" :
-        await chnl.send("```23.Life transferrer- \n  -Can make it so that his life is transferred to another person in game. Doing so will cause all attacks towards them to fail , but if their target is attacked , they will die. \n    -Respawns in 3 days.```")
+        await chnl.send("```23.Life transferrer- \n  -Can make it so that his life is transferred to another person in game. Doing so will cause all attacks towards them to fail , but if their target is attacked , they will die. \n    -  Life will be transferred instantly. Respawns in 3 days.```")
     elif role == "role stealer" or role =="24" :
-        await chnl.send("```24.Role stealer- \n    -Can steal the ability of a dead person. Stolen person will be able to use ability as well. \n   -Respawns in 3 days.```")
+        await chnl.send("```24.Role stealer- \n    -Can steal the ability of a dead person. Stolen person will be able to use ability as well. Cannot steal from teammates.\n -The role stealer will know the stolen role immediately but cannot use it's powers till the next night. \n -Respawns in 3 days.```")
     elif role == "death swapper" or role =="25" :
-        await chnl.send("```25.Death Swapper- \n -Can make anyone respawn for the cost of killing himself. (Person respawns the next day) \n  -Respawns in 2 days```")
+        await chnl.send("```25.Death Swapper- \n -Can make anyone respawn for the cost of killing himself. (Person respawns the next day) \n  -  Swapping is INSTANT .Respawns in 2 days```")
     elif role == "gem trader" or role =="26" :
-        await chnl.send("```26.Gem trader - SOLO role \n - Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. Anyone with a gem cannot be killed until they give it to others. \n -Anyone with a gem can pass it to others. \n -If the gem trader survives 1 full day with 0 gems , they win. Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.) \n -Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. \n -If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader. \n -The gem trader can also get rid of one of his gems by paying 5000c.```")
+        await chnl.send("```26.Gem trader - SOLO role \n - Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. Anyone with a gem cannot be killed until they give it to others. \n -Anyone with a gem can pass it to others. \n -If the gem trader survives 1 full day with 0 gems , they win. Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.) \n -Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. \n -If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader. \n -The gem trader can also get rid of one of his gems by paying 5000c. \n -Gems will be given after kills.```")
     elif role == "disguiser" or role =="27":
-        await chnl.send("```27. Disguiser - \n -Can make any person appear as any other role to all checks. \n -Respawns in 2 days.```")
+        await chnl.send("```27. Disguiser - \n -Can make any person appear as any other role to all checks. \n - Power is instant. Respawns in 2 days.```")
     elif role == "alert warrior" or role=="28":
-        await chnl.send("```28. Alert Warrior - \n -Can choose to stay awake at night , killing anyone who visits him. Cooldown for his ability is 2 days. \n -Respawns in 2 days.```")
+        await chnl.send("```28. Alert Warrior - \n -Can choose to stay awake at night , killing anyone who visits him. Cooldown for his ability is 2 days. \n -Action is instant. Respawns in 2 days.```")
     elif role == "assassin" or role=="29":
-        await chnl.send("```29. Assassin- \n -Can kill one every night. \n -Respawns in 3 days.```")
+        await chnl.send("```29. Assassin- \n -Can kill one every night. \n -Kill is night end. Respawns in 3 days.```")
     elif role == "merchant" or role=="30":
-        await chnl.send("```30. Merchant- \n -Will get back 50% of any cash spent by his team for any market items. \n -Respawns in 2 days.```")
+        await chnl.send("```30. Merchant- \n -Will get back 50% of any cash spent by his team for any market items. \n -Will get the cash back as soon as day ends. Respawns in 2 days.```")
+    elif role== "evil prince" or role=="31":
+        await chnl.send("```31.Evil Prince - SOLO - \n -Similar to a prince but isn't actually on the team. The evil prince's goal is to just get their King killed. \n -Can't respawn but wins immediately if their team king is eliminated. \n -Is disguised as a regular prince in role list and all checks.```")
+    elif role== "cult leader" or role=="32":
+        await chnl.send("```32.Cult Leader- SOLO - \n - Invites people to new solo team every night.(attempts to invite a King ,Prince or a solo role will fail). Winning with the solo is now the new team's goal. People need to kill everyone not on the solo team , they still respawn and also are disguised. (The Cult Leader is now their new king.)Invited person joins team when the night gets over. \n - Everyone in solo team stops respawning once leader dies. \n  -Invited people appear to still be in old team , but are actually part of the solo team.```")
+    elif role== "rich person" or role=="33":
+        await chnl.send("```33.Rich Person - \n -Any money used for them in tribute is counted as x2 . \n -Respawns in 1 day.```")
+    elif role== "minister" or role=="34":
+        await chnl.send("```34.Minister - \n -If the minister is alive when the king dies , Everyone will be able to respawn again once. \n -Respawns in 1 day.```")
+    elif role== "weapon smith" or role=="35":
+        await chnl.send("```35.Weapon Smith - \n -Can craft a weapon to help their team. (Can craft a sword - 2 days or a cannon - 4 days.) Loses progress if killed when crafting. \n -Can keep the weapons to use any night (If killed, their inventory will be reset.). Or they can give it to a killing role to boost the kill ability. A sword allows to kill x2 number of people and a cannon allows to kill x3 number of people. \n -A person can use only 1 weapon for 1 night. \n          -Weapon making starts as soon as sun sets and will end a few days later when the sun sets and can be used as soon as it's done. Weapons can be applied for a night instantly \n -Respawns in 3 days.```")
+    elif role== "postman" or role=="36":
+        await chnl.send("```36.Postman - SOLO - \n -Can choose to give their target a Death package (Die during night) or a protection package ( can't die during night.). The target isn't informed what package they receive. The target can choose to open it or dispose it. \n - If postman kills 4 people or kills 2 and saves 2 in 1 game, he wins. \n          -Package gets delivered when day starts.```")
+    elif role== "healer" or role=="37":
+        await chnl.send("```37.Healer - \n -Heals people to allow them to spawn faster. (Reduces time by 2 days.) \n -Respawns in 3 days.```")
     elif role=="list" or role=="l":
-        await chnl.send("All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.wizard \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.reviver \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant```")
+        await chnl.send("All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.finisher \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.wizard \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant \n 31.evil prince \n 32.cult leader \n 33.rich person \n 34.minister \n 35.weapon smith \n 36.postman \n 37.healer```")
     else:
-        await chnl.send("Error! Role not found.No not capitalise role names. You can also use the number (Found in #role info) to represent the role.\n All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.wizard \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.reviver \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant```")
+        await chnl.send("Error! Role not found.Do not capitalise role names. You can also use the number (Found in #role info) to represent the role.\n All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.finisher \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.wizard \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant \n 31.evil prince \n 32.cult leader \n 33.rich person \n 34.minister \n 35.weapon smith \n 36.postman \n 37.healer```")
 
 async def change():
   global data
-  if data['smarket']['trades']['sun']>0:
-    data['smarket']['stocks']['sun']+=10
+  if data['smarket']['trades']['sun']>20:
+    data['smarket']['stocks']['sun']+=25
     data['smarket']['trades']['sun']=0
   elif data['smarket']['trades']['sun']<0:
-    data['smarket']['stocks']['sun']-=10
+    data['smarket']['stocks']['sun']-=25
     data['smarket']['trades']['sun']=0
     if data['smarket']['stocks']['sun']<=0:
-      data['smarket']['stocks']['sun']=10
+      data['smarket']['stocks']['sun']=25
   else:
-    mylist=[10,0,-10]
+    mylist=[25,0,-25]
     data['smarket']['stocks']['sun']+=random.choice(mylist)
     if data['smarket']['stocks']['sun']<=0:
-      data['smarket']['stocks']['sun']=10
+      data['smarket']['stocks']['sun']=25
 
-  if data['smarket']['trades']['smirk']>0:
-    data['smarket']['stocks']['smirk']+=10
+  if data['smarket']['trades']['smirk']>20:
+    data['smarket']['stocks']['smirk']+=20
     data['smarket']['trades']['smirk']=0
   elif data['smarket']['trades']['smirk']<0:
-    data['smarket']['stocks']['smirk']-=10
+    data['smarket']['stocks']['smirk']-=20
     data['smarket']['trades']['smirk']=0
     if data['smarket']['stocks']['smirk']<=0:
-      data['smarket']['stocks']['smirk']=10
+      data['smarket']['stocks']['smirk']=20
   else:
-    mylist=[10,0,-10]
+    mylist=[20,0,-20]
     data['smarket']['stocks']['smirk']+=random.choice(mylist)
     if data['smarket']['stocks']['smirk']<=0:
-      data['smarket']['stocks']['smirk']=10
+      data['smarket']['stocks']['smirk']=20
 
   if data['smarket']['trades']['smile']>0:
-    data['smarket']['stocks']['smile']+=10
+    data['smarket']['stocks']['smile']+=5
     data['smarket']['trades']['smile']=0
   elif data['smarket']['trades']['smile']<0:
-    data['smarket']['stocks']['smile']-=10
+    data['smarket']['stocks']['smile']-=5
     data['smarket']['trades']['smile']=0
     if data['smarket']['stocks']['smile']<=0:
-      data['smarket']['stocks']['smile']=10
+      data['smarket']['stocks']['smile']=5
   else:
-    mylist=[10,0,-10]
+    mylist=[5,0,-5]
     data['smarket']['stocks']['smile']+=random.choice(mylist)
     if data['smarket']['stocks']['smile']<=0:
-      data['smarket']['stocks']['smile']=10
+      data['smarket']['stocks']['smile']=5
 
   if data['smarket']['trades']['joy']>0:
-    data['smarket']['stocks']['joy']+=10
+    data['smarket']['stocks']['joy']+=5
     data['smarket']['trades']['joy']=0
   elif data['smarket']['trades']['joy']<0:
-    data['smarket']['stocks']['joy']-=10
+    data['smarket']['stocks']['joy']-=5
     data['smarket']['trades']['joy']=0
     if data['smarket']['stocks']['joy']<=0:
-      data['smarket']['stocks']['joy']=10
+      data['smarket']['stocks']['joy']=5 
   else:
-    mylist=[10,0,-10]
+    mylist=[5,0,-5]
     data['smarket']['stocks']['joy']+=random.choice(mylist)
     if data['smarket']['stocks']['joy']<=0:
-      data['smarket']['stocks']['joy']=10
+      data['smarket']['stocks']['joy']=5
 
-  if data['smarket']['trades']['pens']>0:
-    data['smarket']['stocks']['pens']+=10
+  if data['smarket']['trades']['pens']>15:
+    data['smarket']['stocks']['pens']+=5
     data['smarket']['trades']['pens']=0
-  elif data['smarket']['trades']['pens']<0:
-    data['smarket']['stocks']['pens']-=10
+  elif data['smarket']['trades']['pens']<5:
+    data['smarket']['stocks']['pens']-=5
     data['smarket']['trades']['pens']=0
     if data['smarket']['stocks']['pens']<=0:
-      data['smarket']['stocks']['pens']=10
+      data['smarket']['stocks']['pens']=5
   else:
-    mylist=[10,0,-10]
+    mylist=[5,0,-5]
     data['smarket']['stocks']['pens']+=random.choice(mylist)
     if data['smarket']['stocks']['pens']<=0:
-      data['smarket']['stocks']['pens']=10
+      data['smarket']['stocks']['pens']=5
   dump()
 
 
