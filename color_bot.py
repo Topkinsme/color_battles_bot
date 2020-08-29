@@ -700,7 +700,7 @@ async def listallr(ctx):
 
 @bot.command(aliases=["ar"])
 @commands.has_role("Helpers")
-async def addrole(ctx,role,team,litrole):
+async def addrole(ctx,role,team,*,litrole):
     '''Adds roles to the role list.(Similar roles must be entered with a number after them , teams can only be red , blue , green or yellow.(No Caps) Any other team will be considered as a solo team) <Helpers>'''
     if (int(gamestate) >= 3):
         await ctx.send("A game is already going on.")
