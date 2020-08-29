@@ -831,6 +831,7 @@ async def pkill(ctx,user:discord.Member):
 @commands.has_role("Helpers")
 async def massgive(ctx,cash=100):
   '''Gives a certain amount of cash to everyone who has an account. <Helpers>'''
+  global data
   if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
@@ -842,6 +843,7 @@ async def massgive(ctx,cash=100):
       add=cash*data['building'][team]['forge']
     data['money'][ath]+=int(add)
   await ctx.send("Added the cash to everyone who had an account.")
+  dump()
 
 @bot.command(aliases=["mbal"])
 @commands.has_role("Helpers")
@@ -900,6 +902,9 @@ async def closeauction(ctx):
 @commands.has_role("Helpers")
 async def resetstockmarket(ctx):
   '''Use this to start stock market'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on right now.")
+    return
   global data
   data['smarket']['state']=1
   data['smarket']['inv']={}
@@ -933,6 +938,9 @@ async def resetstockmarket(ctx):
 @commands.has_role("Helpers")
 async def togglestockmarket(ctx):
   '''Use this to turn on or turn off the stock market <Helpers>'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on right now.")
+    return
   global data
   if data['smarket']['state']==1:
     data['smarket']['state']=0
@@ -942,10 +950,13 @@ async def togglestockmarket(ctx):
     await ctx.send("Opened.")
   dump()
 
-@bot.command(aliases=["smm"])
+@bot.command(aliases=["cmm"])
 @commands.has_role("Helpers")
-async def startstockmarket(ctx):
+async def createstockmarket(ctx):
   '''Use this to start stock market'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on right now.")
+    return
   global data
   data['smarket']['state']=1
   data['smarket']['inv']={}
@@ -968,6 +979,32 @@ async def startstockmarket(ctx):
   data['smarket']['msg']=str(smarket.id)
   data['smarket']['chn']=str(smarket.channel.id)
   dump()
+
+@bot.command(aliases=["chngmm"])
+@commands.has_role("Helpers")
+async def changestockmarket(ctx):
+    '''Use this to manually change stock market prices <Helpers>'''
+    global data
+    if int(gamestate)!=3:
+      return
+    try:
+      if data['smarket']['state']==0:
+        return
+      guildd=bot.get_guild(448888674944548874)
+      channel=bot.get_channel(int(data['smarket']['chn']))
+      msgid = int(data['smarket']['msg'])
+      msg = await channel.fetch_message(msgid)
+      await change()
+      a=data['smarket']['stocks']['sun']
+      b=data['smarket']['stocks']['smirk']
+      c=data['smarket']['stocks']['smile']
+      d=data['smarket']['stocks']['joy']
+      e=data['smarket']['stocks']['pens']
+      await msg.edit(content="Cost of :sunglasses: is {} \nCost of :smirk: is {} \nCost of :smiley: is {} \nCost of :joy: is {} \nCost of :pensive: is {} \n".format(a,b,c,d,e))
+      await ctx.send("Changed.")
+    except:
+      await ctx.send("Failed")
+      return
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -1418,6 +1455,9 @@ async def inventory(ctx):
 @commands.has_role("Alive")
 async def buy(ctx,thing,num:int=1):
   '''Use this to buy any stocks.'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on right now.")
+    return
   if data['smarket']['state']==0:
     await ctx.send("Market is closed.")
     return
@@ -1495,6 +1535,9 @@ async def buy(ctx,thing,num:int=1):
 @commands.has_role("Alive")
 async def sell(ctx,thing,num:int=1):
   '''Use this to sell stocks.'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on right now.")
+    return
   if data['smarket']['state']==0:
     await ctx.send("Market is closed.")
     return
