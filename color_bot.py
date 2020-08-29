@@ -786,7 +786,7 @@ async def kill(ctx,user:discord.Member):
     await ctx.send("Killed {}.".format(user.mention))
     dump()
     
-@bot.command(aliases=["r"])
+@bot.command(aliases=["re"])
 @commands.has_role("Helpers")
 async def respawn(ctx,user:discord.Member):
     '''Respawns a person in game <Helpers>'''
@@ -1616,7 +1616,7 @@ async def price(ctx):
 
 
 
-@bot.command(aliases=["ri"])
+@bot.command(aliases=["r"])
 async def role(ctx,*,role):
     '''Returns role info. '''
     await rolehelp(role,ctx)
