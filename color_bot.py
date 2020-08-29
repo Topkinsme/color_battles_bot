@@ -886,12 +886,19 @@ async def closeauction(ctx):
   if data['auction']['state']==0:
     await ctx.send("There is no auction going on right now.")
     return
+  while 1==1:
+    a=data['auction']['bid']
+    await asyncio.sleep(30)
+    if a==data['auction']['bid']:
+      break
+
   data['auction']['state']=0
   who=data['auction']['bider']
   cost=data['auction']['bid']
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="market")
   await mark.send("Congrats! <@{}> has won the item auctioned for {} ! ".format(who,cost))
+  data['money'][str(who)]-=cost
   data['auction']['msg']=""
   data['auction']['chn']=""
   data['auction']['bid']=0
@@ -1217,6 +1224,9 @@ async def addinchannel(ctx,member:discord.Member):
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+    if data['players'][str(member.id)]['state']==0:
+        await ctx.send("You add a dead person to the cc.")
+        return
     chnl = ctx.channel.id
     if data['chnls'][str(chnl)]['owner'] == ctx.author.id:
         await ctx.channel.set_permissions(member, read_messages=True,send_messages=True)
@@ -1231,6 +1241,9 @@ async def removeinchannel(ctx,member:discord.Member):
     '''Removes a person from the channel'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
+        return
+    if data['players'][str(member.id)]['state']==0:
+        await ctx.send("Only remove people if they are alive.")
         return
     chnl = ctx.channel.id
     if data['chnls'][str(chnl)]['owner'] == ctx.author.id:
@@ -1643,7 +1656,7 @@ async def rolehelp(role,chnl):
     elif role == "camo warrior" or role =="10" :
         await chnl.send("```10.Camo warrior - \n  -This role cannot be killed when he activates camo mode. Cooldown for this ability is 1 days. \n -Respawns in 2 days.```")
     elif role == "seer" or role =="11" :
-        await chnl.send("```11. Seer - \n -Can get the role of a person, by using his ability on a person a certain number of times. (y=8  - (x/4) where y is number of checks and x is people playing.). \n -Doesn't lose progress if killed or changes target in between. \n -Gets answers as soon as they check thrice. Respawns in 3 days.```")
+        await chnl.send("```11. Seer - \n -Can get the role of a person, by using his ability on a person a certain number of times. (y=30/x , rounded up, where y is number of checks and x is people playing.). \n -Doesn't lose progress if killed or changes target in between. \n -Gets answers as soon as they check y number of times. Respawns in 3 days.```")
     elif role == "guard" or role =="12" :
         await chnl.send("```12.Guard - \n   - Can protect someone once every lifetime.(He will die instead of the person he protects.) Cannot change target after initially picking it. \n - Respawns in 2 days.```")
     elif role == "observer" or role =="13" :
@@ -1673,7 +1686,7 @@ async def rolehelp(role,chnl):
     elif role == "death swapper" or role =="25" :
         await chnl.send("```25.Death Swapper- \n -Can make anyone respawn for the cost of killing himself. (Person respawns the next day) \n  -  Swapping is INSTANT .Respawns in 2 days```")
     elif role == "gem trader" or role =="26" :
-        await chnl.send("```26.Gem trader - SOLO role \n - Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. Anyone with a gem cannot be killed until they give it to others. \n -Anyone with a gem can pass it to others. \n -If the gem trader survives 1 full day with 0 gems , they win. Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.) \n -Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. \n -If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader. \n -The gem trader can also get rid of one of his gems by paying 5000c. \n -Gems will be given after kills.```")
+        await chnl.send("```26.Gem trader - SOLO role \n - Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled and the gem is automatically given to the attacker. \n -Anyone with a gem can pass it to others. \n -If the gem trader survives 1 full day with 0 gems , they win. Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.) \n -Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. \n -If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader. \n -The gem trader can also get rid of one of his gems by paying 5000c. \n -Gems will be given after kills.```")
     elif role == "disguiser" or role =="27":
         await chnl.send("```27. Disguiser - \n -Can make any person appear as any other role to all checks. \n - Power is instant. Respawns in 2 days.```")
     elif role == "alert warrior" or role=="28":
@@ -1697,7 +1710,7 @@ async def rolehelp(role,chnl):
     elif role== "healer" or role=="37":
         await chnl.send("```37.Healer - \n -Heals people to allow them to spawn faster. (Reduces time by 2 days.) \n -Respawns in 3 days.```")
     elif role== "magician" or role=="38":
-        await chnl.send("```38. Magician - \n -Is allowed to submit a list of up to 3 guesses of people with their correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the reset will not be confirmed. \n -Action is immediate. Respawns in 3 days.```")
+        await chnl.send("```38. Magician - \n -Is allowed to submit a list of up to 3 guesses of people with their correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed. \n -Action is immediate. Respawns in 3 days.```")
     elif role=="list" or role=="l":
         await chnl.send("All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.finisher \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.wizard \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant \n 31.evil prince \n 32.cult leader \n 33.rich person \n 34.minister \n 35.weapon smith \n 36.postman \n 37.healer \n 38.magician```")
     else:
