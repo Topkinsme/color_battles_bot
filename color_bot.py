@@ -128,12 +128,11 @@ async def my_loopthree():
   datee = datetime.datetime.now()
   #edit date
   x=bot.get_channel(750580343068688404)
-  await x.edit(name="📅 " + datee.strftime("%A") + " " + datee.strftime("%b") + " " + datee.strftime("%d"))
-  timee = "hi"
+  await x.edit(name="📅 " + datee.strftime("%a") + " " + datee.strftime("%b") + " " + datee.strftime("%d"))
   #edit time
   localtime= datetime.datetime.now()
   x=bot.get_channel(750583960890900542)
-  await x.edit(name="🕐 "+localtime.strftime("%X"))
+  await x.edit(name="🕐 "+ localtime.strftime("%I") + ":" + localtime.strftime("%M") + " "+ localtime.strftime("%p"))
   guildd=bot.get_guild(448888674944548874)
   peoples = guildd.members
   a=0
@@ -143,16 +142,20 @@ async def my_loopthree():
   x=bot.get_channel(750580458957439008)
   await x.edit(name="Users: "+ str(a))
   if int(gamestate)==1:
-        await x.edit(name="❗ Signups open!")
+        people=0
+        for person in data['signedup']:
+          people+=1
+        await x.edit(name="❗ Signups open! {}/∞".format(people))
   elif int(gamestate)==2:
-        await x.edit(name="❎ Signups closed.")
+        await x.edit(name="❎ Signups closed." )
   elif int(gamestate)==3:
         people=0
-        guildd=bot.get_guild(448888674944548874)
-        for person in guildd.members:
-          if "Alive" in person.roles:
+        total=0
+        for member in data['players']:
+          total+=1
+          if data['players'][member]['state']==1:
             people+=1
-        await x.edit(name="🔰 Game in progress. Alive people = " + str(people))
+        await x.edit(name="🔰 Game in progress. {}/{}".format(people,total)) 
   elif int(gamestate)==4:
         await x.edit(name="✅ Game concluded.")
   else:
