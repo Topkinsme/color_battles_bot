@@ -89,6 +89,7 @@ async def on_ready():
         await bot.change_presence(activity=discord.Game(name=" Colour battles!", type=1))
     my_loop.start()
     my_looptwo.start()
+    my_loopthree.start()
     
 @tasks.loop(minutes=5)
 async def my_loop():
@@ -119,6 +120,43 @@ async def my_looptwo():
     except:
       return
 
+@tasks.loop(minutes = 1)
+async def my_loopthree():
+  datee = datetime.datetime.now()
+  if int(datee.strftime("%M"))%5 !=0 :
+    return 
+  datee = datetime.datetime.now()
+  #edit date
+  x=bot.get_channel(750580343068688404)
+  await x.edit(name="📅 " + datee.strftime("%A") + " " + datee.strftime("%b") + " " + datee.strftime("%d"))
+  timee = "hi"
+  #edit time
+  localtime= datetime.datetime.now()
+  x=bot.get_channel(750583960890900542)
+  await x.edit(name="🕐 "+localtime.strftime("%X"))
+  guildd=bot.get_guild(448888674944548874)
+  peoples = guildd.members
+  a=0
+  for person in peoples:
+    a+=1
+  #edit people
+  x=bot.get_channel(750580458957439008)
+  await x.edit(name="Users: "+ str(a))
+  if int(gamestate)==1:
+        await x.edit(name="❗ Signups open!")
+  elif int(gamestate)==2:
+        await x.edit(name="❎ Signups closed.")
+  elif int(gamestate)==3:
+        people=0
+        guildd=bot.get_guild(448888674944548874)
+        for person in guildd.members:
+          if "Alive" in person.roles:
+            people+=1
+        await x.edit(name="🔰 Game in progress. Alive people = " + str(people))
+  elif int(gamestate)==4:
+        await x.edit(name="✅ Game concluded.")
+  else:
+        await x.edit(name="⏸️ No game.")
                         
 @bot.event
 async def on_message(message):
