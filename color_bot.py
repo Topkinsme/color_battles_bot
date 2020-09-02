@@ -132,7 +132,7 @@ async def my_loopthree():
   #edit time
   localtime= datetime.datetime.now()
   x=bot.get_channel(750583960890900542)
-  await x.edit(name="🕐 "+ localtime.strftime("%I") + ":" + localtime.strftime("%M") + " "+ localtime.strftime("%p"))
+  await x.edit(name="🕐 "+ localtime.strftime("%I") + ":" + localtime.strftime("%M") + " "+ localtime.strftime("%p") + " UTC")
   guildd=bot.get_guild(448888674944548874)
   peoples = guildd.members
   a=0
@@ -437,6 +437,33 @@ async def reset(ctx):
      
 
 #moderator/helper
+
+@bot.command(aliases=["d","v"])
+@commands.has_role("Helpers")
+async def demote(ctx):
+  '''To demote yourself. <Helper>'''
+  guildd=bot.get_guild(448888674944548874)
+  role = discord.utils.get(guildd.roles, name="Helper")
+  ath = str(ctx.author.id)
+  await ctx.author.add_roles(role)
+  role = discord.utils.get(guildd.roles, name="Helpers")
+  await ctx.author.remove_roles(role)
+  await ctx.send("You have been demoted , {}".format(ctx.author.mention))
+
+
+@bot.command(aliases=["^"])
+@commands.has_role("Helper")
+async def promote(ctx):
+  '''To promote yourself. <Helper>'''
+  guildd=bot.get_guild(448888674944548874)
+  role = discord.utils.get(guildd.roles, name="Helpers")
+  ath = str(ctx.author.id)
+  await ctx.author.add_roles(role)
+  role = discord.utils.get(guildd.roles, name="Helper")
+  await ctx.author.remove_roles(role)
+  await ctx.send("You have been promoted , {}".format(ctx.author.mention))
+
+
 @bot.command()
 @commands.has_role("Helpers")
 async def poll(ctx,*,message):
