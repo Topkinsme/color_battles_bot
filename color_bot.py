@@ -143,7 +143,7 @@ async def on_message(message):
       try:
         data['money'][ath]+=cash
       except:
-        await message.channel.send("It seems I had trouble accessing your account so I'm just going to have to keep the money with myself.....")
+        await message.channel.send("It seems I had trouble accessing your account so I'm just going to have to keep the money with myself....")
       dump()
     
 @bot.event
