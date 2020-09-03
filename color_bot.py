@@ -123,7 +123,7 @@ async def my_looptwo():
 @tasks.loop(minutes = 1)
 async def my_loopthree():
   datee = datetime.datetime.now()
-  if int(datee.strftime("%M"))%5 !=0 :
+  if int(datee.strftime("%M"))%10 !=0 :
     return 
   datee = datetime.datetime.now()
   #edit date
@@ -438,7 +438,7 @@ async def reset(ctx):
 
 #moderator/helper
 
-@bot.command(aliases=["d","v"])
+@bot.command(aliases=["v","dem"])
 @commands.has_role("Helpers")
 async def demote(ctx):
   '''To demote yourself. <Helper>'''
@@ -451,7 +451,7 @@ async def demote(ctx):
   await ctx.send("You have been demoted , {}".format(ctx.author.mention))
 
 
-@bot.command(aliases=["^"])
+@bot.command(aliases=["^","pro"])
 @commands.has_role("Helper")
 async def promote(ctx):
   '''To promote yourself. <Helper>'''
