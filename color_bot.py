@@ -139,6 +139,8 @@ async def my_loopthree():
   for person in peoples:
     a+=1
   #edit people
+  x=bot.get_channel(750580405102706789)
+  await x.edit(name="👥 Users: {}".format(a))
   x=bot.get_channel(750580458957439008)
   if int(gamestate)==1:
         people=0
