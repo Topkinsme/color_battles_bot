@@ -140,7 +140,6 @@ async def my_loopthree():
     a+=1
   #edit people
   x=bot.get_channel(750580458957439008)
-  await x.edit(name="Users: "+ str(a))
   if int(gamestate)==1:
         people=0
         for person in data['signedup']:
