@@ -1699,7 +1699,7 @@ async def price(ctx):
 
 
 @bot.command(aliases=["r"])
-async def role(ctx,*,role):
+async def role(ctx,*,role="l"):
     '''Returns role info. '''
     await rolehelp(role,ctx)
 
