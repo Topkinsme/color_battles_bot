@@ -1091,6 +1091,20 @@ async def ping(ctx):
     await ctx.send("Pong!")
     dump()
     
+@bot.command()
+async def timer(ctx,timee:int):
+  '''Allows you to set an alarm. (WARNING - Existing timers will be erase if the bot resets. Use with caution)'''
+  if timee > 3600:
+    await ctx.send("You cannot set reminders greater than an hour.")
+    return
+  if timee<=0:
+    await ctx.send("I cannot travel back in time.")
+    return
+  await ctx.send("I'll ping you in {} seconds.".format(timee))
+  await asyncio.sleep(timee)
+  await ctx.send("{}, here is your reminder of {} seconds.".format(ctx.author.mention,timee))
+
+
 @bot.command(aliases=["j","join"])
 async def signup(ctx):
     '''Allows you to signup for a game.Sign out by typing the command again.'''
