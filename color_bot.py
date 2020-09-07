@@ -1830,18 +1830,18 @@ async def change():
       data['smarket']['stocks']['smirk']=20
 #
   if data['smarket']['trades']['smile']>0:
-    data['smarket']['stocks']['smile']+=5
+    data['smarket']['stocks']['smile']+=10
     data['smarket']['trades']['smile']=0
   elif data['smarket']['trades']['smile']<0:
-    data['smarket']['stocks']['smile']-=5
+    data['smarket']['stocks']['smile']-=10
     data['smarket']['trades']['smile']=0
     if data['smarket']['stocks']['smile']<=0:
-      data['smarket']['stocks']['smile']=5
+      data['smarket']['stocks']['smile']=10
   else:
-    mylist=[5,0,-5]
+    mylist=[10,0,-10]
     data['smarket']['stocks']['smile']+=random.choice(mylist)
     if data['smarket']['stocks']['smile']<=0:
-      data['smarket']['stocks']['smile']=5
+      data['smarket']['stocks']['smile']=10
 #
   if data['smarket']['trades']['joy']>0:
     data['smarket']['stocks']['joy']+=5
