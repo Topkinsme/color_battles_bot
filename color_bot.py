@@ -176,7 +176,7 @@ async def on_message(message):
     await score(ath,message.content)
     if message.channel.name!="battlefield":
       return
-    n = random.randint(0,500)
+    n = random.randint(0,1000)
     cash = random.randint(100,500)
     if n ==49:
       emoji = "🎁"
@@ -1041,7 +1041,7 @@ async def createstockmarket(ctx):
   data['smarket']['stocks']['smirk']=500
   data['smarket']['stocks']['smile']=100
   data['smarket']['stocks']['joy']=50
-  data['smarket']['stocks']['pens']=10
+  data['smarket']['stocks']['pens']=50
   data['smarket']['trades']={}
   data['smarket']['trades']['sun']=0
   data['smarket']['trades']['smirk']=0
@@ -1050,7 +1050,7 @@ async def createstockmarket(ctx):
   data['smarket']['trades']['pens']=0
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="market")
-  smarket = await mark.send("Cost of :sunglasses: is 1000 \nCost of :smirk: is 500 \nCost of :smiley: is 100 \nCost of :joy: is 50 \nCost of :pensive: is 10 \n")
+  smarket = await mark.send("Cost of :sunglasses: is 1000 \nCost of :smirk: is 500 \nCost of :smiley: is 100 \nCost of :joy: is 50 \nCost of :pensive: is 50 \n")
   await smarket.pin()
   data['smarket']['msg']=str(smarket.id)
   data['smarket']['chn']=str(smarket.channel.id)
@@ -1733,7 +1733,7 @@ async def rolehelp(role,chnl):
     elif role == "disabler" or role =="7" :
         await chnl.send("```7.Disabler - \n  -Can immobilize a person for a day, making him unable to use any powers. \n -Respawns in 3 days.```")
     elif role == "killer" or role =="8" :
-        await chnl.send("```8.Killer - SOLO role \n - Is a solo role , he kills people individually once a day. Wins if he has killed at least 1/3 of the people in game (rounded down) at least one. \n  -Can't respawn```")
+        await chnl.send("```8.Killer - SOLO role \n - Is a solo role , he kills people individually once a day. Wins if he has killed at least 1/3 of the people in game (rounded down) at least once. \n  -Can't respawn```")
     elif role == "wizard" or role =="9" :
         await chnl.send("```9.Wizard - \n  - Can reduce a player's respawn time by 1 day or increase someone's respawn time by 1 day. \n  - Action is instant. Respawns in 3 days.```")
     elif role == "camo warrior" or role =="10" :
@@ -1814,7 +1814,7 @@ async def change():
     data['smarket']['stocks']['sun']+=random.choice(mylist)
     if data['smarket']['stocks']['sun']<=0:
       data['smarket']['stocks']['sun']=25
-
+#
   if data['smarket']['trades']['smirk']>20:
     data['smarket']['stocks']['smirk']+=20
     data['smarket']['trades']['smirk']=0
@@ -1828,7 +1828,7 @@ async def change():
     data['smarket']['stocks']['smirk']+=random.choice(mylist)
     if data['smarket']['stocks']['smirk']<=0:
       data['smarket']['stocks']['smirk']=20
-
+#
   if data['smarket']['trades']['smile']>0:
     data['smarket']['stocks']['smile']+=5
     data['smarket']['trades']['smile']=0
@@ -1842,7 +1842,7 @@ async def change():
     data['smarket']['stocks']['smile']+=random.choice(mylist)
     if data['smarket']['stocks']['smile']<=0:
       data['smarket']['stocks']['smile']=5
-
+#
   if data['smarket']['trades']['joy']>0:
     data['smarket']['stocks']['joy']+=5
     data['smarket']['trades']['joy']=0
@@ -1856,7 +1856,7 @@ async def change():
     data['smarket']['stocks']['joy']+=random.choice(mylist)
     if data['smarket']['stocks']['joy']<=0:
       data['smarket']['stocks']['joy']=5
-
+#
   if data['smarket']['trades']['pens']>15:
     data['smarket']['stocks']['pens']+=5
     data['smarket']['trades']['pens']=0
