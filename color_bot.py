@@ -202,7 +202,7 @@ async def on_member_remove(member):
     
 @bot.event
 async def on_message_delete(message):
-    await spamchannel.send("'{}' was deleted in <#{}>".format(message.content,message.channel.id))
+    await spamchannel.send("{}'s message `{}` was deleted in <#{}>".format(message.author.mention,message.content,message.channel.id))
     
 @bot.event
 async def on_user_update(before,after):
