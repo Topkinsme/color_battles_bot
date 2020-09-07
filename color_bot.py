@@ -101,6 +101,8 @@ async def my_loop():
 @tasks.loop(minutes=60)
 async def my_looptwo():
     global data
+    global gifted
+    gifted=0
     if int(gamestate)!=3:
       return
     try:
@@ -164,6 +166,7 @@ async def my_loopthree():
                         
 @bot.event
 async def on_message(message):
+    global gifted
     global gamestate
     if message.author.id == 450320950026567692:
         return
@@ -179,6 +182,9 @@ async def on_message(message):
     n = random.randint(0,1000)
     cash = random.randint(100,500)
     if n ==49:
+      if gifted==1:
+        return
+      gifted=1
       emoji = "🎁"
       await message.add_reaction(emoji)
       await message.channel.send(":tada: <@{}> has just won a prize of {}".format(ath,cash))
