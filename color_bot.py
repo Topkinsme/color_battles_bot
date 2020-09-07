@@ -1733,7 +1733,7 @@ async def rolehelp(role,chnl):
     elif role == "disabler" or role =="7" :
         await chnl.send("```7.Disabler - \n  -Can immobilize a person for a day, making him unable to use any powers. \n -Respawns in 3 days.```")
     elif role == "killer" or role =="8" :
-        await chnl.send("```8.Killer - SOLO role \n - Is a solo role , he kills people individually once a day. Wins if he has killed at least 50% of the people in game at least once. \n  -Can't respawn```")
+        await chnl.send("```8.Killer - SOLO role \n - Is a solo role , he kills people individually once a day. Wins if he has killed at least 1/3 of the people in game (rounded down) at least one. \n  -Can't respawn```")
     elif role == "wizard" or role =="9" :
         await chnl.send("```9.Wizard - \n  - Can reduce a player's respawn time by 1 day or increase someone's respawn time by 1 day. \n  - Action is instant. Respawns in 3 days.```")
     elif role == "camo warrior" or role =="10" :
@@ -1789,7 +1789,7 @@ async def rolehelp(role,chnl):
     elif role== "weapon smith" or role=="35":
         await chnl.send("```35.Weapon Smith - \n -Can craft a weapon to help their team. (Can craft a sword - 2 days or a cannon - 4 days.) Loses progress if killed when crafting. \n -Can keep the weapons to use any night (If killed, their inventory will be reset.). Or they can give it to a killing role to boost the kill ability. A sword allows to kill x2 number of people and a cannon allows to kill x3 number of people. \n -A person can use only 1 weapon for 1 night. \n          -Weapon making starts as soon as sun sets and will end a few days later when the sun sets and can be used as soon as it's done. Weapons can be applied for a night instantly \n -Respawns in 3 days.```")
     elif role== "postman" or role=="36":
-        await chnl.send("```36.Postman - SOLO - \n -Can choose to give their target a Death package (Die during night) or a protection package ( can't die during night.). The target isn't informed what package they receive. The target can choose to open it or dispose it. \n - If postman kills 4 people or kills 2 and saves 2 in 1 game, he wins. \n          -Package gets delivered when day starts.```")
+        await chnl.send("```36.Postman - SOLO - \n -Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it. \n -The postman wins if 2 of each type of package are opened. \n -Package gets delivered when day starts.```")
     elif role== "healer" or role=="37":
         await chnl.send("```37.Healer - \n -Heals people to allow them to spawn faster. (Reduces time by 2 days.) \n -Respawns in 3 days.```")
     elif role== "magician" or role=="38":
