@@ -1829,7 +1829,17 @@ async def change():
   data['smarket']['stocks']['smile']+=smile
   data['smarket']['stocks']['joy']+=joy
   data['smarket']['stocks']['pens']+=pens
-
+  #
+  if data['smarket']['stocks']['sun']<=0:
+    data['smarket']['stocks']['sun']=25
+  if data['smarket']['stocks']['smirk']<=0:
+    data['smarket']['stocks']['smirk']=20
+  if data['smarket']['stocks']['smile']<=0:
+    data['smarket']['stocks']['smile']=10
+  if data['smarket']['stocks']['joy']<=0:
+    data['smarket']['stocks']['joy']=5
+  if data['smarket']['stocks']['pens']<=0:
+    data['smarket']['stocks']['pens']=5
 
 
 
