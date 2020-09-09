@@ -1812,11 +1812,11 @@ async def rolehelp(role,chnl):
 
 async def change():
   global data
-  sun=int('''data['smarket']['trades']['sun']*'''random.gauss(25,12)'''/10''')
-  smirk=int('''data['smarket']['trades']['smirk']*'''random.gauss(15,8)'''/10''')
-  smile=int('''data['smarket']['trades']['smile']*'''random.gauss(8,5)'''/10''')
-  joy=int('''data['smarket']['trades']['joy']*'''random.gauss(4,3)'''/10''')
-  pens=int('''data['smarket']['trades']['pens']*'''random.gauss(2,2)'''/10''')
+  sun=int(random.gauss(25,12))
+  smirk=int(random.gauss(15,8))
+  smile=int(random.gauss(8,5))
+  joy=int(random.gauss(4,3))
+  pens=int(random.gauss(2,2))
   #
   data['smarket']['trades']['sun']=0
   data['smarket']['trades']['smirk']=0
