@@ -1812,6 +1812,28 @@ async def rolehelp(role,chnl):
 
 async def change():
   global data
+  sun=int(data['smarket']['trades']['sun']*random.gauss(50,40)/10)
+  smirk=int(data['smarket']['trades']['smirk']*random.gauss(25,25)/10)
+  smile=int(data['smarket']['trades']['smile']*random.gauss(10,15)/10)
+  joy=int(data['smarket']['trades']['joy']*random.gauss(5,10)/10)
+  pens=int(data['smarket']['trades']['pens']*random.gauss(2,5)/10)
+  #
+  data['smarket']['trades']['sun']=0
+  data['smarket']['trades']['smirk']=0
+  data['smarket']['trades']['smile']=0
+  data['smarket']['trades']['joy']=0
+  data['smarket']['trades']['pens']=0
+  #
+  data['smarket']['stocks']['sun']+=sun
+  data['smarket']['stocks']['smirk']+=smirk
+  data['smarket']['stocks']['smile']+=smile
+  data['smarket']['stocks']['joy']+=joy
+  data['smarket']['stocks']['pens']+=pens
+
+
+
+
+  '''
   if data['smarket']['trades']['sun']>20:
     data['smarket']['stocks']['sun']+=25
     data['smarket']['trades']['sun']=0
@@ -1880,7 +1902,7 @@ async def change():
     mylist=[5,0,-5]
     data['smarket']['stocks']['pens']+=random.choice(mylist)
     if data['smarket']['stocks']['pens']<=0:
-      data['smarket']['stocks']['pens']=5
+      data['smarket']['stocks']['pens']=5'''
   dump()
 
 
