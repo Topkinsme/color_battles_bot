@@ -98,7 +98,7 @@ async def my_loop():
     earnd=[]
 
 
-@tasks.loop(minutes=60)
+@tasks.loop(minutes=120)
 async def my_looptwo():
     global data
     global gifted
@@ -1812,11 +1812,11 @@ async def rolehelp(role,chnl):
 
 async def change():
   global data
-  sun=int(random.gauss(25,12))
-  smirk=int(random.gauss(15,8))
-  smile=int(random.gauss(8,5))
-  joy=int(random.gauss(4,3))
-  pens=int(random.gauss(2,2))
+  sun=int(random.gauss(10,12))
+  smirk=int(random.gauss(6,8))
+  smile=int(random.gauss(4,6))
+  joy=int(random.gauss(2,4))
+  pens=int(random.gauss(1,3))
   #
   data['smarket']['trades']['sun']=0
   data['smarket']['trades']['smirk']=0
