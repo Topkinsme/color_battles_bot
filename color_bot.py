@@ -102,7 +102,7 @@ async def my_loop():
 async def my_looptwo():
     global data
     global gifted
-    gifted=0
+    gifted=[]
     if int(gamestate)!=3:
       return
     try:
@@ -158,7 +158,7 @@ async def my_loopthree():
           total+=1
           if data['players'][member]['state']==1:
             people+=1
-        await x.edit(name="🔰 Game in progress. {}/{}".format(people,total)) 
+        await x.edit(name="🔰 Game ongoing. {}/{}".format(people,total)) 
   elif int(gamestate)==4:
         await x.edit(name="✅ Game concluded.")
   else:
@@ -182,9 +182,9 @@ async def on_message(message):
     n = random.randint(0,1000)
     cash = random.randint(100,500)
     if n ==49:
-      if gifted==1:
+      if message.author.id in gifted:
         return
-      gifted=1
+      gifted.append(message.author.id)
       emoji = "🎁"
       await message.add_reaction(emoji)
       await message.channel.send(":tada: <@{}> has just won a prize of {}".format(ath,cash))
@@ -1188,7 +1188,9 @@ async def freeghostsay(ctx,*,msg):
     guildd=bot.get_guild(448888674944548874)
     townc=discord.utils.get(guildd.channels,name="battlefield")
     taboo = "@everyone"
-    if taboo in str(msg):
+    taboo2="<@&722504160691355679>"
+    taboo3="<@&748375810498625597>"
+    if taboo in str(msg) or taboo2 in str(msg) or taboo3 in str(msg):
       await ctx.send("Please don't ping @ everyone.")
     else:
       alpha=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1','2','3','4','5','6','7','8','9','0']
@@ -1215,11 +1217,13 @@ async def ghostsay(ctx,*,msg):
     guildd=bot.get_guild(448888674944548874)
     townc=discord.utils.get(guildd.channels,name="battlefield")
     taboo = "@everyone"
-    if taboo in str(msg):
+    taboo2="<@&722504160691355679>"
+    taboo3="<@&748375810498625597>"
+    if taboo in str(msg) or taboo2 in str(msg) or taboo3 in str(msg):
       await ctx.send("Please don't ping @ everyone.")
     else:
       ath=str(ctx.author.id)
-      data['money'][ath]-=10
+      data['money'][ath]-=25
       await townc.send("<Ghost> {}".format(msg))
     dump()
 
@@ -1564,7 +1568,7 @@ async def buy(ctx,thing,num:int=1):
     await ctx.send("Market is closed.")
     return
   if num<0:
-    await ctx.send("Number cannot be nagative.")
+    await ctx.send("Number cannot be negative .")
     return
   ath=str(ctx.author.id)
   if ath not in data['smarket']['inv']:
@@ -1644,7 +1648,7 @@ async def sell(ctx,thing,num:int=1):
     await ctx.send("Market is closed.")
     return
   if num<0:
-    await ctx.send("Number cannot be nagative.")
+    await ctx.send("Number cannot be negative .")
     return
   ath=str(ctx.author.id)
   if ath not in data['smarket']['inv']:
@@ -1657,7 +1661,7 @@ async def sell(ctx,thing,num:int=1):
   if thing == "😎" or thing ==1:
     cost=data['smarket']['stocks']['sun']*num
     if (data['smarket']['inv'][ath]['sun'] - num)<0:
-      await ctx.send("You canonly sell what yuou have.")
+      await ctx.send("You can only sell what you have.")
     else:
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['sun']-=num
@@ -1666,7 +1670,7 @@ async def sell(ctx,thing,num:int=1):
   elif thing == "😏" or thing ==2:
     cost=data['smarket']['stocks']['smirk']*num
     if (data['smarket']['inv'][ath]['smirk'] - num)<0:
-      await ctx.send("You canonly sell what yuou have.")
+      await ctx.send("You can only sell what you have.")
     else:
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['smirk']-=num
@@ -1675,7 +1679,7 @@ async def sell(ctx,thing,num:int=1):
   elif thing == "😃" or thing ==3:
     cost=data['smarket']['stocks']['smile']*num
     if (data['smarket']['inv'][ath]['smile'] - num)<0:
-      await ctx.send("You canonly sell what yuou have.")
+      await ctx.send("You can only sell what you have.")
     else:
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['smile']-=num
@@ -1684,7 +1688,7 @@ async def sell(ctx,thing,num:int=1):
   elif thing == "😂" or thing ==4:
     cost=data['smarket']['stocks']['joy']*num
     if (data['smarket']['inv'][ath]['joy'] - num)<0:
-      await ctx.send("You canonly sell what yuou have.")
+      await ctx.send("You can only sell what you have.")
     else:
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['joy']-=num
@@ -1693,7 +1697,7 @@ async def sell(ctx,thing,num:int=1):
   elif thing == "😔" or thing ==5:
     cost=data['smarket']['stocks']['pens']*num
     if (data['smarket']['inv'][ath]['pens'] - num)<0:
-      await ctx.send("You canonly sell what yuou have.")
+      await ctx.send("You can only sell what you have.")
     else:
       data['money'][ath]+=cost
       data['smarket']['inv'][ath]['pens']-=num
@@ -1709,6 +1713,7 @@ async def price(ctx):
   '''Use this to see the price of all stocks.'''
   if data['smarket']['state']==0:
     await ctx.send("The market it closed right now.")
+    return
   a=data['smarket']['stocks']['sun']
   b=data['smarket']['stocks']['smirk']
   c=data['smarket']['stocks']['smile']
@@ -1789,7 +1794,7 @@ async def rolehelp(role,chnl):
     elif role== "cult leader" or role=="32":
         await chnl.send("```32.Cult Leader- SOLO - \n - Invites people to new solo team every night.(attempts to invite a King ,Prince or a solo role will fail). Winning with the solo is now the new team's goal. People need to kill everyone not on the solo team , they still respawn and also are disguised. (The Cult Leader is now their new king.)Invited person joins team when the night gets over. \n - Everyone in solo team stops respawning once leader dies. \n  -Invited people appear to still be in old team , but are actually part of the solo team.```")
     elif role== "rich person" or role=="33":
-        await chnl.send("```33.Rich Person - \n -Any money used for them in tribute is counted as x2 . \n -Respawns in 1 day.```")
+        await chnl.send("```33.Rich Person - \n -Any money used for them in tribute is counted as x2 . \n -Respawns in 3 day.```")
     elif role== "minister" or role=="34":
         await chnl.send("```34.Minister - \n -If the minister is alive when the king dies , Everyone will be able to respawn again once. \n -Respawns in 1 day.```")
     elif role== "weapon smith" or role=="35":
@@ -1890,7 +1895,7 @@ async def score(ath,msg):
       else:
             data['money'][ath]=0
             dump()
-            #print(data[ath])
+            #data[ath])
     else:
           coins=[10,20]
           dcoins=[5,10]
