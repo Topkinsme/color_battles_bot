@@ -105,8 +105,8 @@ async def my_looptwo():
     global data
     global gifted
     datee = datetime.datetime.now()
-    '''if int(datee.strftime("%H"))%2 !=0 or (int(datee.strftime("%M"))+61)%61 !=0 :
-      return '''
+    if int(datee.strftime("%H"))%2 !=0 or (int(datee.strftime("%M"))+61)%61 !=0 :
+      return 
     gifted=[]
     if int(gamestate)!=3:
       return
@@ -971,19 +971,23 @@ async def massgive(ctx,cash=100):
     else:
       team=str(data['players'][ath]['team'])
       add=cash*data['building'][team]['forge']
-    if ath not in data['smarket']['inv']:
-      data['smarket']['inv'][ath]={}
-      data['smarket']['inv'][ath]['sun']=0
-      data['smarket']['inv'][ath]['smirk']=0
-      data['smarket']['inv'][ath]['smile']=0
-      data['smarket']['inv'][ath]['joy']=0
-      data['smarket']['inv'][ath]['pens']=0
-    add+=int(data['smarket']['inv'][ath]['sun']*data['smarket']['stocks']['sun']*0.03)
-    add+=int(data['smarket']['inv'][ath]['smirk']*data['smarket']['stocks']['smirk']*0.03)
-    add+=int(data['smarket']['inv'][ath]['smile']*data['smarket']['stocks']['smile']*0.03)
-    add+=int(data['smarket']['inv'][ath]['joy']*data['smarket']['stocks']['joy']*0.03)
-    add+=int(data['smarket']['inv'][ath]['pens']*data['smarket']['stocks']['pens']*0.03)
-    data['money'][ath]+=int(add)
+    try:
+      if ath not in data['smarket']['inv']:
+        data['smarket']['inv'][ath]={}
+        data['smarket']['inv'][ath]['sun']=0
+        data['smarket']['inv'][ath]['smirk']=0
+        data['smarket']['inv'][ath]['smile']=0
+        data['smarket']['inv'][ath]['joy']=0
+        data['smarket']['inv'][ath]['pens']=0
+      add+=int(data['smarket']['inv'][ath]['sun']*data['smarket']['stocks']['sun']*0.03)
+      add+=int(data['smarket']['inv'][ath]['smirk']*data['smarket']['stocks']['smirk']*0.03)
+      add+=int(data['smarket']['inv'][ath]['smile']*data['smarket']['stocks']['smile']*0.03)
+      add+=int(data['smarket']['inv'][ath]['joy']*data['smarket']['stocks']['joy']*0.03)
+      add+=int(data['smarket']['inv'][ath]['pens']*data['smarket']['stocks']['pens']*0.03)
+      data['money'][ath]+=int(add)
+    except:
+      print("The stock market hasn't been created , that part was skipped.")
+      data['money'][ath]+=int(add)
   await ctx.send("Added the cash to everyone who had an account.")
   dump()
 
@@ -1507,7 +1511,7 @@ async def alivelist(ctx):
       person = discord.utils.get(guildd.members,id=int(member))
       temp +="<@{}> ({})\n".format(member,person.name)
       al+=1
-  temp+="The number of alive players are- {} \n".format(al)
+  temp+="The number of alive players is- {} \n".format(al)
   msg = await ctx.send("Loading.")
   await msg.edit(content=temp)
 
@@ -1848,6 +1852,7 @@ async def price(ctx):
 
 @bot.command(aliases=["alert","notifyme","notif"])
 async def pingme(ctx):
+    '''Use this command if you want to be pinged each time the stock market values change.'''
     if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
       return
@@ -1862,7 +1867,7 @@ async def pingme(ctx):
 @bot.command(aliases=["gf","flip"])
 @commands.has_role("Respawning")
 async def gflip(ctx,cash:int,call):
-  '''Allows the user to gamble a amount of money with a 50% chance to double it.'''
+  '''Allows the user to gamble a amount of money with a 50% chance to double it. <Respawning>'''
   global data
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
@@ -1897,7 +1902,7 @@ async def gflip(ctx,cash:int,call):
 @bot.command(aliases=["smac","slot"])
 @commands.has_role("Respawning")
 async def slotmachine(ctx,cash:int):
-  '''Allows the user to gamble a amount in a slot machine with a chance to x10 their bet or double it.'''
+  '''Allows the user to gamble a amount in a slot machine with a chance to x10 their bet or double it.<Respawning>'''
   global data
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
@@ -1926,6 +1931,43 @@ async def slotmachine(ctx,cash:int):
   else:
     data['money'][ath]-=cash
     await ctx.send("Better luck next time! {} has been removed from your account.".format(cash))
+  dump()
+
+#rip roulette
+@bot.command(aliases=["die"])
+@commands.has_role("Respawning")
+async def dicerolls(ctx,cash:int,dicen:int):
+  '''Use this to play dice. Input number of dice after cash. If the total of all the dice is more than 4*number of dice , you will win cash x(the number you go over) of the cash you bet.<Respawning>'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if cash<0:
+    await ctx.send("Number cannot be negative .")
+    return
+  if cash>1000:
+    await ctx.send("You cannot gamble over 1000c.") #change
+    return
+  if dicen>100:
+    await ctx.send("Dice number cannot be over 100.") #change
+    return
+  ath=str(ctx.author.id)
+  if cash>data['money'][ath]:
+    await ctx.send("You can only gamble what you have.")
+    return
+  die=[1,2,3,4,5,6]
+  summ=0
+  for a in range(dicen):
+    summ+=random.choice(die)
+  winno=4*dicen
+  if summ>winno:
+    point=summ-winno
+    add=point*cash
+    await ctx.send("Congrats! You have won! You got {} which was more than {}! {} has been added to your account.".format(summ,winno,add))
+    data['money'][ath]+=add
+  else:
+    await ctx.send("Oh no! You got {} which is not more than {}! {} was deducted from your account".format(summ,winno,cash))
+    data['money'][ath]-=cash
   dump()
 
 @bot.command(aliases=["mark"])
@@ -2030,6 +2072,7 @@ async def tmbuy(ctx,num:int):
 
 @bot.command(aliases=["i","inv"])
 async def inventory(ctx):
+  '''Use this to check your inventory.'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
       return
@@ -2047,85 +2090,314 @@ async def role(ctx,*,role="l"):
 
 async def rolehelp(role,chnl):
     if role == "king" or role == "1":
-          await chnl.send("```1. King - \n -Doesn't have any power but faction can't respawn with out him ! Kill this person to destroy the faction! \n -Can't respawn.```")
-    elif role == "warrior" or role =="2":
-        await chnl.send("```2.Warrior - \n -Doesn't have any powers. \n -Respawns in 1 in game days.```")
-    elif role == "potion master" or role =="3" :
-        await chnl.send("```3.Potion master - \n -Can choose to craft a poison potion (2 days preparation time) which can kill 2 people at once, a protection potion (2 days preparation time) which can be used to protect someone once for 1 attack, or a respawn potion (2 days preparation time) which can used to respawn a person instantly (except the king) and use it on someone or store it for future use. \n -The potion master cannot make multiple potions at once. And potions are not immediate. \n - If a potion master is killed , they will lose all potions stored , and will lose progress on any potion they were crafting. \n -Potion making starts as soon as sun sets and will end a few days later when the sun sets and can be used as soon as it's done. Kill potions acts at night end. Respawn and protection potion are instant. \n -Respawns in 3 days.```")
-    elif role == "finisher" or role =="4" :
-        await chnl.send("```4.Finisher - \n  -Can delay a person's respawn by 2 day. \n   - Action is instant. Respawns in 3 days.```")
-    elif role == "chief warrior" or role =="5" :
-        await chnl.send("```5.Chief Warrior - \n -Chooses who to kill and takes advice from other members of the faction,respawns much quicker at the start and then it  get slower. \n - Respawns in 1 day on the first death , then 2 days after.```")
-    elif role == "prince" or role =="6" :
-        await chnl.send("```6.Prince - \n  -Takes the place of the king , if he is alive when the king dies. \n - Respawns in a day as prince , but can't respawn as the king.```")
-    elif role == "disabler" or role =="7" :
-        await chnl.send("```7.Disabler - \n  -Can immobilize a person for a day, making him unable to use any powers. \n -Respawns in 3 days.```")
-    elif role == "killer" or role =="8" :
-        await chnl.send("```8.Killer - SOLO role \n - Is a solo role , he kills people individually once a day. Wins if he has killed at least 1/3 of the people in game (rounded down) at least once. \n  -Can't respawn```")
-    elif role == "wizard" or role =="9" :
-        await chnl.send("```9.Wizard - \n  - Can reduce a player's respawn time by 1 day or increase someone's respawn time by 1 day. \n  - Action is instant. Respawns in 3 days.```")
-    elif role == "camo warrior" or role =="10" :
-        await chnl.send("```10.Camo warrior - \n  -This role cannot be killed when he activates camo mode. Cooldown for this ability is 1 days. \n -Respawns in 2 days.```")
-    elif role == "seer" or role =="11" :
-        await chnl.send("```11. Seer - \n -Can get the role of a person, by using his ability on a person a certain number of times. (y=30/x , rounded up, where y is number of checks and x is people playing.). \n -Doesn't lose progress if killed or changes target in between. \n -Gets answers as soon as they check y number of times. Respawns in 3 days.```")
-    elif role == "guard" or role =="12" :
-        await chnl.send("```12.Guard - \n   - Can protect someone from all attacks once every lifetime.(He will die instead of the person he protects.) Cannot change target after initially picking it. \n - Respawns in 2 days.```")
-    elif role == "observer" or role =="13" :
-        await chnl.send("```13.Observer - \n -Can know the color of a targeted person instantly. \n -Respawns in 2 days.```")
-    elif role == "painter" or role =="14" :
-        await chnl.send("```14. Painter - \n  -Can paint a person to make his allegiance appear as something else to checks. \n -Respawns in 2 days.```")
-    elif role == "builder" or role =="15" :
-        await chnl.send("```15.Builder - \n - Building materials will be awarded to the builder when any opponent dies. Each person killed by his team gives him 2 pieces ,  any non team kills from outside the team gives him 1 piece. \n -The Builder can build a wall with 12 pieces which stops all attacks for 1 night, A fort for 16 pieces which stops all attacks for 2 nights or a trench with 20 parts which kills the first 2 people to attack their team.  Any kills using the trench do not award parts. \n -They can earn parts while dead but can only build when alive. Any structure built lasts as long as it doesn't get destroyed. \n -Respawns in 3 day.```")
-    elif role == "double agent" or role =="16" :
-        await chnl.send("```16.Double agent - SOLO role - \n - Appears like a warrior to any two factions. He can switch to any one fraction in the game and at that point turns into an regular warrior .If he doesn't switch fast enough , and he gets killed , he cannot respawn  and will lose.```")
-    elif role == "strong warrior" or role =="17" :
-        await chnl.send("```17.Strong Warrior- \n -Needs to be attacked twice for him to die. He does not lose this ability after dying. \n   -Respawns in 3 days.```")
-    elif role == "ex warrior" or role =="18" :
-        await chnl.send("```18.Ex Warrior- \n -Is allowed to kill 1 person during the game at any time. (Not an immediate action. \n -Respawns in 1 days```")
-    elif role == "priest" or role =="19" :
-        await chnl.send("```19.Priest- \n  - Can pray for someone (even for people outside their team) every day. Once he has prayed for someone thrice , they will be protected from the next attack. \n   -Respawns in 3 days.```")
-    elif role == "curse caster" or role =="20" :
-        await chnl.send("```20.Curse caster- \n   -Can reset the priest's progress of prayers on someone. If someone has a complete protecting , cursing on him twice will remove the protection. Can cast a curse everyday. \n  - Curse casting is immediate. Respawns in 2 days.```")
-    elif role == "kidnapper" or role =="21" :
-        await chnl.send("```21.Kidnapper - SOLO role - \n  -Can kidnap a person once every 3 days , after night 1. \n  -Kidnapped people lose access to their chats and loses the ability to perform actions. The kidnapped person also cannot be killed during this duration. The kidnapper gets all the money that the kidnapped person had. The kidnapper is kept anonymous and can send  anonymous messages to the kidnapped person. The team can free the kidnapped person after paying a ransom of 1000c. \n   -Kidnapper cannot respawn. If the kidnapper is killed , then all kidnapped people are released. \n  -The kidnapper wins when he has kidnapped all the kings atleast once. \n -Kidnapping gets done when day starts.```")
-    elif role == "item agent" or role =="22" :
-        await chnl.send("```22.Item Agent - SOLO role - \n -Every night he can contact a person and he gives him a choice. \n  -The contacted person can choose to kill a person or to reveal a person's role and color. ( or to ignore him) \n -If the contacted person accepts, The agent will take all his money. \n  -If the Item agent gets 2500c (By trades only.) , he wins. \n -If a person contacted has less than 200c , he will automatically die. \n -The person gets contacted as day begins.```")
-    elif role == "life transferrer" or role =="23" :
-        await chnl.send("```23.Life transferrer- \n  -Can make it so that his life is transferred to another person in game. Doing so will cause all attacks towards them to fail , but if their target is attacked , they will die. \n    -  Life will be transferred instantly. Respawns in 3 days.```")
-    elif role == "role stealer" or role =="24" :
-        await chnl.send("```24.Role stealer- \n    -Can steal the ability of a dead person. Stolen person will be able to use ability as well. Cannot steal from teammates.\n -The role stealer will know the stolen role immediately but cannot use it's powers till the next night. \n -Respawns in 3 days.```")
-    elif role == "death swapper" or role =="25" :
-        await chnl.send("```25.Death Swapper- \n -Can make anyone respawn for the cost of killing himself. (Person respawns the next day) \n -Swapping is INSTANT .Respawns in 2 days```")
-    elif role == "gem trader" or role =="26" :
-        await chnl.send("```26.Gem trader - SOLO role \n - Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled and the gem is automatically given to the attacker. \n -Anyone with a gem can pass it to others. \n -If the gem trader survives 1 full day with 0 gems , they win. Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.) \n -Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. \n -If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader. \n -The gem trader can also get rid of one of his gems by paying 5000c. \n -Gems will be given after kills.```")
-    elif role == "disguiser" or role =="27":
-        await chnl.send("```27. Disguiser - \n -Can make any person appear as any other role to all checks. \n - Power is instant. Respawns in 2 days.```")
-    elif role == "alert warrior" or role=="28":
-        await chnl.send("```28. Alert Warrior - \n -Can choose to stay awake at night , killing anyone who visits him. Cooldown for his ability is 2 days. \n -Action is instant. Respawns in 2 days.```")
-    elif role == "assassin" or role=="29":
-        await chnl.send("```29. Assassin- \n -Can kill one every night. \n -Kill is night end. Respawns in 3 days.```")
-    elif role == "merchant" or role=="30":
-        await chnl.send("```30. Merchant- \n -Will get back 50% of any cash spent by his team for any market items. \n -Will get the cash back as soon as day ends. Respawns in 2 days.```")
-    elif role== "evil prince" or role=="31":
-        await chnl.send("```31.Evil Prince - SOLO - \n -Similar to a prince but isn't actually on the team. The evil prince's goal is to just get their King killed. \n -Can't respawn but wins immediately if their team king is eliminated. \n -Is disguised as a regular prince in role list and all checks.```")
+          await chnl.send("""```1. King-
+- Is the leader of the team. Has no abilities.
+- The team will stop respawning after the king's death. Chooses a person from the team for tribute , every morning. 
+- Doesn't respawn.```""")
+    elif role == "alert warrior" or role =="2":
+        await chnl.send("""```2. Alert Warrior-
+- Has the ability to go alert during the night.
+- Any person attacking the alert warrior when they're alert will result in the death of the attacker.
+- Action is instant. Has a cooldown of 2 days.
+- Respawns in 4 phases.```""")
+    elif role == "camo warrior" or role =="3" :
+        await chnl.send("""```3. Camo Warrior-
+- Has the ability to go camo during the night.
+- The person cannot be killed when they have the camo mode on.
+- Action is immediate. Has a cooldown of 1 day.
+- Respawns in 4 phases.```""")
+    elif role == "chief warrior" or role =="4" :
+        await chnl.send("""```4. Chief Warrior-
+- Chooses 1 person to kill every night.
+- Kill happens at night end. Has no cooldown.
+- Respawns in 2 phases on the first death , then 4 phases ever after.```""")
+    elif role == "ex warrior" or role =="5" :
+        await chnl.send("""```5. Ex-Warrior-
+- This role is allowed to kill 1 person during the game at any time.
+- Kill is instant, can be used even during day. This ability can only be used once after which it cannot be used again.
+- Respawns in 2 phases.```""")
+    elif role == "strong warrior" or role =="6" :
+        await chnl.send("""```6. Strong Warrior-
+- This role needs to be attacked twice for them to die. They do not not lose this ability after dying.
+- They have no other abilities.
+- Respawns in 6 phases.```""")
+    elif role == "warrior" or role =="7" :
+        await chnl.send("""```7. Warrior-
+- Has no powers.
+- Respawns in 2 phases.```""")
+    elif role == "assassin" or role =="8" :
+        await chnl.send("""```8. Assassin-
+- Has the ability to kill a person every night until they lose this ability.
+- The assassin will lose their ability to kill after they have died at least once.
+- Kill happens during night end.
+- Respawns in 6 phases the first time they die, then it's 2 phases every after.```""")
+    elif role == "builder" or role =="9" :
+        await chnl.send("""```9. Builder-
+- The builder gets building parts when any opponents die. Each person killed by their team gives them 2 pieces, any non team kills from outside the team gives him 1 piece. The builder can then use these parts to build the structures given below:
+-- Wall - 12 parts - Protects all members of their team from all attacks for a night. Structure will remain if not attacked.
+-- Fort - 21 parts - Protects all members of their team from all attacks for 2 nights. Structure will remain if not attacked.
+-- Spikes - 7 parts - The builder can choose to add spiked to any already existing structures, which will kill the first attacker who tries to attack the structure. Note that spikes do not stop the attack, the attack will still go through. Any kills using the spiked do not award any parts.
+- The builder continues to get parts even when dead. However, they can only build when alive. Structures take 1 night to get built and only get built after the attacks occur. Two structures cannot exist at once.
+- Respawns in 6 phases.```""")
+    elif role == "curse caster" or role =="10" :
+        await chnl.send("""```10. Curse Caster-
+- Has the ability to cast a curse on someone every night. A curse resets all prayer progress on the chosen person. 
+- If the selected person is being protected by 2 prayers, it will take 2 curses to undo the protection.
+- Curse casting is instant. The target is informed about what happened. Has no cooldown on abilities.
+- Respawns in 4 phases.```""")
+    elif role == "death swapper" or role =="11" :
+        await chnl.send("""```11. Death Swapper-
+- Has the ability to make anyone respawn instantly for the cost of killing themselves. 
+- Action is instant. 
+- Respawns in 4 phases.```""")
+    elif role == "disabler" or role =="12" :
+        await chnl.send("""```12. Disabler-
+- Can role-block a person for 1 night. Target is informed they were role-blocked.
+- Has a cool down of 1 day. Picks action during the night.
+- Respawns in 6 phases.```""")
+    elif role == "desguiser" or role =="13" :
+        await chnl.send("""```13. Disguiser-
+- Has the ability to make anyone appear as any other role to all checks. 
+- The targeted person is informed if they were disguised, but are not told what they are disguised as. Any applied disguises will stay until the person is killed.
+- Action is instant. No cooldown.
+- Respawns in 4 phases.```""")
+    elif role == "finisher" or role =="14" :
+        await chnl.send("""```14. Finisher-
+- Can delay a person's respawn by 4 phases.
+- Has a ability cooldown of 1 day. Action is instant. Chooses the action during the night.
+- Respawns in 6 phases.```""")
+    elif role == "guard" or role =="15" :
+        await chnl.send("""```15. Guard-
+- Can protect someone from all attacks.
+- They will die instead of the person they protect. 
+- Cannot change their target after initially picking it (Unless target somehow dies before guard). Only protects from night attacks. Protecting is immediate. 
+- Respawns in 4 phases.```""")
+    elif role == "healer" or role =="16" :
+        await chnl.send("""```16. Healer-
+- Can reduce a person's respawn by 4 phases.
+- Has a ability cooldown of 1 day. Action is instant. Chooses the action during the night.
+- Respawns in 6 phases.```""")
+    elif role == "life transferrer" or role =="17" :
+        await chnl.send("""```17. Life Transferrer-
+- Has the ability to give their life to someone else. Doing so will cause all attacks targeted at the life transferrer to fail. But any attacks towards the person with the life will affect the Transferrer as well.
+- Action is instant. Cannot change targets after initial pick. Picks are only done during the night.
+- Respawns in 4 phases.```""")
+    elif role == "magician" or role =="18" :
+        await chnl.send("""```18. Magician-
+- Is allowed to submit a list of up to 3 guesses of people with their correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed.
+- Action is immediate. There is no cooldown.
+- Respawns in 6 phases.```""")
+    elif role == "merchant" or role =="19" :
+        await chnl.send("""```19. Merchant-
+- Will get back 25% of any cash spent by their team on any auction items.
+- The cash is given once the day ends.
+- Respawns in 4 phases.```""")
+    elif role == "minister" or role =="20" :
+        await chnl.send("""```20. Minister-
+- If the minister is alive when the king dies , Everyone will be able to respawn again once before losing their ability to respawn.
+- Respawns in 4 phases.```""")
+    elif role == "observer" or role =="21" :
+        await chnl.send("""```21. Observer-
+- Can get the team of a person by checking them during the night.
+- Action is immediate. Has no cooldown.
+- Respawns in 4 phases.```""")
+    elif role == "painter" or role =="22" :
+        await chnl.send("""```22. Painter-
+- Can paint a person every night to a certain colour making the observer get a false result on checking.
+- Action is immediate. Has no cooldowns.
+- Respawns in 4 phases.```""")
+    elif role == "potion master" or role =="23" :
+        await chnl.send("""```23. Potion Master-
+- Can craft any of these potions to use in the game:
+-- Kill potion - Use this to kill 2 people at the end of phase.
+-- Protection potion - Use this to protect someone from the next attack. (Doesn't expire till attacked)
+-- Revive Potion - Use this to bring back a non-permanently dead teammate back to life instantly.
+- All potions take 2 days to make. The potion master does not lose progress on death. Has to use potion as soon as it is crafted.
+- Respawns in 6 phases.```""")
+    elif role == "priest" or role =="24" :
+        await chnl.send("""```24. Priest-
+- Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice , they will be protected from the next attack on them.
+- They need to pray only twice if there is a curse caster in the game. Else, they need to pray thrice.
+- Prayer is completed instantly. Has no cooldown on abilities. Target is informed if they were prayed for.
+- Respawns in 6 phases.```""")
+    elif role == "prince" or role =="25" :
+        await chnl.send("""```25. Prince-
+- Takes the place of the king, if they are alive when the king dies.
+- Has no other abilities.
+- Respawns in 2 phases as a prince, cannot respawn as a king.```""")
+    elif role == "rich person" or role =="26" :
+        await chnl.send("""```26. Rich Person-
+- If the rich person is selected as tribute, any cash used for the rich person is counted as x1.5.
+- Respawns in 6 phases.```""")
+    elif role == "role copier" or role =="27":
+        await chnl.send("""```27. Role Copier-
+- Has the ability to copy the role of any dead person.
+- Once copied, the role copier can choose to use the role as long as they wish. If they wish to steal a new role, they need to discard their old role which takes 1 night. The role copier will know the copied role immediately but cannot use it's powers till the next night (If it's a action). 
+- Copying is instant. Other conditions are ported from the copied role.
+- Respawns in 6 phases.```""")
+    elif role == "seer" or role=="28":
+        await chnl.send("""```28. Seer-
+- Can get the role of a person by checking them during the night.
+- Action is immediate. Has a cooldown of 1 day.
+- Respawns in 6 phases.```""")
+    elif role == "truth seeker" or role=="29":
+        await chnl.send("""```29. Truth Seeker-
+- Can get the role of anyone that is dead at the moment of checking.
+- Can use ability once every night. Action is immediate. No cooldowns.
+- Respawns in 4 phases.```""")
+    elif role == "weapon smith" or role=="30":
+        await chnl.send("""```30. Weapon Smith-
+- Can craft any of these potions to use in the game:
+-- Sword - 1 day prep time - Allows a person to make x2 kills if used.
+-- Cannon - 3 day prep time - Allows a person to make x4 kills if used.
+-- Robot - 4 day prep time - Allows a person to make a kill that passes through all protection.
+- Any made weapons will kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smit will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
+- Weapons are used instantly when required.
+- Respawns in 6 phases.```""")
+    elif role== "wizard" or role=="31":
+        await chnl.send("""```31. Wizard-
+- Can reduce or increase a person's respawn time by 2 phases every night.
+- Action is instant. Has a cooldown of 1 day.
+- Respawns in 6 phases.```""")
     elif role== "cult leader" or role=="32":
-        await chnl.send("```32.Cult Leader- SOLO - \n - Invites people to new solo team every night.(attempts to invite a King ,Prince or a solo role will fail). Winning with the solo is now the new team's goal. People need to kill everyone not on the solo team , they still respawn and also are disguised. (The Cult Leader is now their new king.)Invited person joins team when the night gets over. \n - Everyone in solo team stops respawning once leader dies. \n  -Invited people appear to still be in old team , but are actually part of the solo team.```")
-    elif role== "rich person" or role=="33":
-        await chnl.send("```33.Rich Person - \n -Any money used for them in tribute is counted as x2 . \n -Respawns in 3 day.```")
-    elif role== "minister" or role=="34":
-        await chnl.send("```34.Minister - \n -If the minister is alive when the king dies , Everyone will be able to respawn again once. \n -Respawns in 1 day.```")
-    elif role== "weapon smith" or role=="35":
-        await chnl.send("```35.Weapon Smith - \n -Can craft a weapon to help their team. (Can craft a sword - 2 days or a cannon - 4 days.) Loses progress if killed when crafting. \n -Can keep the weapons to use any night (If killed, their inventory will be reset.). Or they can give it to a killing role to boost the kill ability. A sword allows to kill x2 number of people and a cannon allows to kill x3 number of people. \n -A person can use only 1 weapon for 1 night. \n          -Weapon making starts as soon as sun sets and will end a few days later when the sun sets and can be used as soon as it's done. Weapons can be applied for a night instantly \n -Respawns in 3 days.```")
-    elif role== "postman" or role=="36":
-        await chnl.send("```36.Postman - SOLO - \n -Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it. \n -The postman wins if 2 of each type of package are opened. \n -Package gets delivered when day starts.```")
-    elif role== "healer" or role=="37":
-        await chnl.send("```37.Healer - \n -Heals people to allow them to spawn faster. (Reduces time by 2 days.) \n -Respawns in 3 days.```")
-    elif role== "magician" or role=="38":
-        await chnl.send("```38. Magician - \n -Is allowed to submit a list of up to 3 guesses of people with their correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed. \n -Action is immediate. Respawns in 3 days.```")
+        await chnl.send("""```32. Cult Leader- SOLO -
+- The cult leader leads their own team that wants to end all other teams in the name of peace.
+- They have the ability to add a random alive person to their team chat every night. The added person is now on the cult's team and has the same win goal as the cult leader (The cult  leader is now their new king).
+- The added person will not lose their abilities and will still have access to their old team chat.
+- Everyone in the cult will stop respawning if the cult leader dies. The old king is irrelevant after they join the new team.
+- Can't respawn. Wins if the cult is the only team alive.```""")
+    elif role== "double agent" or role=="33":
+        await chnl.send("""```33. Double Agent- SOLO -
+-  Appears like a warrior to any two factions. They can switch to any one fraction in the game and at that point they turn into an regular warrior. If they don't switch fast enough, and get killed before they switch, they will lose the game.
+- Switching is instant. The teams will be informed of the same.
+- Can't respawn before picking a side, after they switch they can respawn in 2 phases.```""")
+    elif role== "evil prince" or role=="34":
+        await chnl.send("""```34. Evil Prince- SOLO -
+- The evil prince is actually a traitor to the team. The evil prince's goal is to just get their King killed.
+- Is disguised as a regular prince in role list and all checks.
+- Can't respawn but wins immediately if their team king is eliminated.```""")
+    elif role== "gem trader" or role=="35":
+        await chnl.send("""```35. Gem Trader- SOLO -
+- Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled and the gem is automatically given to the attacker. 
+- Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
+- Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.)
+- Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
+- The gem trader can also get rid of one of his gems by paying 5000c. Gems are given to people after attacks.
+- Cannot respawn.```""")
+    elif role== "item agent" or role=="36":
+        await chnl.send("""```36. Item Agent- SOLO -
+- Has the ability to contact a person anonymously with a choice. 
+- The contacted person can choose to kill a person or to reveal a person's role and color, (or to ignore the agent). If the contacted person accepts, The agent will take all his money.
+- If the contacted person has less than 200c, they will be killed instantly before day starts..
+- Doesn't have a cooldown. The contacted person is given the choice during the next day.
+- Cannot respawn.```""")
+    elif role== "kidnapper" or role=="37":
+        await chnl.send("""```37. Kidnapper- SOLO -
+- Has the ability to kidnap a person once every 3 nights, starting with night 2. Doing so will tell the person's role to the kidnapper. (The person is kidnapped when day starts)
+- The kidnapped person will not be able to talk in their group chat and will not be able to perform any actions. The kidnapper gets all the money that the kidnapped person had.
+- The team is informed about the person from their team that has been kidnapped. The team can choose to free their teammate by paying a ransom of 1000c. If the kidnapper is killed, all the kidnapped people are released. 
+- Has a cooldown of 2 days. The kidnapper wins when they have kidnapped all kings at least once.
+- Can not respawn.```""")
+    elif role== "killer" or role=="38":
+        await chnl.send("""```38. Killer- SOLO -
+- Kills 1 person each night.
+- Has to kill at least 1/4th of the people playing the game to win. Killing the same person doesn't count towards towards kill score.
+- Has no cooldown. Kill happens at night end.
+- Doesn't respawn.```""")
+    elif role== "postman" or role=="39":
+        await chnl.send("""```39. Postman- SOLO -
+- Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it.
+- The postman wins if 2 of each type of package are opened. Package gets delivered when day start. The target has the entire day to choose. The package will be delivered even if the postman is dead.
+- Cannot respawn.```""")
     elif role=="list" or role=="l":
-        await chnl.send("All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.finisher \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.wizard \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant \n 31.evil prince \n 32.cult leader \n 33.rich person \n 34.minister \n 35.weapon smith \n 36.postman \n 37.healer \n 38.magician```")
+        await chnl.send("""All the available roles are-
+```1. king
+WARRIORS-
+2. alert warrior
+3. camo warrior
+4. chief warrior
+5. ex warrior
+6. strong warrior
+7. warrior
+POWER ROLES-
+8. assassin
+9. builder
+10. curse caster
+11. death swapper 
+12. disabler 
+13. disguiser
+14. finisher
+15. guard
+16. healer
+17. life transferrer
+18. magician
+19. merchant
+20. minister
+21. observer
+22. painter 
+23. potion master
+24. priest
+25.  prince
+26. rich person
+27. role copier
+28. seer
+29. truth seeker
+30. weapon smith
+31. wizard
+SOLOS-
+32. cult leader
+33. double agent
+34. evil prince
+35. gem trader 
+36. item agent
+37. kidnapper
+38. killer
+39. postman```""")
     else:
-        await chnl.send("Error! Role not found.Do not capitalise role names. You can also use the number (Found in #role info) to represent the role.\n All the available roles are- \n ``` 1.king \n 2.warrior \n 3.potion master \n 4.finisher \n 5.chief warrior \n 6.prince \n 7.disabler \n 8.killer \n 9.wizard \n 10.camo warrior \n 11.seer \n 12.guard \n 13.observer \n 14.painter \n 15.builder \n 16.double agent \n 17.strong warrior \n 18.ex warrior \n 19.priest \n 20.curse caster \n 21.kidnapper \n 22.item agent \n 23.life transferrer \n 24.role stealer \n 25.death swapper \n 26.gem trader \n 27.disguiser \n 28.alert warrior \n 29.assassin \n 30.merchant \n 31.evil prince \n 32.cult leader \n 33.rich person \n 34.minister \n 35.weapon smith \n 36.postman \n 37.healer \n 38.magician```")
+        await chnl.send("""Error! Role not found.Do not capitalise role names. You can also use the number (Found in #game-role-info) to represent the role.
+All the available roles are-
+```1. king
+WARRIORS-
+2. alert warrior
+3. camo warrior
+4. chief warrior
+5. ex warrior
+6. strong warrior
+7. warrior
+POWER ROLES-
+8. assassin
+9. builder
+10. curse caster
+11. death swapper 
+12. disabler 
+13. disguiser
+14. finisher
+15. guard
+16. healer
+17. life transferrer
+18. magician
+19. merchant
+20. minister
+21. observer
+22. painter 
+23. potion master
+24. priest
+25.  prince
+26. rich person
+27. role copier
+28. seer
+29. truth seeker
+30. weapon smith
+31. wizard
+SOLOS-
+32. cult leader
+33. double agent
+34. evil prince
+35. gem trader 
+36. item agent
+37. kidnapper
+38. killer
+39. postman```""")
 
 async def change():
   global data
