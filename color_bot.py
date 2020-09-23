@@ -224,7 +224,7 @@ async def on_member_remove(member):
 async def on_message_delete(message):
     if message.author.id==450320950026567692:
       return
-    await spamchannel.send("{}'s message `{}` was deleted in <#{}>".format(message.author.mention,message.content,message.channel.id))
+    await spamchannel.send("{}'s message `{}` was deleted in <#{}>".format(message.author.name,message.content,message.channel.id))
     
 @bot.event
 async def on_user_update(before,after):
@@ -2129,7 +2129,7 @@ async def rolehelp(role,chnl):
         await chnl.send("""```8. Assassin-
 - Has the ability to kill a person every night until they lose this ability.
 - The assassin will lose their ability to kill after they have died at least once.
-- Kill happens during night end.
+- Kill happens during night end. No cooldown.
 - Respawns in 6 phases the first time they die, then it's 2 phases every after.```""")
     elif role == "builder" or role =="9" :
         await chnl.send("""```9. Builder-
@@ -2232,8 +2232,8 @@ async def rolehelp(role,chnl):
     elif role == "role copier" or role =="27":
         await chnl.send("""```27. Role Copier-
 - Has the ability to copy the role of any dead person.
-- Once copied, the role copier can choose to use the role as long as they wish. If they wish to steal a new role, they need to discard their old role which takes 1 night. The role copier will know the copied role immediately but cannot use it's powers till the next night (If it's a action). 
-- Copying is instant. Other conditions are ported from the copied role.
+- Once copied, the role copier can choose to use the role as long as they wish. Each night they can use the role they have copied earlier, or try to copy a new role. The role copier will know the copied role immediately but cannot use it's powers till the next night (If it's a action). 
+- Copying is instant. Other conditions are ported from the copied role. The copier cannot copy their dead teammates. 
 - Respawns in 6 phases.```""")
     elif role == "seer" or role=="28":
         await chnl.send("""```28. Seer-
@@ -2251,8 +2251,8 @@ async def rolehelp(role,chnl):
 -- Sword - 1 day prep time - Allows a person to make x2 kills if used.
 -- Cannon - 3 day prep time - Allows a person to make x4 kills if used.
 -- Robot - 4 day prep time - Allows a person to make a kill that passes through all protection.
-- Any made weapons will kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smit will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
-- Weapons are used instantly when required.
+- Any made weapons will kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smith will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
+- Weapons are used instantly when required. 1 person can only use 1 weapon at a time.
 - Respawns in 6 phases.```""")
     elif role== "wizard" or role=="31":
         await chnl.send("""```31. Wizard-
