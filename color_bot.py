@@ -23,7 +23,14 @@ import copy
 token = str(os.environ.get("tokeno"))
 dbpass=str(os.environ.get("dbpass"))
 
-bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'))
+intents = discord.Intents.default()
+intents.members = True
+intents.presences = True
+
+
+bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=intents)
+logging.basicConfig(level=logging.INFO)
+
 
 
 #bot.remove_command('help')
@@ -231,7 +238,7 @@ async def on_user_update(before,after):
     if before.name==after.name:
         return
     else:
-        await spamchannel.send("'{}' has changed his name to '{}' .".format(before.name,after.name))
+        await spamchannel.send("'{}' has changed thier name to '{}' .".format(before.name,after.name))
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -678,6 +685,7 @@ async def assignroles(ctx,code):
     respc = await guildd.create_text_channel('respawning',overwrites=resp,category=cate)      
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
     await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
+    await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)")
     #
     guildd=ctx.message.guild
     role0 = discord.utils.get(guildd.roles, name="Helpers")
@@ -1993,11 +2001,11 @@ async def market(ctx):
   if state==0:
     msg+="You have not unlocked the market yet. Use !upmarket to unlock it fo 5k"
   if state>0:
-    msg+="\nLVL 1 (5k) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for once. - For {} \n".format(data['building']['all']['market'][1],data['building']['all']['market'][2],data['building']['all']['market'][3])
+    msg+="\nLVL 1 (5k, 5k for the next level.) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for one night. - For {} \n".format(data['building']['all']['market'][1],data['building']['all']['market'][2],data['building']['all']['market'][3])
   if state>1:
-    msg+="\nLVL 2 (10k) \n 4.Bomb - Set a bomb in someone's house to kill everyone who visits them - For {} \n 5.Respawn stone - Use this to respawn instantly once. - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building']['all']['market'][4],data['building']['all']['market'][5],data['building']['all']['market'][6])
+    msg+="\nLVL 2 (5k, 10k for the next level) \n 4.Respawn Tortem - Allows you to respawn once even if your king is dead. - For {}\n 5.Respawn stone - Use this to respawn instantly once (Only works if you are in the respawning state). - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building']['all']['market'][4],data['building']['all']['market'][5],data['building']['all']['market'][6])
   if state>2:
-    msg+="\nLVL 3 (15k) \n 7.Respawn Ticket - Allows you to respawn once even after king is dead. - For {} \n 8.Role Seeker - Get the role of a person once. - For {} \n 9.GOD - Use this to instantly kill someone passing all protection or Protect someone for 1 attack or respawn someone instantly or reduce all cooldowns. (Can only be bought once in game) - For {} \n".format(data['building']['all']['market'][7],data['building']['all']['market'][8],data['building']['all']['market'][9])
+    msg+="\nLVL 3 (10k, There is no next level.) \n  7.Bomb - Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Bomb does not trigger if there is no attack) - For {} \n 8.Role Seeker - Get the role and team of a person once and role block them for the next night. - For {} \n 9.GOD - Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game)- For {} \n".format(data['building']['all']['market'][7],data['building']['all']['market'][8],data['building']['all']['market'][9])
   await ctx.send(msg)
 
 @bot.command(aliases=["upm"])
@@ -2017,9 +2025,9 @@ async def upmarket(ctx):
   if state==0:
     cost=5000
   elif state==1:
-    cost=10000
+    cost=5000
   elif state==2:
-    cost=15000
+    cost=10000
   else:
     await ctx.send("Your market has already been fully upgraded.")
     return
@@ -2555,5 +2563,6 @@ def dump():
     my_collection.insert_one(data)
     '''with open('data.json', 'w+') as f:
         json.dump(data, f)'''
+
 keep_alive.keep_alive()
 bot.run(token)
