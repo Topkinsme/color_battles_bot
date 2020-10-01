@@ -2290,12 +2290,12 @@ async def rolehelp(role,chnl):
 - Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
 - Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.)
 - Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
-- The gem trader can also get rid of one of his gems by paying 5000c. Gems are given to people after attacks.
+- The gem trader can also get rid of one of thier gems by paying 5000c. Gems are given to people after attacks.
 - Cannot respawn.```""")
     elif role== "item agent" or role=="36":
         await chnl.send("""```36. Item Agent- SOLO -
 - Has the ability to contact a person anonymously with a choice. 
-- The contacted person can choose to kill a person or to reveal a person's role and color, (or to ignore the agent). If the contacted person accepts, The agent will take all his money.
+- The contacted person can choose to kill a person or to reveal a person's role and color, (or to ignore the agent). If the contacted person accepts, The agent will take all all of their money.
 - If the contacted person has less than 200c, they will be killed instantly before day starts..
 - Doesn't have a cooldown. The contacted person is given the choice during the next day.
 - Cannot respawn.```""")
