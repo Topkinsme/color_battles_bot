@@ -238,7 +238,7 @@ async def on_user_update(before,after):
     if before.name==after.name:
         return
     else:
-        await spamchannel.send("'{}' has changed thier name to '{}' .".format(before.name,after.name))
+        await spamchannel.send("'{}' has changed their name to '{}' .".format(before.name,after.name))
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -2290,7 +2290,7 @@ async def rolehelp(role,chnl):
 - Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
 - Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.)
 - Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
-- The gem trader can also get rid of one of thier gems by paying 5000c. Gems are given to people after attacks.
+- The gem trader can also get rid of one of their gems by paying 5000c. Gems are given to people after attacks.
 - Cannot respawn.```""")
     elif role== "item agent" or role=="36":
         await chnl.send("""```36. Item Agent- SOLO -
