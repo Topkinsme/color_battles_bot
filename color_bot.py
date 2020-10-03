@@ -57,6 +57,7 @@ async def on_ready():
     global spamchannel
     global gamestate
     global lstmsg
+    global gifted
     spamchannel=bot.get_channel(450698253508542474)
     await spamchannel.send("The bot is online!")
     lstmsg={}
@@ -64,6 +65,7 @@ async def on_ready():
         my_collection = db.main
         data = my_collection.find_one()
         gamestate = data['gamestate']
+        gifted=[]
         '''with open('data.json','r') as f:
             data = json.load(f)
             print(data)
@@ -193,14 +195,17 @@ async def on_message(message):
     if int(gamestate) != 3:
         return
     user=str(message.author.id)
-    data['players'][user]['msg']+=1
+    try:
+      data['players'][user]['msg']+=1
+    except:
+      pass
     ath=str(message.author.id)
     fath=message.author
     channel = message.channel
     await score(ath,message.content)
     if message.channel.name!="battlefield":
       return
-    n = random.randint(0,1000)
+    n = random.randint(1,500)
     cash = random.randint(300,500)
     if n ==49:
       if message.author.id in gifted:
@@ -864,15 +869,22 @@ async def removerole(ctx,role,team):
 @commands.has_role("Helpers")
 async def listroles(ctx):
     '''Prints the entire role list. <Helpers>'''
-    temp = ""
-    temp+="The rolelist is - "
+    temp="The rolelist is - \n"
     num=0
     for role in data['roles']:
         num+=1
         temp +="{} of {}\n".format(role,data['rt'][role])
-    temp+="The number of roles is "+num
-    msg = await ctx.send("Loading.")
-    await msg.edit(content=temp)
+    temp+="The number of roles is "+str(num)
+    if len(temp)>2000:
+      a=temp[:2000]
+      b=temp[2000:]
+      am=await ctx.send("Loading.")
+      await am.edit(content=a)
+      bm=await ctx.send("Loading.")
+      await bm.edit(content=b)
+    else:
+      msg = await ctx.send("Loading.")
+      await msg.edit(content=temp)
     
 @bot.command(aliases=["cr"])
 @commands.has_role("Helpers")
