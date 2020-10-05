@@ -1039,6 +1039,7 @@ async def createauction(ctx,name,*,text):
     data['auction']['chn']=str(aucmsg.channel.id)
     data['auction']['bid']=0
     data['auction']['bider']=""
+    data['auction']['item']=name
     dump()
 
 @bot.command(aliases=["cla"])
@@ -1052,6 +1053,7 @@ async def closeauction(ctx):
   if data['auction']['state']==0:
     await ctx.send("There is no auction going on right now.")
     return
+  await ctx.send("The market is closing!")
   while True:
     a=data['auction']['bid']
     await asyncio.sleep(30)
@@ -1065,10 +1067,12 @@ async def closeauction(ctx):
   mark=discord.utils.get(guildd.channels,name="market")
   await mark.send("Congrats! <@{}> has won the item auctioned for {} ! ".format(who,cost))
   data['money'][str(who)]-=cost
+  data['players'][str(who)]['inv'].append(data['auction']['item'])
   data['auction']['msg']=""
   data['auction']['chn']=""
   data['auction']['bid']=0
   data['auction']['bider']=""
+  data['auction']['item']=""
   dump()
 
 @bot.command(aliases=["rmm"])
@@ -1486,9 +1490,6 @@ async def removeinchannel(ctx,member:discord.Member):
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
-    if data['players'][str(member.id)]['state']==0:
-        await ctx.send("Only remove people if they are alive.")
-        return
     chnl = ctx.channel.id
     if data['chnls'][str(chnl)]['owner'] == ctx.author.id:
         await ctx.channel.set_permissions(member, read_messages=False,send_messages=False)
@@ -1537,7 +1538,7 @@ async def alivelist(ctx):
 
 @bot.command(aliases=["b"])
 @commands.has_role("Alive")
-async def bid(ctx,cash:int):
+async def bid(ctx,cash:int=0):
   '''Allows the person to bid in the auction.'''
   global data
   ath=str(ctx.author.id)
@@ -1553,11 +1554,13 @@ async def bid(ctx,cash:int):
     await ctx.send("You are not a king. Please only use this command if your role is King.")
     return'''
   await ctx.message.delete()
+  if cash==0:
+    cash=data['money'][ath]+100
   if cash>data['money'][ath]:
     await ctx.send("You can only bid what you have.")
     return
-  if cash <= data['auction']['bid']:
-    await ctx.send("The current bid is higher than what you're currently offering.")
+  if cash < data['auction']['bid']+100:
+    await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100.)")
     return
   data['auction']['bid']=cash
   '''if data['players'][ath]['team'] =="red":
