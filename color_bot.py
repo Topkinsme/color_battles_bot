@@ -1381,7 +1381,7 @@ async def teamsay(ctx,*,msg):
 @bot.command(aliases=["cc"])
 @commands.has_role("Alive")
 async def createchannel(ctx,ccname,*member:discord.Member):
-    '''Used to create a communication channel.'''
+    '''Used to create a communication channel. Costs 50c.'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
@@ -2011,13 +2011,13 @@ async def market(ctx):
     state=3
   msg="__**MARKET**__\n"
   if state==0:
-    msg+="You have not unlocked the market yet. Use !upmarket to unlock it fo 5k"
+    msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
   if state>0:
-    msg+="\nLVL 1 (5k, 5k for the next level.) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for one night. - For {} \n".format(data['building']['all']['market'][1],data['building']['all']['market'][2],data['building']['all']['market'][3])
+    msg+="\nLVL 1 (2.5k, 2.5k for the next level.) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for one night. - For {} \n".format(data['building']['all']['market'][1],data['building']['all']['market'][2],data['building']['all']['market'][3])
   if state>1:
-    msg+="\nLVL 2 (5k, 10k for the next level) \n 4.Respawn Tortem - Allows you to respawn once even if your king is dead. - For {}\n 5.Respawn stone - Use this to respawn instantly once (Only works if you are in the respawning state). - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building']['all']['market'][4],data['building']['all']['market'][5],data['building']['all']['market'][6])
+    msg+="\nLVL 2 (2.5k, 5k for the next level) \n 4.Respawn Totem - Allows you to respawn once even if your king is dead. (Solos cannot buy this.) - For {}\n 5.Respawn stone - Use this to respawn instantly once (Only works if you are in the respawning state). - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building']['all']['market'][4],data['building']['all']['market'][5],data['building']['all']['market'][6])
   if state>2:
-    msg+="\nLVL 3 (10k, There is no next level.) \n  7.Bomb - Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Bomb does not trigger if there is no attack) - For {} \n 8.Role Seeker - Get the role and team of a person once and role block them for the next night. - For {} \n 9.GOD - Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game)- For {} \n".format(data['building']['all']['market'][7],data['building']['all']['market'][8],data['building']['all']['market'][9])
+    msg+="\nLVL 3 (5k, There is no next level.) \n  7.Bomb - Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Bomb does not trigger if there is no attack) - For {} \n 8.Role Seeker - Get the role and team of a person once and role block them for the next night. - For {} \n 9.GOD - Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game)- For {} \n".format(data['building']['all']['market'][7],data['building']['all']['market'][8],data['building']['all']['market'][9])
   await ctx.send(msg)
 
 @bot.command(aliases=["upm"])
@@ -2035,11 +2035,11 @@ async def upmarket(ctx):
     state=data['building'][team]['market']
 
   if state==0:
-    cost=5000
+    cost=2500
   elif state==1:
-    cost=5000
+    cost=2500
   elif state==2:
-    cost=10000
+    cost=5000
   else:
     await ctx.send("Your market has already been fully upgraded.")
     return
