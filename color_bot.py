@@ -1555,7 +1555,7 @@ async def bid(ctx,cash:int=0):
     return'''
   await ctx.message.delete()
   if cash==0:
-    cash=data['money'][ath]+100
+    cash=data['auction']['bid']+100
   if cash>data['money'][ath]:
     await ctx.send("You can only bid what you have.")
     return
