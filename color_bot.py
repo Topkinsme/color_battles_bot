@@ -1195,7 +1195,7 @@ async def msgcount(ctx):
 
 @bot.command(aliases=["addinv"])
 @commands.has_role("Helpers")
-async def addtoinv(ctx,user:discord.Member,item):
+async def addtoinv(ctx,user:discord.Member,*,item):
   '''Use this to add something to a person's inventory <Helpers>'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
@@ -2077,13 +2077,13 @@ async def tmbuy(ctx,num:int):
   elif num==3:
     item="Protection"
   elif num==4:
-    item="Bomb"
+    item="Respawn Tortem"
   elif num==5:
     item="Respawn Stone"
   elif num==6:
     item="Check Bal"
   elif num==7:
-    item="Respawn Ticket"
+    item="Bomb"
   elif num==8:
     item="Role seeker"
   elif num==9:
