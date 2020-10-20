@@ -191,6 +191,9 @@ async def on_message(message):
     global data
     if message.author.id == 450320950026567692:
         return
+    if message.guild==None:
+      await spamchannel.send(f"<{message.author}> {message.content}")
+    ath=str(message.author.id)
     await bot.process_commands(message)
     if int(gamestate) != 3:
         return
@@ -903,6 +906,7 @@ async def clearroles(ctx):
 async def endgame(ctx):
     '''Ends the game. <Helpers>'''
     global gamestate
+    global data
     if int(gamestate)!=3:
         await ctx.send("A game isn't even going on.")
         return
