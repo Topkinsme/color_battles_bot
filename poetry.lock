@@ -39,6 +39,14 @@ tests = ["coverage (>=5.0.2)", "hypothesis", "pympler", "pytest (>=4.3.0)", "six
 
 [[package]]
 category = "main"
+description = "Blazingly fast cleaning swear words (and their leetspeak) in strings"
+name = "better-profanity"
+optional = false
+python-versions = "==3.*"
+version = "0.6.1"
+
+[[package]]
+category = "main"
 description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
 optional = false
@@ -258,7 +266,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "978023c8b03df3682fe623ecf26c50b9832db940cd09e5c181ac68114f352e0f"
+content-hash = "b6b56be74c072501bae1c5e2ada6cbd49fdb7ad4cc29ecca244529ad72a66dc5"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -283,6 +291,10 @@ async-timeout = [
 attrs = [
     {file = "attrs-20.1.0-py2.py3-none-any.whl", hash = "sha256:2867b7b9f8326499ab5b0e2d12801fa5c98842d2cbd22b35112ae04bf85b4dff"},
     {file = "attrs-20.1.0.tar.gz", hash = "sha256:0ef97238856430dcf9228e07f316aefc17e8939fc8507e18c6501b761ef1a42a"},
+]
+better-profanity = [
+    {file = "better_profanity-0.6.1-py3-none-any.whl", hash = "sha256:a20902b17f846aff9f9030e61ca75e2142824c2af287c078808e76a6e3292ecc"},
+    {file = "better_profanity-0.6.1.tar.gz", hash = "sha256:c8f1a05dfabc5e8bbe3c6f51e25cea9d1df3e2a38e433b7b88e6579d46df296b"},
 ]
 certifi = [
     {file = "certifi-2020.6.20-py2.py3-none-any.whl", hash = "sha256:8fc0819f1f30ba15bdb34cceffb9ef04d99f420f68eb75d901e9560b8749fc41"},
