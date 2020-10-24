@@ -261,9 +261,9 @@ async def on_message(message):
         dump()
 
     
-#@bot.event
-#async def on_command_error(ctx,error):
-    #await ctx.send(error)
+@bot.event
+async def on_command_error(ctx,error):
+    await ctx.send(error)
 
 @bot.event
 async def on_member_join(member):
