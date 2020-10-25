@@ -837,6 +837,9 @@ async def assignroles(ctx,code):
       data['building'][team]['vault']=0
       data['building'][team]['forge']=1
       data['building'][team]['market']=0
+      data['building'][team]['trihouse']={}
+      data['building'][team]['trihouse']['who']=""
+      data['building'][team]['trihouse']['cash']=0
       data['building'][team]['marketprices']=[]
       data['building'][team]['marketprices'].append("Placeholder")
       data['building'][team]['marketprices'].append(1000)
@@ -1176,7 +1179,7 @@ async def closeauction(ctx):
   cost=data['auction']['bid']
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="market")
-  await mark.send("Congrats! <@{}> has won the item auctioned for {} ! ".format(who,cost))
+  await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
   data['money'][str(who)]-=cost
   data['players'][str(who)]['inv'].append(data['auction']['item'])
   data['auction']['msg']=""
@@ -1330,6 +1333,44 @@ async def removefrominv(ctx,user:discord.Member,*,item):
     await ctx.send("That item was not found in their inventory.")
     return
   await ctx.send("Done.")
+
+@bot.command(aliases=["endt"])
+@commands.has_role("Helpers")
+async def endtribute(ctx):
+  '''Use this to commence the tributing. <Helper>'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  teams=['red','blue','green','yellow']
+  info={}
+  lowest=99999
+  lowestteam=""
+  for team in teams:
+    if data['building'][team]['trihouse']['cash']==0:
+      pass
+    else:
+      info[team]=data['building'][team]['trihouse']['cash']
+      if  data['building'][team]['trihouse']['cash']>0 and data['building'][team]['trihouse']['cash'] <=lowest:
+        lowestteam=team
+        lowest=data['building'][team]['trihouse']['cash']
+  sort = sorted(info.items(),key = lambda x:x[1],reverse=True)
+  print(sort)
+  text=""
+  for entry in sort:
+	  text+=f"{entry[0]} paid {entry[1]} \n"
+  who=str(data['building'][lowestteam]['trihouse']['who'])
+  guildd=bot.get_guild(448888674944548874)
+  user=discord.utils.get(guildd.members,id=int(who))
+  await kill(ctx,user)
+  triinfo = discord.Embed(colour=discord.Colour.red())
+  triinfo.set_author(name="Tribute Info-")
+  triinfo.add_field(name="Who is dying?-",value=f"**{user.mention}was killed.**",inline="false")
+  triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
+  for team in teams:
+    data['building'][team]['trihouse']['who']=""
+    data['building'][team]['trihouse']['cash']=0
+  await ctx.send(embed=triinfo)
+  dump()
 
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
@@ -1601,6 +1642,9 @@ async def addinchannel(ctx,member:discord.Member):
     if data['players'][str(member.id)]['state']==0:
         await ctx.send("You add a dead person to the cc.")
         return
+    if ctx.author==member:
+      await ctx.send("You can't add or remove yourself.")
+      return
     chnl = ctx.channel.id
     if data['chnls'][str(chnl)]['owner'] == ctx.author.id:
         await ctx.channel.set_permissions(member, read_messages=True,send_messages=True)
@@ -1616,6 +1660,9 @@ async def removeinchannel(ctx,member:discord.Member):
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+    if ctx.author==member:
+      await ctx.send("You can't add or remove yourself.")
+      return
     chnl = ctx.channel.id
     if data['chnls'][str(chnl)]['owner'] == ctx.author.id:
         await ctx.channel.set_permissions(member, read_messages=False,send_messages=False)
@@ -1711,23 +1758,23 @@ async def bid(ctx,cash:int=0):
     await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100.)")
     return
   data['auction']['bid']=cash
-  '''if data['players'][ath]['team'] =="red":
-    who= "Red King."
+  if data['players'][ath]['team'] =="red":
+    who= "Red Team."
   elif data['players'][ath]['team'] =="blue":
-    who= "Blue King."
+    who= "Blue Team."
   elif data['players'][ath]['team'] =="green":
-    who= "Green King."
+    who= "Green Team.."
   elif data['players'][ath]['team'] =="yellow":
-    who= "Yellow King."
+    who= "Yellow Team."
   else:
-    who = "Unknown bidder"'''
-  who=str(ctx.author.id)
+    who = "Solo."
+  #who=str(ctx.author.id)
   data['auction']['bider']=who
   guildd=bot.get_guild(448888674944548874)
   channel=bot.get_channel(int(data['auction']['chn']))
   msgid = int(data['auction']['msg'])
   msg = await channel.fetch_message(msgid)
-  await msg.edit(content="Current bid - {} by <@{}>".format(cash,who))
+  await msg.edit(content="Current bid - {} by {}".format(cash,who))
   dump()
 
 @bot.command(aliases=["ai"])
@@ -1743,7 +1790,7 @@ async def auctioninfo(ctx):
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['auction']['item']}**",inline="false")
   info.add_field(name="Item Perks-",value=data['auction']['perks'],inline="false")
-  info.add_field(name="Current bid-",value=f"{data['auction']['bid']} by <@{data['auction']['bider']}>",inline="false")
+  info.add_field(name="Current bid-",value=f"{data['auction']['bid']} by {data['auction']['bider']}",inline="false")
   await ctx.send(embed=info)
 
 @bot.command(aliases=["de","dep"])
@@ -2353,6 +2400,38 @@ async def inventory(ctx):
     msg+="{}\n".format(item)
   await ctx.send(msg)
 
+@bot.command(aliases=["tri","tribute"])
+@commands.has_role("Alive")
+async def picktribute(ctx,person:discord.User,cash:int):
+  '''Allows the king of a team to pick the tribute and cash <King Only.>'''
+  global data
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  if cash<1:
+    await ctx.send("Cash can't be a negative value or 0.")
+    return
+  ath=str(ctx.author.id)
+  ath2=str(person.id)
+  team=data['players'][ath]['team']
+  team2=data['players'][ath2]['team']
+  role = data['players'][ath]['role']
+  rolet=data['rt'][role]['lirole']
+  if rolet!="king" and rolet!="prince": 
+    await ctx.send("You are not a king or a prince. Please only use this command if your role is King or a prince.")
+    return
+  if team!=team2:
+    await ctx.send("That person is not on your team.")
+    return
+  if cash>data['money'][ath]:
+    await ctx.send("You do not have that much cash.")
+    return
+  data['building'][team]['trihouse']['who']=ath2
+  data['building'][team]['trihouse']['cash']=cash
+  await ctx.send(f"Done! {cash} was set as your tribute person and {person.mention} is set as your price.")
 
 @bot.command(aliases=["r"])
 async def role(ctx,*,role="l"):
