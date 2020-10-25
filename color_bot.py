@@ -803,7 +803,7 @@ async def assignroles(ctx,code):
     cate = discord.utils.get(ctx.message.guild.categories, name=namee)
     story = await guildd.create_text_channel('story-time',overwrites=storymark,category=cate)
     batlec = await guildd.create_text_channel('battlefield',overwrites=batle,category=cate)
-    markc = await guildd.create_text_channel('market',overwrites=storymark,category=cate)
+    markc = await guildd.create_text_channel('auction_house',overwrites=storymark,category=cate)
     respc = await guildd.create_text_channel('respawning',overwrites=resp,category=cate)      
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
@@ -1143,7 +1143,7 @@ async def createauction(ctx,name,*,text):
         return
     global data
     guildd=bot.get_guild(448888674944548874)
-    mark=discord.utils.get(guildd.channels,name="market")
+    mark=discord.utils.get(guildd.channels,name="auction_house")
     data['auction']['state']=1
     await mark.send("__**ITEM - {}**__".format(name))
     await mark.send("Perks - {}".format(text))
@@ -1178,7 +1178,7 @@ async def closeauction(ctx):
   who=data['auction']['bider']
   cost=data['auction']['bid']
   guildd=bot.get_guild(448888674944548874)
-  mark=discord.utils.get(guildd.channels,name="market")
+  mark=discord.utils.get(guildd.channels,name="auction_house")
   await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
   data['money'][str(who)]-=cost
   data['players'][str(who)]['inv'].append(data['auction']['item'])
@@ -1265,7 +1265,7 @@ async def createstockmarket(ctx):
   data['smarket']['trades']['joy']=0
   data['smarket']['trades']['pens']=0
   guildd=bot.get_guild(448888674944548874)
-  mark=discord.utils.get(guildd.channels,name="market")
+  mark=discord.utils.get(guildd.channels,name="auction_house")
   smarket = await mark.send("Cost of :sunglasses: is 1000 \nCost of :smirk: is 500 \nCost of :smiley: is 250 \nCost of :joy: is 100 \nCost of :pensive: is 50 \n")
   await smarket.pin()
   data['smarket']['msg']=str(smarket.id)
@@ -1565,7 +1565,7 @@ async def createchannel(ctx,ccname,*member:discord.Member):
       if str(people.id) not in data['signedup']:
         await ctx.send("That person is not in this game.")
         return
-    if ccname=="battlefield" or ccname=="respawning":
+    if ccname=="battlefield" or ccname=="respawning" or ccname=="auction_house":
       await ctx.send("You cannot name a cc that.")
       return
     if data['code']['ccno'] ==0:
@@ -1966,7 +1966,7 @@ async def stockinventory(ctx):
   await ctx.send("You have- \n {} of :sunglasses: \n {} of :smirk: \n {} of :smiley: \n {} of :joy: \n {} of :pensive: ".format(a,b,c,d,e))
   dump()
 
-@bot.command(aliases=["by"])
+@bot.command(aliases=["sbuy","by"])
 async def smbuy(ctx,thing,num:int=1):
   '''Use this to buy any stocks.'''
   if int(gamestate)!=3:
@@ -2270,15 +2270,49 @@ async def market(ctx):
   else:
     state=3
   msg="__**MARKET**__\n"
-  if state==0:
-    msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
-  if state>0:
-    msg+="\nLVL 1 (2.5k, 2.5k for the next level.) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for one night. - For {} \n".format(data['building'][team]['marketprices'][1],data['building'][team]['marketprices'][2],data['building'][team]['marketprices'][3])
-  if state>1:
-    msg+="\nLVL 2 (2.5k, 5k for the next level) \n 4.Respawn Totem - Allows you to respawn once even if your king is dead. (Solos cannot buy this.) - For {}\n 5.Respawn stone - Use this to respawn instantly once (Only works if you are in the respawning state). - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building'][team]['marketprices'][4],data['building'][team]['marketprices'][5],data['building'][team]['marketprices'][6])
-  if state>2:
-    msg+="\nLVL 3 (5k, There is no next level.) \n  7.Bomb - Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Bomb does not trigger if there is no attack) - For {} \n 8.Role Seeker - Get the role and team of a person once and role block them for the next night. - For {} \n 9.GOD - Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game)- For {} \n".format(data['building'][team]['marketprices'][7],data['building'][team]['marketprices'][8],data['building'][team]['marketprices'][9])
+  #if state==0:
+    #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
+  #if state>0:
+  msg+="\nLVL 1 (2.5k, 2.5k for the next level.) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for one night. - For {} \n".format(data['building'][team]['marketprices'][1],data['building'][team]['marketprices'][2],data['building'][team]['marketprices'][3])
+  #if state>1:
+  msg+="\nLVL 2 (2.5k, 5k for the next level) \n 4.Respawn Totem - Allows you to respawn once even if your king is dead. (Solos cannot buy this.) - For {}\n 5.Respawn stone - Use this to respawn instantly once (Only works if you are in the respawning state). - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building'][team]['marketprices'][4],data['building'][team]['marketprices'][5],data['building'][team]['marketprices'][6])
+  #if state>2:
+  msg+="\nLVL 3 (5k, There is no next level.) \n  7.Bomb - Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Bomb does not trigger if there is no attack) - For {} \n 8.Role Seeker - Get the role and team of a person once and role block them for the next night. - For {} \n 9.GOD - Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game)- For {} \n".format(data['building'][team]['marketprices'][7],data['building'][team]['marketprices'][8],data['building'][team]['marketprices'][9])
   await ctx.send(msg)
+
+@bot.command(aliases=["dim"])
+@commands.has_role("Alive")
+async def dismarket(ctx):
+  '''Displays your team's market level.'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  if team=="red":
+    state=data['building']['red']['market']
+  elif team=="blue":
+    state=data['building']['blue']['market']
+  elif team=="green":
+    state=data['building']['green']['market']
+  elif team=="yellow":
+    state=data['building']['yellow']['market']
+  else:
+    state=3
+
+  if state==0:
+    text= "The next upgrade costs 2500."
+  elif state==1:
+    text= "The next upgrade costs 2500."
+  elif state==2:
+    text= "The next upgrade costs 5000."
+  elif state==3:
+    text= "Your market has been maxed out."
+  await ctx.send(f"Your team's forge is on level {state}.{text}")
+
 
 @bot.command(aliases=["upm"])
 @commands.has_role("Alive")
