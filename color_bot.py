@@ -1152,6 +1152,7 @@ async def createauction(ctx,name,*,text):
     data['auction']['chn']=str(aucmsg.channel.id)
     data['auction']['bid']=0
     data['auction']['bider']=""
+    data['auction']['bider']=""
     data['auction']['item']=name
     data['auction']['perks']=text
     dump()
@@ -1175,17 +1176,19 @@ async def closeauction(ctx):
       break
 
   data['auction']['state']=0
-  who=data['auction']['bider']
+  who=data['auction']['bidern']
   cost=data['auction']['bid']
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="auction_house")
   await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
-  data['money'][str(who)]-=cost
-  data['players'][str(who)]['inv'].append(data['auction']['item'])
+  whop=data['auction']['bider']
+  data['money'][str(whop)]-=cost
+  data['players'][str(whop)]['inv'].append(data['auction']['item'])
   data['auction']['msg']=""
   data['auction']['chn']=""
   data['auction']['bid']=0
   data['auction']['bider']=""
+  data['auction']['bidern']=""
   data['auction']['item']=""
   data['auction']['perks']=""
   dump()
@@ -1350,6 +1353,7 @@ async def endtribute(ctx):
       pass
     else:
       info[team]=data['building'][team]['trihouse']['cash']
+      data['building'][team]['vault']-=data['building'][team]['trihouse']['cash']
       if  data['building'][team]['trihouse']['cash']>0 and data['building'][team]['trihouse']['cash'] <=lowest:
         lowestteam=team
         lowest=data['building'][team]['trihouse']['cash']
@@ -1769,7 +1773,8 @@ async def bid(ctx,cash:int=0):
   else:
     who = "Solo."
   #who=str(ctx.author.id)
-  data['auction']['bider']=who
+  data['auction']['bider']=str(ctx.author.id)
+  data['auction']['bidern']=who
   guildd=bot.get_guild(448888674944548874)
   channel=bot.get_channel(int(data['auction']['chn']))
   msgid = int(data['auction']['msg'])
@@ -2460,12 +2465,12 @@ async def picktribute(ctx,person:discord.User,cash:int):
   if team!=team2:
     await ctx.send("That person is not on your team.")
     return
-  if cash>data['money'][ath]:
-    await ctx.send("You do not have that much cash.")
+  if cash>data['building'][team]['vault']:
+    await ctx.send("You do not have that much cash in your vault. Kindly keep the tribute cash in the vault at all times.")
     return
   data['building'][team]['trihouse']['who']=ath2
   data['building'][team]['trihouse']['cash']=cash
-  await ctx.send(f"Done! {cash} was set as your tribute person and {person.mention} is set as your price.")
+  await ctx.send(f"Done! {person.mention} was set as your tribute person and {cash} is set as your price.")
 
 @bot.command(aliases=["r"])
 async def role(ctx,*,role="l"):
