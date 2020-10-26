@@ -17,7 +17,7 @@ from dhooks import Webhook
 import os
 import pymongo,dns
 import keep_alive
-import copy
+import copy, inspect
 from better_profanity import profanity
 
 
@@ -599,6 +599,26 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   data['smarket']['inv'][athap]['joy']=data['smarket']['inv'][athiap]['joy']
   data['smarket']['inv'][athap]['pens']=data['smarket']['inv'][athiap]['pens']
   await ctx.send("Done.")
+
+@bot.command()
+@commands.has_role("Informer")
+async def evall(ctx,*,thing:str):
+    '''Eval command <Informer>'''
+    ctx=ctx
+    try:
+      res = eval(thing)
+      if inspect.isawaitable(res):
+            await res
+            await ctx.send("Command executed!")
+      else:
+            #await ctx.send("Command executed!!")
+            await ctx.send(res)
+    except Exception as e:
+        try:
+          exec(thing)
+          await ctx.send("Command executed!")
+        except:
+          await ctx.send(f"Eval failed! Exception - {e}")
 
 
 #moderator/helper
