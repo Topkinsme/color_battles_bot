@@ -870,6 +870,7 @@ async def assignroles(ctx,code):
       data['building'][team]['marketprices'].append(5000)
       data['building'][team]['marketprices'].append(5000)
       data['building'][team]['marketprices'].append(6000)
+      data['building'][team]['marketprices'].append(6000)
       data['building'][team]['marketprices'].append(10000)
 
     #
@@ -2293,16 +2294,17 @@ async def market(ctx):
   elif team=="yellow":
     state=data['building']['yellow']['market']
   else:
-    state=3
+    state=4
   msg="__**MARKET**__\n"
   #if state==0:
     #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
   #if state>0:
-  msg+="\nLVL 1 (2.5k, 2.5k for the next level.) \n 1.Poison someone - They die in 1 day if they don't buy antidode.(End phase) - For {} \n 2.Antidote - Use this to cure yourself if you're poisoned. - For {} \n 3.Protection - Use this to protect someone from all attacks for one night. - For {} \n".format(data['building'][team]['marketprices'][1],data['building'][team]['marketprices'][2],data['building'][team]['marketprices'][3])
+  msg+=f"\n__**LVL 1 (2.5k, 2.5k for the next level.)**__ \n **1.Poison someone -** They die in 1 day if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
   #if state>1:
-  msg+="\nLVL 2 (2.5k, 5k for the next level) \n 4.Respawn Totem - Allows you to respawn once even if your king is dead. (Solos cannot buy this.) - For {}\n 5.Respawn stone - Use this to respawn instantly once (Only works if you are in the respawning state). - For {} \n 6.Check Bal - Use this to check one person/one team's balance/value once respectively. - For {} \n".format(data['building'][team]['marketprices'][4],data['building'][team]['marketprices'][5],data['building'][team]['marketprices'][6])
+  msg+=f"\n__**LVL 2 (2.5k, 5k for the next level)**__ \n **4.Protection -** Use this to protect someone from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
   #if state>2:
-  msg+="\nLVL 3 (5k, There is no next level.) \n  7.Bomb - Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Bomb does not trigger if there is no attack) - For {} \n 8.Role Seeker - Get the role and team of a person once and role block them for the next night. - For {} \n 9.GOD - Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game)- For {} \n".format(data['building'][team]['marketprices'][7],data['building'][team]['marketprices'][8],data['building'][team]['marketprices'][9])
+  msg+=f"\n__**LVL 3 (5k, 1k for the next level)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the next night. *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
+  msg+=f"\n__**LVL 4 (1k, There is no next level)**__ \n **10.GOD -** Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   await ctx.send(msg)
 
 @bot.command(aliases=["dim"])
@@ -2349,7 +2351,7 @@ async def upmarket(ctx):
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
   if team=="solo":
-    state=3
+    state=4
   else:
     state=data['building'][team]['market']
 
@@ -2359,6 +2361,8 @@ async def upmarket(ctx):
     cost=2500
   elif state==2:
     cost=5000
+  elif state==3:
+    cost=1000
   else:
     await ctx.send("Your market has already been fully upgraded.")
     return
@@ -2441,6 +2445,11 @@ async def tmbuy(ctx,num:int):
     if state<3:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
+    item="Strength Potion"
+  elif num==9:
+    if state<4:
+      await ctx.send("You need to upgrade your market to buy this item.")
+      return
     item="GOD"
     data['building'][team]['marketprices'][num]+=89000
   data['building'][team]['marketprices'][num]+=1000
@@ -2453,6 +2462,9 @@ async def inventory(ctx):
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
       return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
   ath=str(ctx.author.id)
   msg="You have-\n"
   for item in data['players'][ath]['inv']:
@@ -2512,7 +2524,7 @@ async def rolehelp(role,chnl):
     elif role == "camo warrior" or role =="3" :
         msg="""```3. Camo Warrior-
 - Has the ability to go camo during the night.
-- The person cannot be killed when they have the camo mode on.
+- The person cannot be killed when they have the camo mode on. (Except with the use of poison)
 - Action is immediate. Has a cooldown of 1 day.
 - Respawns in 4 phases.```"""
     elif role == "chief warrior" or role =="4" :
@@ -2527,7 +2539,7 @@ async def rolehelp(role,chnl):
 - Respawns in 2 phases.```"""
     elif role == "strong warrior" or role =="6" :
         msg="""```6. Strong Warrior-
-- This role needs to be attacked twice for them to die. They do not not lose this ability after dying.
+- This role does not die the first night they get attacked after respawning. This ability resets after they respawn.
 - They have no other abilities.
 - Respawns in 6 phases.```"""
     elif role == "warrior" or role =="7" :
@@ -2545,7 +2557,7 @@ async def rolehelp(role,chnl):
 - The builder gets building parts when any opponents die. Each person killed by their team gives them 2 pieces, any non team kills from outside the team gives him 1 piece. The builder can then use these parts to build the structures given below:
 -- Wall - 12 parts - Protects all members of their team from all attacks for a night. Structure will remain if not attacked.
 -- Fort - 21 parts - Protects all members of their team from all attacks for 2 nights. Structure will remain if not attacked.
--- Spikes - 7 parts - The builder can choose to add spiked to any already existing structures, which will kill the first attacker who tries to attack the structure. Note that spikes do not stop the attack, the attack will still go through. Any kills using the spiked do not award any parts.
+-- Spikes - 7 parts - The builder can choose to add spiked to any already existing structures, which will kill the first attacker who tries to attack the structure. Note that spikes do not stop the structure from breaking. The attacks will still break the structures. Any kills using the spiked do not award any parts.
 - The builder continues to get parts even when dead. However, they can only build when alive. Structures take 1 night to get built and only get built after the attacks occur. Two structures cannot exist at once.
 - Respawns in 6 phases.```"""
     elif role == "curse caster" or role =="10" :
@@ -2619,13 +2631,13 @@ async def rolehelp(role,chnl):
         msg="""```23. Potion Master-
 - Can craft any of these potions to use in the game:
 -- Kill potion - Use this to kill 2 people at the end of phase.
--- Protection potion - Use this to protect someone from the next attack. (Doesn't expire till attacked)
+-- Protection potion - Use this to protect someone from all attacks for a night. (Doesn't expire till attacked)
 -- Revive Potion - Use this to bring back a non-permanently dead teammate back to life instantly.
-- All potions take 2 days to make. The potion master does not lose progress on death. Has to use potion as soon as it is crafted.
+- All potions take 2 days to make. The potion master does not lose progress on death. The potion will be added to a person's inventory upon completion and can be used at any time. (Even Day) 
 - Respawns in 6 phases.```"""
     elif role == "priest" or role =="24" :
         msg="""```24. Priest-
-- Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice , they will be protected from the next attack on them.
+- Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice , they will be protected from all attacks on them for a night. (Does not expire if not attacked)
 - They need to pray only twice if there is a curse caster in the game. Else, they need to pray thrice.
 - Prayer is completed instantly. Has no cooldown on abilities. Target is informed if they were prayed for.
 - Respawns in 6 phases.```"""
@@ -2642,7 +2654,7 @@ async def rolehelp(role,chnl):
         msg="""```27. Role Copier-
 - Has the ability to copy the role of any dead person.
 - Once copied, the role copier can choose to use the role as long as they wish. Each night they can use the role they have copied earlier, or try to copy a new role. The role copier will know the copied role immediately but cannot use it's powers till the next night (If it's a action). 
-- Copying is instant. Other conditions are ported from the copied role. The copier cannot copy their dead teammates. 
+- Copying is instant. Other conditions are ported from the copied role. The copier cannot copy their dead teammates. The role copier cannot copy the same person twice in a game. 
 - Respawns in 6 phases.```"""
     elif role == "seer" or role=="28":
         msg="""```28. Seer-
@@ -2687,11 +2699,11 @@ async def rolehelp(role,chnl):
 - Can't respawn but wins immediately if their team king is eliminated.```"""
     elif role== "gem trader" or role=="35":
         msg="""```35. Gem Trader- SOLO -
-- Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled and the gem is automatically given to the attacker. 
+- Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled. Gems are permanent protection for the holder.
 - Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
 - Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.)
-- Gems cannot be given to anyone with a gem (Except the gem trader). Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
-- The gem trader can also get rid of one of their gems by paying 5000c. Gems are given to people after attacks.
+- Gems cannot be given to anyone with a gem (Except the gem trader).If attempted to do so, your action will fail. Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
+- The gem trader can also get rid of one of their gems by paying 5000c during night ends. Gems are given to people after attacks.
 - Cannot respawn.```"""
     elif role== "item agent" or role=="36":
         msg="""```36. Item Agent- SOLO -
