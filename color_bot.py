@@ -2726,9 +2726,16 @@ async def rolehelp(role,chnl):
 - Has no cooldown. Kill happens at night end.
 - Doesn't respawn.```"""
     elif role== "postman" or role=="39":
-        msg="""```39. Postman- SOLO -
-- Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it.
+        msg="""```39. Postman - SOLO -
+- Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it. If the package is opened, the postman cannot be killed during that night.
 - The postman wins if 2 of each type of package are opened. Package gets delivered when day start. The target has the entire day to choose. The package will be delivered even if the postman is dead.
+- Cannot respawn.```"""
+    elif role== "town leader" or role=="40":
+        msg="""```40. Town Leader - SOLO
+- As the leader of a powerful town, you have the power to kill a person every night (End Phase action), or protect someone against all attacks for a night.(Instant but you cannot protect yourself twice in a row).
+- Once you have used an action on a person, you can never use an action on them again in a game.
+- The town leader has to choose an action on every night that they can. Failing to do so will automatically kill them.
+- You win if you survive till the end, or if you do not have a valid target to use your power on when night starts.
 - Cannot respawn.```"""
     elif role=="list" or role=="l":
         msg="""All the available roles are-
@@ -2773,7 +2780,8 @@ SOLOS-
 36. item agent
 37. kidnapper
 38. killer
-39. postman```"""
+39. postman
+40. town leader```"""
     else:
         msg="""Error! Role not found.Do not capitalise role names. You can also use the number (Found in #game-role-info) to represent the role.
 All the available roles are-
@@ -2818,7 +2826,8 @@ SOLOS-
 36. item agent
 37. kidnapper
 38. killer
-39. postman```"""
+39. postman
+40. town leader```"""
     msg = await chnl.send(msg)
     return msg
 
