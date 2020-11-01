@@ -942,6 +942,18 @@ async def assignroles(ctx,code):
         else:
             data['building'][str(user)]={}
             data['building'][str(user)]['forge']=5
+            data['building'][str(user)]['marketprices']=[]
+            data['building'][str(user)]['marketprices'].append("Placeholder")
+            data['building'][str(user)]['marketprices'].append(1000)
+            data['building'][str(user)]['marketprices'].append(1000)
+            data['building'][str(user)]['marketprices'].append(2000)
+            data['building'][str(user)]['marketprices'].append(3000)
+            data['building'][str(user)]['marketprices'].append(4000)
+            data['building'][str(user)]['marketprices'].append(5000)
+            data['building'][str(user)]['marketprices'].append(5000)
+            data['building'][str(user)]['marketprices'].append(6000)
+            data['building'][str(user)]['marketprices'].append(6000)
+            data['building'][str(user)]['marketprices'].append(10000)
         roleid= data['players'][user]['role']
         rolename=data['rt'][roleid]['lirole']
         chnlname = str(data['players'][user]['team']) + "_" + str(rolename)
@@ -2294,6 +2306,7 @@ async def market(ctx):
   elif team=="yellow":
     state=data['building']['yellow']['market']
   else:
+    team=str(ctx.author.id)
     state=4
   msg="__**MARKET**__\n"
   #if state==0:
@@ -2396,6 +2409,7 @@ async def tmbuy(ctx,num:int):
     state=data['building']['yellow']['market']
   else:
     state=3
+    team=str(ctx.author.id)
   cost=data['building'][team]['marketprices'][num]
   if cost>data['money'][ath]:
     await ctx.send("You cannot afford this.")
@@ -2707,10 +2721,10 @@ async def rolehelp(role,chnl):
 - Cannot respawn.```"""
     elif role== "item agent" or role=="36":
         msg="""```36. Item Agent- SOLO -
-- Has the ability to contact a person anonymously with a choice. 
-- The contacted person can choose to kill a person or to reveal a person's role and color, (or to ignore the agent). If the contacted person accepts, The agent will take all all of their money.
-- If the contacted person has less than 200c, they will be killed instantly before day starts..
-- Doesn't have a cooldown. The contacted person is given the choice during the next day.
+- Has the ability to contact a person anonymously with a choice. The item agent can choose a disguise to show to people if they use their power against them. (This disguise does not work for any other checks) 
+- The contacted person can pay 1000c for the services of the item agent, and can then choose to kill a person or to reveal a person's role and colour, (or to ignore the agent, which is free). If the target picks the item agent, the item agent will show up as the chosen disguise.
+- If the contacted person has less than 200c, they will be killed instantly before day starts.
+- Doesn't have a cooldown. The contacted person is given the choice during the next day. The item agent will win if they complete 5 trades without dying.
 - Cannot respawn.```"""
     elif role== "kidnapper" or role=="37":
         msg="""```37. Kidnapper- SOLO -
@@ -2765,7 +2779,7 @@ POWER ROLES-
 22. painter 
 23. potion master
 24. priest
-25.  prince
+25. prince
 26. rich person
 27. role copier
 28. seer
@@ -2811,7 +2825,7 @@ POWER ROLES-
 22. painter 
 23. potion master
 24. priest
-25.  prince
+25. prince
 26. rich person
 27. role copier
 28. seer
