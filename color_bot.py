@@ -578,6 +578,19 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   else:
       data['building'][athap]={}
       data['building'][athap]['forge']=5
+      data['building'][athap]['marketprices']=[]
+      data['building'][athap]['marketprices'].append("Placeholder")
+      #loopthislater
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][1])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][2])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][3])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][4])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][5])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][6])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][7])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][8])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][9])
+      data['building'][athap]['marketprices'].append(data['building'][athiap]['marketprices'][10])
   #
   for channel in data['chnls']:
     if data['chnls'][channel]['owner']==int(athiap):
