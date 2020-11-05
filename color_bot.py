@@ -606,6 +606,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   roleid= data['players'][athap]['role']
   rolename=data['rt'][roleid]['lirole']
   chnlname = str(data['players'][athap]['team']) + "_" + str(rolename)
+  chnlname=chnlname.replace(' ','-')
   chnl = discord.utils.get(guildd.channels,name=chnlname)
   await chnl.set_permissions(activep, read_messages=True,send_messages=True,add_reactions=True)
   data['smarket']['inv'][athap]={}
@@ -2367,7 +2368,7 @@ async def dismarket(ctx):
     text= "The next upgrade costs 5000."
   elif state==3:
     text= "Your market has been maxed out."
-  await ctx.send(f"Your team's forge is on level {state}.{text}")
+  await ctx.send(f"Your team's market is on level {state}.{text}")
 
 
 @bot.command(aliases=["upm"])
