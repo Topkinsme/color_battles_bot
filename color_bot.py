@@ -1844,7 +1844,7 @@ async def auctioninfo(ctx):
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['auction']['item']}**",inline="false")
   info.add_field(name="Item Perks-",value=data['auction']['perks'],inline="false")
-  info.add_field(name="Current bid-",value=f"{data['auction']['bid']} by {data['auction']['bider']}",inline="false")
+  info.add_field(name="Current bid-",value=f"{data['auction']['bid']} by {data['auction']['bidern']}",inline="false")
   await ctx.send(embed=info)
 
 @bot.command(aliases=["de","dep"])
