@@ -683,6 +683,43 @@ async def poll(ctx,*,message):
 
 @bot.command()
 @commands.has_role("Helpers")
+async def advancedpoll(ctx,timee:int,*,message):
+    '''Creates a poll with yes or no to close it in a certain amount of time (Note that the bot closing will stop this from working). <Helper>'''
+    poll = discord.Embed(colour=discord.Colour.blurple())
+    poll.set_author(name="POLL")
+    poll.add_field(name="Reg:- ",value=message,inline="false")
+    reac="\U0001f44d"
+    reac2="\U0001f44e"
+    reac3="⛔"
+    a=await ctx.send(embed=poll)
+    await a.add_reaction(reac)
+    await a.add_reaction(reac2)
+    await a.add_reaction(reac3)
+    await asyncio.sleep(timee)
+    yesn=0
+    non=0
+    mehn=0
+    other=0
+    channel=a.channel
+    msgid = a.id
+    a = await channel.fetch_message(msgid)
+    for reaction in a.reactions:
+      print(reaction)
+      if str(reaction)==reac:
+        yesn+=reaction.count-1
+      elif str(reaction)==reac2:
+        non+=reaction.count-1
+      elif str(reaction)==reac3:
+        mehn+=reaction.count-1
+      else:
+        other+=reaction.count
+    cont= a.content + f"{yesn} voted yes, {non} voted no and {mehn} voted neither."
+    if other>0:
+       cont+=f" {other} voted something that wasn't even an option."
+    await a.edit(content=cont)
+
+@bot.command()
+@commands.has_role("Helpers")
 async def kick(ctx,member:discord.Member):
     '''To kick a person out of the server. <Helper>'''
     await member.kick()
