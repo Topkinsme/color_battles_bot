@@ -1104,7 +1104,7 @@ async def endgame(ctx):
         await ctx.send("A game isn't even going on.")
         return
     gamestate=4
-    data['gamastate']=4
+    data['gamestate']=4
     await bot.change_presence(activity=discord.Game(name="Game concluded!", type=1))
     for user in data['players']:
         guildd=bot.get_guild(448888674944548874)
