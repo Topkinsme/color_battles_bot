@@ -19,6 +19,8 @@ import pymongo,dns
 import keep_alive
 import copy, inspect
 from better_profanity import profanity
+import textwrap
+import io
 
 
 token = str(os.environ.get("tokeno"))
@@ -263,7 +265,7 @@ async def on_message(message):
     
 @bot.event
 async def on_command_error(ctx,error):
-    await ctx.send(error)
+    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')
 
 @bot.event
 async def on_member_join(member):
@@ -621,8 +623,8 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
 @commands.has_role("Informer")
 async def evall(ctx,*,thing:str):
     '''Eval command <Informer>'''
-    ctx=ctx
-    try:
+    #ctx=ctx
+    '''try:
       res = eval(thing)
       if inspect.isawaitable(res):
             await res
@@ -632,10 +634,55 @@ async def evall(ctx,*,thing:str):
             await ctx.send(res)
     except Exception as e:
         try:
+          #thing=f'async def func():\n{textwrap.indent(thing, "  ")}'
           exec(thing)
           await ctx.send("Command executed!")
         except:
-          await ctx.send(f"Eval failed! Exception - {e}")
+          await ctx.send(f"Eval failed! Exception - {e}")'''
+    #rdanny's
+    env = {
+            'bot': bot,
+            'ctx': ctx,
+            'channel': ctx.channel,
+            'author': ctx.author,
+            'guild': ctx.guild,
+            'message': ctx.message,
+            #'_': self._last_result
+        }
+
+    env.update(globals())
+    stdout = io.StringIO()
+    if thing.startswith('```') and thing.endswith('```'):
+            a = '\n'.join(thing.split('\n')[1:-1])
+            thing = a.strip('` \n')
+    #await ctx.send(thing)
+    to_compile = f'async def func():\n{textwrap.indent(thing, "  ")}'
+    try:
+            exec(to_compile, env)
+    except Exception as e:
+            await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+    func = env['func']
+    try:
+            #with redirect_stdout(stdout):
+        ret = await func()
+    except Exception as e:
+            value = stdout.getvalue()
+            #await ctx.send(f'```py\n{value}{traceback.format_exc()}\n```')
+            await ctx.send(f'```py\n{e.__class__.__name__}: {e}\n```')
+    else:
+            value = stdout.getvalue()
+            try:
+                await ctx.message.add_reaction('\u2705')
+            except:
+                pass
+
+            if ret is None:
+                if value:
+                    await ctx.send(f'```py\n{value}\n```')
+            else:
+                #self._last_result = ret
+                await ctx.send(f'```py\n{value}{ret}\n```')
+    
 
 
 #moderator/helper
