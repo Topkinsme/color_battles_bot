@@ -237,13 +237,13 @@ async def on_message(message):
         def check(mo):
             return mo.content=='good' or mo.content=='bad' and mo.channel == message.channel
         try:
-          msg = await bot.wait_for('message', timeout=20 ,check=check)
+          msg = await bot.wait_for('message', timeout=60 ,check=check)
           townc=discord.utils.get(guildd.channels,name="battlefield")
           await townc.send("The dead have sent a package to you! Type 'open' to open it! You have 20 seconds!")
           def checkk(m):
               return m.content=='open' and m.channel == townc
           try:
-            msgg = await bot.wait_for('message', timeout=20 ,check=checkk)
+            msgg = await bot.wait_for('message', timeout=60 ,check=checkk)
             getter=str(msgg.author.id)
             if msg.content == 'good':
                 await townc.send("It was a good package, you have recieved 25c!")
@@ -542,7 +542,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   if athiap not in data['signedup']:
     await ctx.send("That person is not in game.")
     return
-  if athap in data['signedup']:
+  if athap in data['players']:
     await ctx.send("That person is already in game.")
     return
   #
@@ -555,6 +555,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   role = discord.utils.get(guildd.roles, name="Alive")
   await activep.add_roles(role)
   data['signedup'][athap] = 1
+  data['signedup'].pop(athiap)
   data['money'][athap]=data['money'][athiap]
   data['players'][athap]['role']=data['players'][athiap]['role']
   data['players'][athap]['team']=data['players'][athiap]['team']
@@ -611,12 +612,14 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   chnlname=chnlname.replace(' ','-')
   chnl = discord.utils.get(guildd.channels,name=chnlname)
   await chnl.set_permissions(activep, read_messages=True,send_messages=True,add_reactions=True)
+  await chnl.set_permissions(inactivep, read_messages=True,send_messages=False,add_reactions=True)
   data['smarket']['inv'][athap]={}
   data['smarket']['inv'][athap]['sun']=data['smarket']['inv'][athiap]['sun']
   data['smarket']['inv'][athap]['smirk']=data['smarket']['inv'][athiap]['smirk']
   data['smarket']['inv'][athap]['smile']=data['smarket']['inv'][athiap]['smile']
   data['smarket']['inv'][athap]['joy']=data['smarket']['inv'][athiap]['joy']
   data['smarket']['inv'][athap]['pens']=data['smarket']['inv'][athiap]['pens']
+  dump()
   await ctx.send("Done.")
 
 @bot.command()
@@ -1871,7 +1874,7 @@ async def alivelist(ctx):
 @bot.command(aliases=["b"])
 @commands.has_role("Alive")
 async def bid(ctx,cash:int=0):
-  '''Allows the person to bid in the auction.'''
+  '''Allows the person to bid in the auction. Typing 0 bids 100 more than the current bid.'''
   global data
   ath=str(ctx.author.id)
   if int(gamestate) != 3:
@@ -1934,16 +1937,21 @@ async def auctioninfo(ctx):
 
 @bot.command(aliases=["de","dep"])
 @commands.has_role("Alive")
-async def deposit(ctx,cash:int):
-  '''Helps you to deposit cash to your team's vault'''
+async def deposit(ctx,cash:int=0):
+  '''Helps you to deposit cash to your team's vault. Typing 0 deposits your entire balance.'''
   global data
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
     return
   if cash<0:
     await ctx.send("Cash can't be a negative value")
     return
   ath=str(ctx.author.id)
+  if cash==0:
+    cash=data['money'][ath]
   team=data['players'][ath]['team']
   try:
     print(data['building'][team]['vault'])
@@ -1999,6 +2007,9 @@ async def withdraw(ctx,cash:int):
   global data
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
     return
   if cash<0:
     await ctx.send("Cash can't be a negative value")
@@ -2530,12 +2541,12 @@ async def tmbuy(ctx,num:int):
     if state<1:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
-    item="Protection"
+    item="Check Bal"
   elif num==4:
     if state<2:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
-    item="Respawn Tortem"
+    item="Protection"
   elif num==5:
     if state<2:
       await ctx.send("You need to upgrade your market to buy this item.")
@@ -2545,7 +2556,7 @@ async def tmbuy(ctx,num:int):
     if state<2:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
-    item="Check Bal"
+    item="Respawn Tortem"
   elif num==7:
     if state<3:
       await ctx.send("You need to upgrade your market to buy this item.")
