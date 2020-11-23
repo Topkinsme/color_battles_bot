@@ -39,7 +39,7 @@ logging.basicConfig(level=logging.INFO)
 #bot.remove_command('help')
 
 client = pymongo.MongoClient("mongodb+srv://Topkinsme:"+dbpass+"@top-cluster.x2y8s.mongodb.net/<dbname>?retryWrites=true&w=majority")
-db = client.test
+db = client.cbbot
 
 '''
 Gamestates:-
