@@ -96,7 +96,12 @@ async def on_ready():
     elif int(gamestate)==2:
         await bot.change_presence(activity=discord.Game(name="Signups are closed.A game will soon begin.", type=1))
     elif int(gamestate)==3:
-        await bot.change_presence(activity=discord.Game(name="Game running.", type=1))
+        num = data['code']['gamephase']
+        if num %2==0:
+          text = f"Day {int(num/2)}"
+        else:
+          text = f"Night {int((num+1)/2)}"
+        await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
     elif int(gamestate)==4:
         await bot.change_presence(activity=discord.Game(name="Game concluded!", type=1))
     else:
@@ -429,6 +434,12 @@ async def cgamestate(ctx,num):
         await ctx.send("Signups closed!")
         await bot.change_presence(activity=discord.Game(name="Signups are closed.A game will soon begin.", type=1))
     elif int(gamestate)==3:
+        num = data['code']['gamephase']
+        if num %2==0:
+          text = f"Day {int(num/2)}"
+        else:
+          text = f"Night {int((num+1)/2)}"
+        await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
         await ctx.send("Game has started!")
         await bot.change_presence(activity=discord.Game(name="Game running.", type=1))
     elif int(gamestate)==4:
@@ -874,7 +885,7 @@ async def start(ctx,code:str,num=0):
     data['gamestate']=gamestate
     data['code']['gamecode']=str(code)
     await ctx.send("Game has started with code {} !".format(code))
-    await bot.change_presence(activity=discord.Game(name="Game running.", type=1))
+    await bot.change_presence(activity=discord.Game(name="A game is going on. It's day 0 now.", type=1))
     data['players']={}
     data['code']['ccno']=0
     for user in data['signedup']:
@@ -903,6 +914,7 @@ async def assignroles(ctx,code):
         return
     listoplayers = []
     rolelist=[]
+    data['code']['gamephase']=0
     #
     guildd=ctx.message.guild
     role0 = discord.utils.get(guildd.roles, name="Helpers") 
@@ -1537,6 +1549,32 @@ async def endtribute(ctx):
   await ctx.send(embed=triinfo)
   dump()
 
+@bot.command(aliases=["ap"])
+@commands.has_role("Helpers")
+async def advancephase(ctx):
+  """ Use this command to advance the game phase.
+
+  Use this by typing !advancephase
+  
+  """
+  global data
+  guildd=bot.get_guild(448888674944548874)
+  data['code']['gamephase']+=1
+  num = data['code']['gamephase']
+  if num %2==0:
+    text = f"Day {int(num/2)}"
+  else:
+    text = f"Night {int((num+1)/2)}"
+  namee= str(data['code']['gamecode']) + ' factions'
+  cate = discord.utils.get(ctx.message.guild.categories, name=namee)
+  for channel in cate.channels:
+      msg = await channel.send(f"**It is {text} now.**\n────────────────────────────────────────────────────────────────────────")
+      await msg.pin()
+  townc=discord.utils.get(guildd.channels,name="battlefield")
+  msg = await townc.send(f"**It is {text} now. Pick your actions, <@&748375810498625597>!**\n────────────────────────────────────────────────────────────────────────")
+  await msg.pin()
+  await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
+  dump()
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -2684,8 +2722,8 @@ async def rolehelp(role,chnl):
 - Respawns in 2 phases on the first death , then 4 phases ever after.```"""
     elif role == "ex warrior" or role =="5" :
         msg="""```5. Ex-Warrior-
-- This role is allowed to kill 1 person during the game at any time.
-- Kill is instant, can be used even during day. This ability can only be used once after which it cannot be used again.
+- This role is allowed to kill 1 person during the game at any time. This kill bypasses any and all forms of protection.
+- Kill is instant, can be used even during day, cannot be used if dead. This ability can only be used once after which it cannot be used again. 
 - Respawns in 2 phases.```"""
     elif role == "strong warrior" or role =="6" :
         msg="""```6. Strong Warrior-
@@ -2724,7 +2762,7 @@ async def rolehelp(role,chnl):
     elif role == "disabler" or role =="12" :
         msg="""```12. Disabler-
 - Can role-block a person for 1 night. Target is informed they were role-blocked.
-- Has a cool down of 1 day. Picks action during the night.
+- Has a cool down of 1 day. Picks action during the day for the following night.
 - Respawns in 6 phases.```"""
     elif role == "desguiser" or role =="13" :
         msg="""```13. Disguiser-
@@ -2739,9 +2777,9 @@ async def rolehelp(role,chnl):
 - Respawns in 6 phases.```"""
     elif role == "guard" or role =="15" :
         msg="""```15. Guard-
-- Can protect someone from all attacks.
-- They will die instead of the person they protect. 
-- Cannot change their target after initially picking it (Unless target somehow dies before guard). Only protects from night attacks. Protecting is immediate. 
+- Can protect someone from all attacks at all times. They will die instead of the person they protect. 
+- Cannot change their target after initially picking it (Unless target somehow dies before guard). Protecting is immediate. 
+- The guard cannot be role-blocked. The guard is the last layer of protection, any other protection comes first in effect before this.
 - Respawns in 4 phases.```"""
     elif role == "healer" or role =="16" :
         msg="""```16. Healer-
@@ -2882,10 +2920,10 @@ async def rolehelp(role,chnl):
 - Cannot respawn.```"""
     elif role== "town leader" or role=="40":
         msg="""```40. Town Leader - SOLO
-- As the leader of a powerful town, you have the power to kill a person every night (End Phase action), or protect someone against all attacks for a night.(Instant but you cannot protect yourself twice in a row).
+- As the leader of a powerful town, you have the power to kill a person every night (End Phase action), or protect someone against all attacks for a night. (You cannot protect yourself twice in a row).
 - Once you have used an action on a person, you can never use an action on them again in a game.
-- The town leader has to choose an action on every night that they can. Failing to do so will automatically kill them.
-- You win if you survive till the end, or if you do not have a valid target to use your power on when night starts.
+- The town leader has to choose an action on every day that they can. Failing to do so will automatically kill them.
+- You win if you survive till the end, or if you do not have a valid target to use your power on when night starts. The town leader submits actions during the day for the following night.
 - Cannot respawn.```"""
     elif role=="list" or role=="l":
         msg="""All the available roles are-
