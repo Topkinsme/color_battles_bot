@@ -1559,6 +1559,9 @@ async def advancephase(ctx):
   """
   global data
   guildd=bot.get_guild(448888674944548874)
+  if int(gamestate)!=3:
+        await ctx.send("There isn't a game going on.")
+        return
   data['code']['gamephase']+=1
   num = data['code']['gamephase']
   if num %2==0:
@@ -2889,7 +2892,7 @@ async def rolehelp(role,chnl):
         msg="""```35. Gem Trader- SOLO -
 - Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled. Gems are permanent protection for the holder.
 - Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
-- Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. Any form of night protection will save you from this. (Even a guard protection.)
+- Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. No protection can save you from this.
 - Gems cannot be given to anyone with a gem (Except the gem trader).If attempted to do so, your action will fail. Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
 - The gem trader can also get rid of one of their gems by paying 5000c during night ends. Gems are given to people after attacks.
 - Cannot respawn.```"""
@@ -3178,3 +3181,4 @@ def dump():
 
 keep_alive.keep_alive()
 bot.run(token)
+  
