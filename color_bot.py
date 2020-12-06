@@ -2717,7 +2717,7 @@ async def rolehelp(role,chnl):
 - Has the ability to go camo during the night. They can either pick to go camo themselves, or pick another person to go camo instead of them. They cannot pick the same person twice in a row.
 - The person cannot be killed when they have the camo mode on. (Except with the use of poison)
 - Action is immediate. Has a cooldown of 1 day.
-- Respawns in 4 phases.```"""
+- Respawns in 6 phases.```"""
     elif role == "chief warrior" or role =="4" :
         msg="""```4. Chief Warrior-
 - Chooses 1 person to kill every night.
@@ -2751,7 +2751,7 @@ async def rolehelp(role,chnl):
 -- The Weak Shield, protects the person for a night, but kills you as well if the person is attacked.
 - Each of the shields can be used only once, regardless of if the person is attacked or not. Gets back all the shields if they die and respawn.
 - Cannot use more than 1 shield every night. Can be role blocked. Protection is instant.
-- Respawns in 4 phases.```"""
+- Respawns in 6 phases.```"""
     elif role == "builder" or role =="10" :
         msg="""```10. Builder-
 - The builder gets building parts when any opponents die. Each person killed by their team gives them 2 pieces, any non team kills from outside the team gives him 1 piece. The builder can then use these parts to build the structures given below:
@@ -2851,7 +2851,7 @@ async def rolehelp(role,chnl):
 - Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice , they will be protected from all attacks on them for a night. (Does not expire if not attacked)
 - They need to pray only twice if there is a curse caster in the game. Else, they need to pray thrice.
 - Prayer is completed instantly. Has no cooldown on abilities. Target is informed if they were prayed for.
-- Respawns in 6 phases.```"""
+- Respawns in 4 phases.```"""
     elif role == "prince" or role =="28" :
         msg="""```28. Prince-
 - Takes the place of the king, if they are alive when the king dies.
