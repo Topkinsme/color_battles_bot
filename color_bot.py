@@ -434,11 +434,12 @@ async def cgamestate(ctx,num):
         await ctx.send("Signups closed!")
         await bot.change_presence(activity=discord.Game(name="Signups are closed.A game will soon begin.", type=1))
     elif int(gamestate)==3:
-        num = data['code']['gamephase']
+        '''num = data['code']['gamephase']
         if num %2==0:
           text = f"Day {int(num/2)}"
         else:
-          text = f"Night {int((num+1)/2)}"
+          text = f"Night {int((num+1)/2)}"'''
+        text="?"
         await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
         await ctx.send("Game has started!")
         await bot.change_presence(activity=discord.Game(name="Game running.", type=1))
@@ -2033,7 +2034,7 @@ async def deposit(ctx,cash:int=0):
 
 @bot.command(aliases=["forcedep","fdep"])
 @commands.has_role("Alive")
-async def forcedeposit(ctx,person:discord.User,cash:int):
+async def forcedeposit(ctx,person:discord.User,cash:int=0):
   '''Allows the king of a team to force a teammate to deposit cash.'''
   global data
   if int(gamestate)!=3:
@@ -2042,11 +2043,16 @@ async def forcedeposit(ctx,person:discord.User,cash:int):
   if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
     await ctx.send("You can only use this command in faction channels.")
     return
+  if data['players'][str(person.id)]['state']==0:
+        await ctx.send("You can't force a dead person to deposit.")
+        return
+  ath=str(ctx.author.id)
+  ath2=str(person.id)
+  if cash==0:
+    cash=data['money'][ath2]
   if cash<0:
     await ctx.send("Cash can't be a negative value")
     return
-  ath=str(ctx.author.id)
-  ath2=str(person.id)
   team=data['players'][ath]['team']
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
@@ -2591,7 +2597,6 @@ async def tmbuy(ctx,num:int):
   if cost>data['money'][ath]:
     await ctx.send("You cannot afford this.")
     return
-  data['money'][ath]-=cost
   if num==1:
     if state<1:
       await ctx.send("You need to upgrade your market to buy this item.")
@@ -2643,9 +2648,11 @@ async def tmbuy(ctx,num:int):
       return
     item="GOD"
     data['building'][team]['marketprices'][num]+=89000
+  data['money'][ath]-=cost
   data['building'][team]['marketprices'][num]+=1000
   data['players'][ath]['inv'].append(item)
   await ctx.send("Transaction successful.")
+  dump()
 
 @bot.command(aliases=["i","inv"])
 async def inventory(ctx):
