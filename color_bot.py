@@ -238,13 +238,13 @@ async def on_message(message):
     elif message.channel.name=="respawning":
       n = random.randint(1,200)
       if n ==49:
-        await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.")
+        await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.  You have 60 seconds!")
         def check(mo):
             return mo.content=='good' or mo.content=='bad' and mo.channel == message.channel
         try:
           msg = await bot.wait_for('message', timeout=60 ,check=check)
           townc=discord.utils.get(guildd.channels,name="battlefield")
-          await townc.send("The dead have sent a package to you! Type 'open' to open it! You have 20 seconds!")
+          await townc.send("The dead have sent a package to you! Type 'open' to open it! You have 60 seconds!")
           def checkk(m):
               return m.content=='open' and m.channel == townc
           try:
@@ -1572,10 +1572,10 @@ async def advancephase(ctx):
   namee= str(data['code']['gamecode']) + ' factions'
   cate = discord.utils.get(ctx.message.guild.categories, name=namee)
   for channel in cate.channels:
-      msg = await channel.send(f"**It is {text} now.**\n────────────────────────────────────────────────────────────────────────")
+      msg = await channel.send(f"**__          {text}          __**")
       await msg.pin()
   townc=discord.utils.get(guildd.channels,name="battlefield")
-  msg = await townc.send(f"**It is {text} now. Pick your actions, <@&748375810498625597>!**\n────────────────────────────────────────────────────────────────────────")
+  msg = await townc.send(f"**__          {text}          __**\n<@&748375810498625597>")
   await msg.pin()
   await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
   dump()
@@ -1684,7 +1684,8 @@ async def freeghostsay(ctx,*,fmsg):
     taboo = "@everyone"
     taboo2="<@&722504160691355679>"
     taboo3="<@&748375810498625597>"
-    if taboo in str(fmsg) or taboo2 in str(fmsg) or taboo3 in str(fmsg):
+    taboo4="@here"
+    if taboo in str(fmsg) or taboo2 in str(fmsg) or taboo3 in str(fmsg) or taboo4 in str(fmsg):
       await ctx.send("Please don't ping @ everyone.")
     else:
       alpha=['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z','A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','1','2','3','4','5','6','7','8','9','0']
@@ -1711,7 +1712,8 @@ async def ghostsay(ctx,*,msg):
     taboo = "@everyone"
     taboo2="<@&722504160691355679>"
     taboo3="<@&748375810498625597>"
-    if taboo in str(msg) or taboo2 in str(msg) or taboo3 in str(msg):
+    taboo4="@here"
+    if taboo in str(msg) or taboo2 in str(msg) or taboo3 in str(msg) or taboo4 in str(msg):
       await ctx.send("Please don't ping @ everyone.")
     else:
       if data['money'][str(ctx.author.id)] <25:
@@ -1937,6 +1939,29 @@ async def alivelist(ctx):
   msg = await ctx.send("Loading.")
   await msg.edit(content=temp)
 
+@bot.command(aliases=["ael"])
+async def alivenonteamlist(ctx):
+  '''Shows all alive players who are not on your team.'''
+  if int(gamestate) != 3:
+    await ctx.send("There is no game going on right now.")
+    return
+  guildd=bot.get_guild(448888674944548874)
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  temp = ""
+  temp+="All alive players are- \n"
+  al=0
+  for member in data['players']:
+    if data['players'][member]['state']==1:
+      if data['players'][member]['team']==data['players'][str(ctx.author.id)]['team']:
+        person = discord.utils.get(guildd.members,id=int(member))
+        temp +="<@{}> ({})\n".format(member,person.name)
+        al+=1
+  temp+="The number of alive players is- {} \n".format(al)
+  msg = await ctx.send("Loading.")
+  await msg.edit(content=temp)
+
 @bot.command(aliases=["b"])
 @commands.has_role("Alive")
 async def bid(ctx,cash:int=0):
@@ -1970,7 +1995,7 @@ async def bid(ctx,cash:int=0):
   elif data['players'][ath]['team'] =="blue":
     who= "Blue Team."
   elif data['players'][ath]['team'] =="green":
-    who= "Green Team.."
+    who= "Green Team."
   elif data['players'][ath]['team'] =="yellow":
     who= "Yellow Team."
   else:
@@ -2893,7 +2918,7 @@ async def rolehelp(role,chnl):
 - Respawns in 4 phases.```"""
     elif role == "weapon smith" or role=="34":
         msg="""```34. Weapon Smith-
-- Can craft any of these potions to use in the game:
+- Can craft any of these weapons to use in the game:
 -- Sword - 1 day prep time - Allows a person to make x2 kills if used.
 -- Cannon - 3 day prep time - Allows a person to make x4 kills if used.
 -- Robot - 4 day prep time - Allows a person to make a kill that passes through all protection.
