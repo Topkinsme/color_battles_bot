@@ -86,6 +86,7 @@ async def on_ready():
             data['specters']=[]
             data['code']={}
             data['auction']={}
+            data['bauction']={}
             data['building']={}
             data['smarket']={}
             data['marketalert']=[]
@@ -378,6 +379,7 @@ async def compreset(ctx):
     data['specters']=[]
     data['code']={}
     data['auction']={}
+    data['bauction']={}
     data['building']={}
     data['smarket']={}
     data['marketalert']=[]
@@ -534,6 +536,7 @@ async def reset(ctx):
     data['chnls']={}
     data['code']={}
     data['auction']={}
+    data['bauction']={}
     data['building']={}
     data['smarket']={}
     data['marketalert']=[]
@@ -1326,7 +1329,7 @@ async def createauction(ctx,name,*,text):
     data['auction']['chn']=str(aucmsg.channel.id)
     data['auction']['bid']=0
     data['auction']['bider']=""
-    data['auction']['bider']=""
+    data['auction']['bidern']=""
     data['auction']['item']=name
     data['auction']['perks']=text
     dump()
@@ -1366,6 +1369,53 @@ async def closeauction(ctx):
   data['auction']['item']=""
   data['auction']['perks']=""
   dump()
+
+@bot.command(aliases=["cba"])
+@commands.has_role("Helpers")
+async def createblindauction(ctx,name,*,text):
+    '''Allows the user to create a blind auction <Helpers>'''
+    if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+    global data
+    guildd=bot.get_guild(448888674944548874)
+    mark=discord.utils.get(guildd.channels,name="auction_house")
+    data['bauction']['state']=1
+    await mark.send("__**ITEM - {}**__".format(name))
+    await mark.send("Perks - {}".format(text))
+    data['bauction']['biders']={}
+    data['bauction']['item']=name
+    data['bauction']['perks']=text
+    dump()
+
+@bot.command(aliases=["clba"])
+@commands.has_role("Helpers")
+async def closeblindauction(ctx):
+  '''Allows the user to close a auction <Helpers>'''
+  if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+  global data
+  if data['bauction']['state']==0:
+    await ctx.send("There is no blind auction going on right now.")
+    return
+  data['bauction']['state']=0
+  cost=0
+  whop=""
+  for person in data['bauction']['biders']:
+    if data['bauction']['biders'][person]>cost:
+      cost=data['bauction']['biders'][person]
+      whop=person
+  guildd=bot.get_guild(448888674944548874)
+  mark=discord.utils.get(guildd.channels,name="auction_house")
+  await mark.send("Congrats! The item auctioned for {} ! ".format(cost))
+  data['money'][str(whop)]-=cost
+  data['players'][str(whop)]['inv'].append(data['bauction']['item'])
+  data['bauction']['biders']={}
+  data['bauction']['item']=""
+  data['bauction']['perks']=""
+  dump()
+
 
 @bot.command(aliases=["rmm"])
 @commands.has_role("Helpers")
@@ -2010,6 +2060,31 @@ async def bid(ctx,cash:int=0):
   await msg.edit(content="Current bid - {} by {}".format(cash,who))
   dump()
 
+@bot.command(aliases=["bb"])
+@commands.has_role("Alive")
+async def blindbid(ctx,cash:int):
+  '''Allows the person to put a in blind bid for the blind auction item.'''
+  global data
+  ath=str(ctx.author.id)
+  if int(gamestate) != 3:
+    await ctx.send("There is no game going on right now.")
+    return
+  print(ctx.message.channel)
+  if data['bauction']['state']==0:
+    await ctx.send("There is no blind auction going on right now.")
+    return
+  await ctx.message.delete()
+  if cash<=0:
+    await ctx.send("Cash has to be positive.")
+    return
+  if cash>data['money'][ath]:
+    await ctx.send("You can only bid what you have.")
+    return
+  who=str(ctx.author.id)
+  data['bauction']['biders'][who]=cash
+  await ctx.send("Done.")
+  dump()
+
 @bot.command(aliases=["ai"])
 async def auctioninfo(ctx):
   '''Use this to get info on auction items'''
@@ -2024,6 +2099,21 @@ async def auctioninfo(ctx):
   info.add_field(name="Item Name-",value=f"**{data['auction']['item']}**",inline="false")
   info.add_field(name="Item Perks-",value=data['auction']['perks'],inline="false")
   info.add_field(name="Current bid-",value=f"{data['auction']['bid']} by {data['auction']['bidern']}",inline="false")
+  await ctx.send(embed=info)
+
+@bot.command(aliases=["bai"])
+async def blindauctioninfo(ctx):
+  '''Use this to get info on blind auction items'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if data['bauction']['state']==0:
+    await ctx.send("There is no blind auction going on right now.")
+    return
+  info = discord.Embed(colour=discord.Colour.gold())
+  info.set_author(name="Auction Info-")
+  info.add_field(name="Item Name-",value=f"**{data['bauction']['item']}**",inline="false")
+  info.add_field(name="Item Perks-",value=data['bauction']['perks'],inline="false")
   await ctx.send(embed=info)
 
 @bot.command(aliases=["de","dep"])
