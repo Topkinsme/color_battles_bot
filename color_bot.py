@@ -997,7 +997,7 @@ async def assignroles(ctx,code):
       data['building'][team]={}
       data['building'][team]['vault']=0
       data['building'][team]['forge']=1
-      data['building'][team]['market']=0
+      data['building'][team]['market']=1
       data['building'][team]['trihouse']={}
       data['building'][team]['trihouse']['who']=""
       data['building'][team]['trihouse']['cash']=0
@@ -1082,7 +1082,7 @@ async def assignroles(ctx,code):
             data['players'][str(user)]['incc'].append(yellow.id)
         else:
             data['building'][str(user)]={}
-            data['building'][str(user)]['forge']=5
+            data['building'][str(user)]['forge']=7
             data['building'][str(user)]['marketprices']=[]
             data['building'][str(user)]['marketprices'].append("Placeholder")
             data['building'][str(user)]['marketprices'].append(1000)
@@ -2932,7 +2932,7 @@ async def rolehelp(role,chnl):
 - Respawns in 6 phases.```"""
     elif role== "anarchist" or role=="36":
         msg="""```36. Anarchist - SOLO
-- Can kill a person every night. If the anarchist kills a king, he can kill 2 people every night that follows, and if he kills another king, he can kill 3 people and so on and so forth.
+- Can kill 2 person every night. If the anarchist kills a king, he can kill 3 people every night that follows, and if he kills another king, he can kill 4 people and so on and so forth.
 - If the Anarchist is attacked, the number of kills he can perform reduces by 1, ticking to 0 and eventually -1 at which point the anarchist will die.
 - Kills are phase end. The Anarchist wins when there are no more kings alive. (They need to kill all princes as well.)
 - Cannot respawn.```"""
