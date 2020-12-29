@@ -2004,7 +2004,7 @@ async def alivenonteamlist(ctx):
   al=0
   for member in data['players']:
     if data['players'][member]['state']==1:
-      if data['players'][member]['team']==data['players'][str(ctx.author.id)]['team']:
+      if data['players'][member]['team']!=data['players'][str(ctx.author.id)]['team']:
         person = discord.utils.get(guildd.members,id=int(member))
         temp +="<@{}> ({})\n".format(member,person.name)
         al+=1
