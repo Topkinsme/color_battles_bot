@@ -21,6 +21,8 @@ import copy, inspect
 from better_profanity import profanity
 import textwrap
 import io
+import emoji as emj
+import typing
 
 
 token = str(os.environ.get("tokeno"))
@@ -272,9 +274,9 @@ async def on_message(message):
         dump()
 
     
-@bot.event
+'''@bot.event
 async def on_command_error(ctx,error):
-    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')
+    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')'''
 
 @bot.event
 async def on_member_join(member):
@@ -403,7 +405,7 @@ async def pdata(ctx):
     
 @bot.command(hidden=True)
 @commands.has_role("Informer")
-async def sudo(ctx,who: discord.User, *, command: str):
+async def sudo(ctx,who: discord.Member, *, command: str):
         """Run a command as another user optionally in another channel."""
         msg = copy.copy(ctx.message)
         channel = ctx.channel
@@ -804,21 +806,46 @@ async def ban(ctx,member:discord.Member):
     
 @bot.command(aliases=["rc"])
 @commands.has_role("Helpers")
-async def removecash(ctx,member:discord.Member,cash):
+async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Removes a certain amount of cash from a person. <Helper>'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+    guildd=ctx.message.guild
+    if member in emj.UNICODE_EMOJI:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(member,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
+
     data['money'][str(member.id)]-=int(cash)
     await ctx.send("{} has been reduced from {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
     
 @bot.command(aliases=["ac"])
 @commands.has_role("Helpers")
-async def addcash(ctx,member:discord.Member,cash):
+async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Adds a certain amount of cash to a person's balance. <Helper>'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+    guildd=ctx.message.guild
+    if member in emj.UNICODE_EMOJI:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(member,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
     data['money'][str(member.id)]+=int(cash)
     await ctx.send("{} has been added to {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
     
@@ -1033,6 +1060,7 @@ async def assignroles(ctx,code):
         #state 1 is alive ,0 is dead
         data['players'][user]['msg']=0
         data['players'][user]['inv']=[]
+        data['players'][user]['emoji']=data['signedup'][user]['emoji']
         #print(data)
         num+=1
     #print(data)
@@ -1162,13 +1190,24 @@ async def endgame(ctx):
     
 @bot.command(aliases=["k"])
 @commands.has_role("Helpers")
-async def kill(ctx,user:discord.Member):
+async def kill(ctx,user:typing.Union[discord.Member,str]):
     '''Sets a person's status as respawning in game. <Helpers>'''
     if int(gamestate)!=3:
         await ctx.send("There isn't a game going on.")
         return
-    data['players'][str(user.id)]['state']=0
     guildd=bot.get_guild(448888674944548874)
+    if user in emj.UNICODE_EMOJI:
+      idd=emjtop(user)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      user = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(user,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
+    data['players'][str(user.id)]['state']=0
     role = discord.utils.get(guildd.roles, name="Respawning")
     await user.add_roles(role)
     role = discord.utils.get(guildd.roles, name="Alive")
@@ -1181,11 +1220,23 @@ async def kill(ctx,user:discord.Member):
     
 @bot.command(aliases=["re"])
 @commands.has_role("Helpers")
-async def respawn(ctx,user:discord.Member):
+async def respawn(ctx,user:typing.Union[discord.Member,str]):
     '''Respawns a person in game <Helpers>'''
     if int(gamestate)!=3:
         await ctx.send("There isn't a game going on.")
         return
+    guildd=ctx.message.guild
+    if user in emj.UNICODE_EMOJI:
+      idd=emjtop(user)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      user = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(user,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
     data['players'][str(user.id)]['state']=1
     guildd=bot.get_guild(448888674944548874)
     role = discord.utils.get(guildd.roles, name="Respawning")
@@ -1200,13 +1251,24 @@ async def respawn(ctx,user:discord.Member):
 
 @bot.command(aliases=["pk"])
 @commands.has_role("Helpers")
-async def pkill(ctx,user:discord.Member):
+async def pkill(ctx,user:typing.Union[discord.Member,str]):
     '''Kills a person permanently in game. <Helpers>'''
     if int(gamestate)!=3:
         await ctx.send("There isn't a game going on.")
         return
-    data['players'][str(user.id)]['state']=0
     guildd=bot.get_guild(448888674944548874)
+    if user in emj.UNICODE_EMOJI:
+      idd=emjtop(user)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      user = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(user,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
+    data['players'][str(user.id)]['state']=0
     role = discord.utils.get(guildd.roles, name="Respawning")
     await user.remove_roles(role)
     role = discord.utils.get(guildd.roles, name="Alive")
@@ -1256,11 +1318,23 @@ async def massgive(ctx,cash=100):
 
 @bot.command(aliases=["mbal"])
 @commands.has_role("Helpers")
-async def masterbalance(ctx,member:discord.Member):
+async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
   '''Allows to see the balance of another player <Helpers>'''
   if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+  guildd=ctx.message.guild
+  if member in emj.UNICODE_EMOJI:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(member,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
+      return
   id=str(member.id)
   await ctx.send("{}'s balance is {}.".format(member.mention,data['money'][id]))
 
@@ -1493,10 +1567,22 @@ async def msgcount(ctx):
 
 @bot.command(aliases=["addinv"])
 @commands.has_role("Helpers")
-async def addtoinv(ctx,user:discord.Member,*,item):
+async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
   '''Use this to add something to a person's inventory <Helpers>'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
+      return
+  guildd=ctx.message.guild
+  if user in emj.UNICODE_EMOJI:
+      idd=emjtop(user)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      user = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(user,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
       return
   ath=str(user.id)
   data['players'][ath]['inv'].append(item)
@@ -1504,10 +1590,22 @@ async def addtoinv(ctx,user:discord.Member,*,item):
 
 @bot.command(aliases=["reminv"])
 @commands.has_role("Helpers")
-async def removefrominv(ctx,user:discord.Member,*,item):
+async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
   '''Use this to remove something from someone's inventory. <Helpers>'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
+      return
+  guildd=ctx.message.guild
+  if user in emj.UNICODE_EMOJI:
+      idd=emjtop(user)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      user = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(user,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
       return
   ath=str(user.id)
   try:
@@ -1610,7 +1708,7 @@ async def timer(ctx,timee:int):
 
 
 @bot.command(aliases=["j","join"])
-async def signup(ctx):
+async def signup(ctx,emoji="Emoji"):
     '''Allows you to signup for a game.Sign out by typing the command again.'''
     global data
     if (int(gamestate) != 1):
@@ -1619,7 +1717,15 @@ async def signup(ctx):
     ath=str(ctx.author.id) 
     if not ath in data['signedup']:
       if not ath in data['specters']:
-        data['signedup'][ath] = 1
+        if emoji not in emj.UNICODE_EMOJI:
+          await ctx.send("That is not a valid emoji.")
+          return
+        for people in data['signedup']:
+          if emoji == data['signedup'][people]['emoji']:
+            await ctx.send("That emoji has already been used. Please pick another one.")
+            return
+        data['signedup'][ath] = {}
+        data['signedup'][ath]['emoji'] = emoji
         guildd=bot.get_guild(448888674944548874)
         role = discord.utils.get(guildd.roles, name="Signed-Up!")
         await ctx.send("You have been signed-up! :thumbsup:")
@@ -1645,7 +1751,7 @@ async def slist(ctx):
     for member in data['signedup']:
         tempno+=1
         person = discord.utils.get(guildd.members,id=int(member))
-        temp +="<@{}> ({}) \n".format(member,person.name)
+        temp +=f"{data['signedup'][member]['emoji']} - <@{member}> ({person.name}) \n"
     temp += "The number of people signed up is {} \n".format(tempno)
     msg = await ctx.send("​")
     await msg.edit(content=temp)
@@ -1756,7 +1862,7 @@ async def teamsay(ctx,*,msg):
 
 @bot.command(aliases=["cc"])
 @commands.has_role("Alive")
-async def createchannel(ctx,ccname,*member:discord.Member):
+async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     '''Used to create a communication channel. Costs 50c.'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
@@ -1771,6 +1877,18 @@ async def createchannel(ctx,ccname,*member:discord.Member):
         await ctx.message.delete()
         return
     for people in member:
+      if people in emj.UNICODE_EMOJI:
+        idd=emjtop(people)
+        if idd== None:
+          await ctx.send(f"Invalid Emoji {people}.")
+          return
+        people = discord.utils.get(guildd.members,id=int(idd))
+      elif isinstance(people,discord.member.Member):
+        pass
+      else:
+        await ctx.send(f"Invalid Input {people}.")
+        return
+      await ctx.send(people)
       if data['players'][str(people.id)]['state']==0:
         await ctx.send("You cannot make ccs with the dead.")
         return
@@ -1835,6 +1953,17 @@ async def createchannel(ctx,ccname,*member:discord.Member):
     plist=""
     plist+="<@{}> \n".format(author.id)
     for people in member:
+      if people in emj.UNICODE_EMOJI:
+        idd=emjtop(people)
+        if idd== None:
+          await ctx.send(f"Invalid Emoji {people}.")
+          return
+        people = discord.utils.get(guildd.members,id=int(idd))
+      elif isinstance(people,discord.member.Member):
+        pass
+      else:
+        await ctx.send(f"Invalid Input {people}.")
+        return
       await a.set_permissions(people, read_messages=True,send_messages=True)
       data['players'][str(people.id)]['incc'].append(a.id)
       plist+="<@{}> \n".format(people.id)
@@ -1849,11 +1978,23 @@ async def createchannel(ctx,ccname,*member:discord.Member):
 
 @bot.command(aliases=["add"])
 @commands.has_role("Alive")
-async def addinchannel(ctx,member:discord.Member):
+async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Adds a person to the channel'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+    guildd=ctx.message.guild
+    if member in emj.UNICODE_EMOJI:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(member,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
     if data['players'][str(member.id)]['state']==0:
         await ctx.send("You add a dead person to the cc.")
         return
@@ -1872,11 +2013,23 @@ async def addinchannel(ctx,member:discord.Member):
         
 @bot.command(aliases=["remove"])
 @commands.has_role("Alive")
-async def removeinchannel(ctx,member:discord.Member):
+async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Removes a person from the channel'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+    guildd=ctx.message.guild
+    if member in emj.UNICODE_EMOJI:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(member,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
     if ctx.author==member:
       await ctx.send("You can't add or remove yourself.")
       return
@@ -1915,12 +2068,24 @@ async def renamechannel(ctx,*,newname):
 
 @bot.command(aliases=["sm"])
 @commands.has_role("Alive")
-async def sendmoney(ctx,member:discord.Member,cash):
+async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
   '''Allows alive players to send money to others.'''
   ath=str(ctx.message.author.id)
   if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
+  guildd=ctx.message.guild
+  if member in emj.UNICODE_EMOJI:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(member,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
+      return
   if int(cash) < 0:
     await ctx.send("You cannot send negative money.")
     return
@@ -1945,7 +2110,7 @@ async def alivelist(ctx):
   for member in data['players']:
     if data['players'][member]['state']==1:
       person = discord.utils.get(guildd.members,id=int(member))
-      temp +="<@{}> ({})\n".format(member,person.name)
+      temp +=f"{data['signedup'][member]['emoji']} - <@{member}> ({person.name}) \n"
       al+=1
   temp+="The number of alive players is- {} \n".format(al)
   msg = await ctx.send("​")
@@ -1968,7 +2133,7 @@ async def alivenonteamlist(ctx):
     if data['players'][member]['state']==1:
       if data['players'][member]['team']!=data['players'][str(ctx.author.id)]['team']:
         person = discord.utils.get(guildd.members,id=int(member))
-        temp +="<@{}> ({})\n".format(member,person.name)
+        temp +=f"{data['signedup'][member]['emoji']} - <@{member}> ({person.name}) \n"
         al+=1
   temp+="The number of alive players is- {} \n".format(al)
   msg = await ctx.send("​")
@@ -2103,12 +2268,24 @@ async def deposit(ctx,cash:int=0):
 
 @bot.command(aliases=["forcedep","fdep"])
 @commands.has_role("Alive")
-async def forcedeposit(ctx,person:discord.User,cash:int=0):
+async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
   '''Allows the king of a team to force a teammate to deposit cash.'''
   global data
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
     return
+  guildd=ctx.message.guild
+  if person in emj.UNICODE_EMOJI:
+      idd=emjtop(person)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      person = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(person,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
+      return
   if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
     await ctx.send("You can only use this command in faction channels.")
     return
@@ -2729,7 +2906,7 @@ async def inventory(ctx):
 
 @bot.command(aliases=["tri","tribute"])
 @commands.has_role("Alive")
-async def picktribute(ctx,person:discord.User,cash:int):
+async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   '''Allows the king of a team to pick the tribute and cash <King Only.>'''
   global data
   if int(gamestate)!=3:
@@ -2741,6 +2918,18 @@ async def picktribute(ctx,person:discord.User,cash:int):
   if cash<1:
     await ctx.send("Cash can't be a negative value or 0.")
     return
+  guildd=ctx.message.guild
+  if person in emj.UNICODE_EMOJI:
+      idd=emjtop(person)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      person = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(person,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
+      return
   ath=str(ctx.author.id)
   ath2=str(person.id)
   team=data['players'][ath]['team']
@@ -3279,7 +3468,13 @@ async def score(ath,msg):
             return
           dump()
           #print(data[ath])
-            
+
+def emjtop(emj):
+  for player in data['players']:
+    if data['players'][player]['emoji']==emj:
+      return player
+  return None
+
 def dump():
     my_collection = db.main
     my_collection.drop()
