@@ -110,6 +110,7 @@ async def on_ready():
     my_loop.start()
     my_looptwo.start()
     my_loopthree.start()
+   
     
 @tasks.loop(minutes=5)
 async def my_loop():
