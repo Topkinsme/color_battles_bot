@@ -1074,7 +1074,7 @@ async def listallr(ctx):
         guildd=bot.get_guild(448888674944548874)
         userr=discord.utils.get(guildd.members,id=int(user))
         temp +="{} has the role `{}` \n".format(userr.mention,data['players'][user]['role'])
-    msg = await ctx.send("Loading.")
+    msg = await ctx.send("​")
     await msg.edit(content=temp)
 
 
@@ -1120,12 +1120,12 @@ async def listroles(ctx):
     if len(temp)>2000:
       a=temp[:2000]
       b=temp[2000:]
-      am=await ctx.send("Loading.")
+      am=await ctx.send("​")
       await am.edit(content=a)
-      bm=await ctx.send("Loading.")
+      bm=await ctx.send("​")
       await bm.edit(content=b)
     else:
-      msg = await ctx.send("Loading.")
+      msg = await ctx.send("​")
       await msg.edit(content=temp)
     
 @bot.command(aliases=["cr"])
@@ -1333,40 +1333,43 @@ async def createblindauction(ctx,name,*,text):
     global data
     guildd=bot.get_guild(448888674944548874)
     mark=discord.utils.get(guildd.channels,name="auction_house")
-    data['bauction']['state']=1
-    await mark.send("__**ITEM - {}**__".format(name))
-    await mark.send("Perks - {}".format(text))
-    data['bauction']['biders']={}
-    data['bauction']['item']=name
-    data['bauction']['perks']=text
+    code=chr(random.randint(97, 122))+chr(random.randint(97, 122))+chr(random.randint(97, 122))
+    if code not in data['bauction']:
+      data['bauction'][code]={}
+      data['bauction'][code]['biders']={}
+      data['bauction'][code]['item']=name
+      data['bauction'][code]['perks']=text
+    auction = discord.Embed(colour=random.randint(0, 0xffffff))
+    auction.set_author(name="BLIND AUCTION")
+    auction.add_field(name=f"__**ITEM - {name}**__",value=f"Code- {code}\nPerks - {text}",inline="false")
+    await mark.send(embed=auction)
     dump()
+    
 
 @bot.command(aliases=["clba"])
 @commands.has_role("Helpers")
-async def closeblindauction(ctx):
+async def closeblindauction(ctx,code):
   '''Allows the user to close a auction <Helpers>'''
   if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
   global data
-  if data['bauction']['state']==0:
-    await ctx.send("There is no blind auction going on right now.")
+  if code not in data['bauction']:
+    await ctx.send("Invalid Code.")
     return
   data['bauction']['state']=0
   cost=0
   whop=""
-  for person in data['bauction']['biders']:
-    if data['bauction']['biders'][person]>cost:
-      cost=data['bauction']['biders'][person]
+  for person in data['bauction'][code]['biders']:
+    if data['bauction'][code]['biders'][person]>cost:
+      cost=data['bauction'][code]['biders'][person]
       whop=person
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="auction_house")
-  await mark.send("Congrats! The item auctioned for {} ! ".format(cost))
+  await mark.send(f"Congrats! The item auctioned for {cost} ! (Code was {code})")
   data['money'][str(whop)]-=cost
-  data['players'][str(whop)]['inv'].append(data['bauction']['item'])
-  data['bauction']['biders']={}
-  data['bauction']['item']=""
-  data['bauction']['perks']=""
+  data['players'][str(whop)]['inv'].append(data['bauction'][code]['item'])
+  data['bauction'].pop(code)
   dump()
 
 
@@ -1644,7 +1647,7 @@ async def slist(ctx):
         person = discord.utils.get(guildd.members,id=int(member))
         temp +="<@{}> ({}) \n".format(member,person.name)
     temp += "The number of people signed up is {} \n".format(tempno)
-    msg = await ctx.send("Loading.")
+    msg = await ctx.send("​")
     await msg.edit(content=temp)
     
 @bot.command(aliases=["sp","spec"])
@@ -1945,7 +1948,7 @@ async def alivelist(ctx):
       temp +="<@{}> ({})\n".format(member,person.name)
       al+=1
   temp+="The number of alive players is- {} \n".format(al)
-  msg = await ctx.send("Loading.")
+  msg = await ctx.send("​")
   await msg.edit(content=temp)
 
 @bot.command(aliases=["ael"])
@@ -1968,7 +1971,7 @@ async def alivenonteamlist(ctx):
         temp +="<@{}> ({})\n".format(member,person.name)
         al+=1
   temp+="The number of alive players is- {} \n".format(al)
-  msg = await ctx.send("Loading.")
+  msg = await ctx.send("​")
   await msg.edit(content=temp)
 
 @bot.command(aliases=["b"])
@@ -2013,7 +2016,7 @@ async def bid(ctx,cash:int=0):
 
 @bot.command(aliases=["bb"])
 @commands.has_role("Alive")
-async def blindbid(ctx,cash:int):
+async def blindbid(ctx,code,cash:int):
   '''Allows the person to put a in blind bid for the blind auction item.'''
   global data
   ath=str(ctx.author.id)
@@ -2021,8 +2024,8 @@ async def blindbid(ctx,cash:int):
     await ctx.send("There is no game going on right now.")
     return
   print(ctx.message.channel)
-  if data['bauction']['state']==0:
-    await ctx.send("There is no blind auction going on right now.")
+  if code not in data['bauction']:
+    await ctx.send("Invalid Code.")
     return
   await ctx.message.delete()
   if cash<=0:
@@ -2032,7 +2035,7 @@ async def blindbid(ctx,cash:int):
     await ctx.send("You can only bid what you have.")
     return
   who=str(ctx.author.id)
-  data['bauction']['biders'][who]=cash
+  data['bauction'][code]['biders'][who]=cash
   await ctx.send("Done.")
   dump()
 
