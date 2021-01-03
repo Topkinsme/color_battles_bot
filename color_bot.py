@@ -1706,7 +1706,7 @@ async def createpoll(ctx):
   for member in data['players']:
       if data['players'][member]['state']==1:
         an+=1
-  pages=math.ceil(an/20)
+  pages=math.ceil(an/15)
   if pages==1:
     for member in data['players']:
       if data['players'][member]['state']==1:
@@ -1731,20 +1731,21 @@ async def createpoll(ctx):
     data['poll'][code]['pages']=pages
     data['poll'][code]['msgid']=[]
     data['poll'][code]['chnlid']=str(ctx.message.channel.id)
-    lineslist = temp.splitlines()
-    for i in range(0,an+1,20):
-      for j in range(i,i+21):
+    lineslist = temp.splitlines(True)
+    await ctx.send(lineslist[0])
+    for i in range(1,an+1,15): 
+      msg=""
+      for j in range(i,i+15): 
         if j>an:
           break
         msg+=lineslist[j]
+
       msgg = await ctx.send(msg)
-      for j in range(i,i+21):
+      for j in range(i,i+15):
         if j>an:
           break
-        await msgg.add_reaction(emojilist[j])
+        await msgg.add_reaction(emjlist[j-1])
       data['poll'][code]['msgid'].append(str(msgg.id))
-
-
   dump()
 
 @bot.command(aliases=["ccp"])
@@ -1773,17 +1774,22 @@ async def closepoll(ctx,code):
                   reacted[user.id]=[]
                   reacted[user.id].append(reaction)
 
+    
     for people in reacted:
         who=discord.utils.get(guildd.members,id=int(people))
         if len(reacted[people])>1:
-          for emoji in reacted[people]:
-            await a.remove_reaction(emoji, who)
+          for msgid in data['poll'][code]['msgid']:
+            try:
+              a = await channel.fetch_message(msgid)
+              for emoji in reacted[people]:
+                await a.remove_reaction(emoji, who)
+            except:
+              pass
 
 
 
 
     for msgid in data['poll'][code]['msgid']:
-      a = await channel.fetch_message(msgid)
       emjlist=[]
 
       for member in data['players']:
