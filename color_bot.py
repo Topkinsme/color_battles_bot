@@ -23,6 +23,7 @@ import textwrap
 import io
 import emoji as emj
 import typing
+import math
 
 
 token = str(os.environ.get("tokeno"))
@@ -93,6 +94,7 @@ async def on_ready():
             data['building']={}
             data['smarket']={}
             data['marketalert']=[]
+            data['poll']={}
             dump()
             await spamchannel.send("Warning! Data.json wasn't found. Please check if anything is wrong.")
     if int(gamestate)==1:
@@ -274,9 +276,10 @@ async def on_message(message):
         dump()
 
     
-'''@bot.event
+@bot.event
 async def on_command_error(ctx,error):
-    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')'''
+    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')
+
 
 @bot.event
 async def on_member_join(member):
@@ -393,6 +396,7 @@ async def compreset(ctx):
     data['building']={}
     data['smarket']={}
     data['marketalert']=[]
+    data['poll']={}
     await ctx.send("A complete erasure of all data has been done.")
     dump()
     
@@ -551,6 +555,7 @@ async def reset(ctx):
     data['building']={}
     data['smarket']={}
     data['marketalert']=[]
+    data['poll']={}
     dump()
     await ctx.send("Reset complete!")
     dump()   
@@ -1109,7 +1114,7 @@ async def listallr(ctx):
 @bot.command(aliases=["ar"])
 @commands.has_role("Helpers")
 async def addrole(ctx,role,team,soloq=0,*,litrole):
-    '''Adds roles to the role list.(Similar roles must be entered with a number after them , teams can only be red , blue , green or yellow.(No Caps) Any other team will be considered as a solo team) <Helpers> OUTDATED'''
+    '''Adds roles to the role list.(Similar roles must be entered with a number after them , teams can anything, but repeat teams will make them have the same teams. Solos need to have a different team. <Helpers>'''
     if (int(gamestate) >= 3):
         await ctx.send("A game is already going on.")
         return
@@ -1683,6 +1688,132 @@ async def advancephase(ctx):
   await msg.pin()
   await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
   dump()
+
+@bot.command(aliases=["cp"])
+@commands.has_role("Helpers")
+async def createpoll(ctx):
+  '''Allows the host to create a poll.'''
+  global data
+  if int(gamestate) != 3:
+    await ctx.send("There is no game going on right now.")
+    return
+  guildd=bot.get_guild(448888674944548874)
+  code=chr(random.randint(97, 122))+chr(random.randint(97, 122))+chr(random.randint(97, 122))
+  temp = ""
+  temp+=f"Poll `{code}`- \n"
+  emjlist=[]
+  an=0
+  for member in data['players']:
+      if data['players'][member]['state']==1:
+        an+=1
+  pages=math.ceil(an/20)
+  if pages==1:
+    for member in data['players']:
+      if data['players'][member]['state']==1:
+        person = discord.utils.get(guildd.members,id=int(member))
+        temp +=f"{data['signedup'][member]['emoji']} - <@{member}> ({person.name}) \n"
+        emjlist.append(data['signedup'][member]['emoji'])
+    msg = await ctx.send(temp)
+    for emoji in emjlist:
+      await msg.add_reaction(emoji)
+    data['poll'][code]={}
+    data['poll'][code]['pages']=1
+    data['poll'][code]['msgid']=[]
+    data['poll'][code]['msgid'].append(str(msg.id))
+    data['poll'][code]['chnlid']=str(msg.channel.id)
+  else:
+    for member in data['players']:
+      if data['players'][member]['state']==1:
+        person = discord.utils.get(guildd.members,id=int(member))
+        temp +=f"{data['signedup'][member]['emoji']} - <@{member}> ({person.name}) \n"
+        emjlist.append(data['signedup'][member]['emoji'])
+    data['poll'][code]={}
+    data['poll'][code]['pages']=pages
+    data['poll'][code]['msgid']=[]
+    data['poll'][code]['chnlid']=str(ctx.message.channel.id)
+    lineslist = temp.splitlines()
+    for i in range(0,an+1,20):
+      for j in range(i,i+21):
+        if j>an:
+          break
+        msg+=lineslist[j]
+      msgg = await ctx.send(msg)
+      for j in range(i,i+21):
+        if j>an:
+          break
+        await msgg.add_reaction(emojilist[j])
+      data['poll'][code]['msgid'].append(str(msgg.id))
+
+
+  dump()
+
+@bot.command(aliases=["ccp"])
+@commands.has_role("Helpers")
+async def closepoll(ctx,code):
+    '''Command that allows you to close polls.'''
+    global data
+    number=0
+    text=""
+    tempmsg="Results-\n\n"
+    guildd=bot.get_guild(448888674944548874)
+    channel=discord.utils.get(guildd.channels,id=int(data['poll'][code]['chnlid']))
+
+    reacted={}
+    for msgid in data['poll'][code]['msgid']:
+    #doublercheck
+      a = await channel.fetch_message(msgid)
+      for reaction in a.reactions:
+          users = await reaction.users().flatten()
+          for user in users:
+                if user.id==450320950026567692:
+                  continue
+                if user.id in reacted:
+                  reacted[user.id].append(reaction)
+                else:
+                  reacted[user.id]=[]
+                  reacted[user.id].append(reaction)
+
+    for people in reacted:
+        who=discord.utils.get(guildd.members,id=int(people))
+        if len(reacted[people])>1:
+          for emoji in reacted[people]:
+            await a.remove_reaction(emoji, who)
+
+
+
+
+    for msgid in data['poll'][code]['msgid']:
+      a = await channel.fetch_message(msgid)
+      emjlist=[]
+
+      for member in data['players']:
+        if data['players'][member]['state']==1:
+          emjlist.append(data['signedup'][member]['emoji'])
+
+      a = await channel.fetch_message(msgid)
+      for emoji in emjlist:
+        for reaction in a.reactions:
+          if str(reaction)==emoji:
+            for member in data['players']:
+              if emoji==data['players'][member]['emoji']:
+                who=discord.utils.get(guildd.members,id=int(member))
+            users = await reaction.users().flatten()
+            for user in users:
+              if user.id==450320950026567692:
+                continue
+              text+=f"{user.mention} "
+            number+=reaction.count-1
+            if number==0:
+              continue
+            tempmsg+= f"For {who.mention} ({emoji}) - \n {number} - {text} \n\n"
+            number=0
+            text=""
+      await a.clear_reactions()
+    data['poll'].pop(code)
+    await ctx.send(tempmsg)
+    dump()
+
+
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
