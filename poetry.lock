@@ -129,6 +129,17 @@ trio = ["trio (>=0.14.0)", "sniffio (>=1.1)"]
 
 [[package]]
 category = "main"
+description = "Emoji for Python"
+name = "emoji"
+optional = false
+python-versions = "*"
+version = "0.6.0"
+
+[package.extras]
+dev = ["pytest", "coverage", "coveralls"]
+
+[[package]]
+category = "main"
 description = "A simple framework for building complex web applications."
 name = "flask"
 optional = false
@@ -266,7 +277,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "b6b56be74c072501bae1c5e2ada6cbd49fdb7ad4cc29ecca244529ad72a66dc5"
+content-hash = "aaae4f8bdd193d3a5dee4cc55b0102ce76f2ca88b5d32d5d87936b073b959857"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -322,6 +333,9 @@ discord = [
 dnspython = [
     {file = "dnspython-2.0.0-py3-none-any.whl", hash = "sha256:40bb3c24b9d4ec12500f0124288a65df232a3aa749bb0c39734b782873a2544d"},
     {file = "dnspython-2.0.0.zip", hash = "sha256:044af09374469c3a39eeea1a146e8cac27daec951f1f1f157b1962fc7cb9d1b7"},
+]
+emoji = [
+    {file = "emoji-0.6.0.tar.gz", hash = "sha256:e42da4f8d648f8ef10691bc246f682a1ec6b18373abfd9be10ec0b398823bd11"},
 ]
 flask = [
     {file = "Flask-1.1.2-py2.py3-none-any.whl", hash = "sha256:8a4fdd8936eba2512e9c85df320a37e694c93945b33ef33c89946a340a238557"},
