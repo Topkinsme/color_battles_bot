@@ -1862,7 +1862,7 @@ async def signup(ctx,emoji="Emoji"):
     '''Allows you to signup for a game.Sign out by typing the command again.'''
     global data
     if (int(gamestate) != 1):
-        await ctx.send("Sign ups are closed right now. Try joining when they are open , of after the game has concluded. Contact a Informer or a helper if you need help.")
+        await ctx.send("Sign ups are closed right now. Try joining when they are open , or after the game has concluded. Contact a Informer or a helper if you need help.")
         return
     ath=str(ctx.author.id) 
     if not ath in data['signedup']:
@@ -2038,7 +2038,6 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
       else:
         await ctx.send(f"Invalid Input {people}.")
         return
-      await ctx.send(people)
       if data['players'][str(people.id)]['state']==0:
         await ctx.send("You cannot make ccs with the dead.")
         return
@@ -2373,18 +2372,18 @@ async def auctioninfo(ctx):
   await ctx.send(embed=info)
 
 @bot.command(aliases=["bai"])
-async def blindauctioninfo(ctx):
+async def blindauctioninfo(ctx,code):
   '''Use this to get info on blind auction items'''
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
     return
-  if data['bauction']['state']==0:
-    await ctx.send("There is no blind auction going on right now.")
+  if code not in data['bauction']:
+    await ctx.send("Invalid Code.")
     return
   info = discord.Embed(colour=random.randint(0, 0xffffff))
   info.set_author(name="Auction Info-")
-  info.add_field(name="Item Name-",value=f"**{data['bauction']['item']}**",inline="false")
-  info.add_field(name="Item Perks-",value=data['bauction']['perks'],inline="false")
+  info.add_field(name="Item Name-",value=f"**{data['bauction'][code]['item']}**",inline="false")
+  info.add_field(name="Item Perks-",value=data['bauction'][code]['perks'],inline="false")
   await ctx.send(embed=info)
 
 @bot.command(aliases=["de","dep"])
@@ -2905,16 +2904,7 @@ async def dismarket(ctx):
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
-  if team=="red":
-    state=data['building']['red']['market']
-  elif team=="blue":
-    state=data['building']['blue']['market']
-  elif team=="green":
-    state=data['building']['green']['market']
-  elif team=="yellow":
-    state=data['building']['yellow']['market']
-  else:
-    state=3
+  state=data['building'][team]['market']
 
   if state==0:
     text= "The next upgrade costs 2500."
@@ -2923,6 +2913,8 @@ async def dismarket(ctx):
   elif state==2:
     text= "The next upgrade costs 5000."
   elif state==3:
+    text= "The nest upgrade costs 1000."
+  else:
     text= "Your market has been maxed out."
   await ctx.send(f"Your team's market is on level {state}.{text}")
 
@@ -2964,22 +2956,12 @@ async def tmbuy(ctx,num:int):
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
       return
-  if num>9 or num<1:
+  if num>10 or num<1:
     await ctx.send("Please enter a valid number.")
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
-  if team=="red":
-    state=data['building']['red']['market']
-  elif team=="blue":
-    state=data['building']['blue']['market']
-  elif team=="green":
-    state=data['building']['green']['market']
-  elif team=="yellow":
-    state=data['building']['yellow']['market']
-  else:
-    state=3
-    team=str(ctx.author.id)
+  state=data['building'][team]['market']
   cost=data['building'][team]['marketprices'][num]
   if cost>data['money'][ath]:
     await ctx.send("You cannot afford this.")
@@ -3029,7 +3011,7 @@ async def tmbuy(ctx,num:int):
       await ctx.send("You need to upgrade your market to buy this item.")
       return
     item="Strength Potion"
-  elif num==9:
+  elif num==10:
     if state<4:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
