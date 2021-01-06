@@ -718,9 +718,27 @@ async def promote(ctx):
   await ctx.author.remove_roles(role)
   await ctx.send("You have been promoted , {}".format(ctx.author.mention))
 
+@bot.command()
+@commands.has_role("Helpers")
+async def kick(ctx,member:discord.Member):
+    '''To kick a person out of the server. <Helper>'''
+    await member.kick()
+    await ctx.send("{} has been kicked from the server.".format(member.mention))
 
 @bot.command()
 @commands.has_role("Helpers")
+async def ban(ctx,member:discord.Member):
+    '''To ban a person from the server. <Helper>'''
+    await member.ban()
+    await ctx.send("{} has been banned from the server.".format(member.mention))
+
+#host
+
+
+
+
+@bot.command()
+@commands.has_any_role("Helpers","Host")
 async def poll(ctx,*,message):
     '''Creates a poll with yes or no. <Helper>'''
     poll = discord.Embed(colour=random.randint(0, 0xffffff))
@@ -735,7 +753,7 @@ async def poll(ctx,*,message):
     await a.add_reaction(reac3)
 
 @bot.command()
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def advancedpoll(ctx,timee:int,*,message):
     '''Creates a poll with yes or no to close it in a certain amount of time (Note that the bot closing will stop this from working). <Helper>'''
     poll = discord.Embed(colour=random.randint(0, 0xffffff))
@@ -794,23 +812,9 @@ async def advancedpoll(ctx,timee:int,*,message):
     if other>0:
        cont+=f" {other} ({otherp}) voted something that wasn't even an option."
     await a.edit(content=cont)
-
-@bot.command()
-@commands.has_role("Helpers")
-async def kick(ctx,member:discord.Member):
-    '''To kick a person out of the server. <Helper>'''
-    await member.kick()
-    await ctx.send("{} has been kicked from the server.".format(member.mention))
-
-@bot.command()
-@commands.has_role("Helpers")
-async def ban(ctx,member:discord.Member):
-    '''To ban a person from the server. <Helper>'''
-    await member.ban()
-    await ctx.send("{} has been banned from the server.".format(member.mention))
     
 @bot.command(aliases=["rc"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Removes a certain amount of cash from a person. <Helper>'''
     if (int(gamestate) != 3):
@@ -833,7 +837,7 @@ async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     await ctx.send("{} has been reduced from {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
     
 @bot.command(aliases=["ac"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Adds a certain amount of cash to a person's balance. <Helper>'''
     if (int(gamestate) != 3):
@@ -855,7 +859,7 @@ async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
     await ctx.send("{} has been added to {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
     
 @bot.command(aliases=["gso"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def opensignups(ctx):
     '''Opens signups. <Helpers>'''
     global gamestate
@@ -871,7 +875,7 @@ async def opensignups(ctx):
     dump()
     
 @bot.command(aliases=["gsc"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def closesignups(ctx):
     '''Closes signups. <Helpers>'''
     global gamestate
@@ -887,7 +891,7 @@ async def closesignups(ctx):
     dump()
     
 @bot.command(aliases=["s"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def start(ctx,code:str,num=0):
     '''Starts the game (Type a number after s to run the assignroles command automatically) <Helpers>'''
     global gamestate
@@ -923,7 +927,7 @@ async def start(ctx,code:str,num=0):
     dump()
         
 @bot.command(aliases=["as"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def assignroles(ctx,code):
     '''Assigns roles and makes all channels. <Helpers>'''
     global data
@@ -935,6 +939,7 @@ async def assignroles(ctx,code):
     data['code']['gamephase']=0
     #
     guildd=ctx.message.guild
+    rolem1 = discord.utils.get(guildd.roles, name="Host")
     role0 = discord.utils.get(guildd.roles, name="Helpers") 
     role1 = discord.utils.get(guildd.roles, name="Alive")
     role2 = discord.utils.get(guildd.roles, name="Respawning")
@@ -943,6 +948,7 @@ async def assignroles(ctx,code):
     storymark = {
     guildd.default_role: discord.PermissionOverwrite(read_messages=False),
     guildd.me: discord.PermissionOverwrite(read_messages=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role1: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role2: discord.PermissionOverwrite(read_messages=True,send_messages=False),
@@ -952,6 +958,7 @@ async def assignroles(ctx,code):
     batle = {
     guildd.default_role: discord.PermissionOverwrite(read_messages=False),
     guildd.me: discord.PermissionOverwrite(read_messages=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role1: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True),
     role2: discord.PermissionOverwrite(read_messages=True,send_messages=False),
@@ -961,6 +968,7 @@ async def assignroles(ctx,code):
     resp = {
     guildd.default_role: discord.PermissionOverwrite(read_messages=False),
     guildd.me: discord.PermissionOverwrite(read_messages=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role1: discord.PermissionOverwrite(read_messages=False,send_messages=False,add_reactions=True),
     role2: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True),
@@ -970,6 +978,7 @@ async def assignroles(ctx,code):
     deads = {
     guildd.default_role: discord.PermissionOverwrite(read_messages=False),
     guildd.me: discord.PermissionOverwrite(read_messages=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role1: discord.PermissionOverwrite(read_messages=False,send_messages=False,add_reactions=True),
     role2: discord.PermissionOverwrite(read_messages=False,send_messages=False,add_reactions=True),
@@ -982,6 +991,7 @@ async def assignroles(ctx,code):
     story = await guildd.create_text_channel('story-time',overwrites=storymark,category=cate)
     batlec = await guildd.create_text_channel('battlefield',overwrites=batle,category=cate)
     markc = await guildd.create_text_channel('auction_house',overwrites=storymark,category=cate)
+    pollc = await guildd.create_text_channel('voting_booth',overwrites=storymark,category=cate)
     respc = await guildd.create_text_channel('respawning',overwrites=resp,category=cate)      
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
@@ -989,12 +999,14 @@ async def assignroles(ctx,code):
     msg = await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)")
     await msg.pin()
     #
+    rolem1 = discord.utils.get(guildd.roles, name="Host")
     role0 = discord.utils.get(guildd.roles, name="Helpers")
     role3 = discord.utils.get(guildd.roles, name="Dead")
     role4 = discord.utils.get(guildd.roles, name="Spectator")
     overwrites = {
     guildd.default_role: discord.PermissionOverwrite(read_messages=False),
     guildd.me: discord.PermissionOverwrite(read_messages=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role3: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role4: discord.PermissionOverwrite(read_messages=True,send_messages=False)
@@ -1099,7 +1111,7 @@ async def assignroles(ctx,code):
     dump()    
     
 @bot.command(aliases=["a"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def listallr(ctx):
     '''Lists everyone's roles. <Helpers>'''
     temp = ""
@@ -1112,7 +1124,7 @@ async def listallr(ctx):
 
 
 @bot.command(aliases=["ar"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def addrole(ctx,role,team,soloq=0,*,litrole):
     '''Adds roles to the role list.(Similar roles must be entered with a number after them , teams can anything, but repeat teams will make them have the same teams. Solos need to have a different team. <Helpers>'''
     if (int(gamestate) >= 3):
@@ -1128,7 +1140,7 @@ async def addrole(ctx,role,team,soloq=0,*,litrole):
     dump()
     
 @bot.command(aliases=["rr"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def removerole(ctx,role,team):
     '''Removes a role from the role list. <Helpers>'''
     if (int(gamestate) >= 3):
@@ -1141,7 +1153,7 @@ async def removerole(ctx,role,team):
     dump()
    
 @bot.command(aliases=["lr"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def listroles(ctx):
     '''Prints the entire role list. <Helpers>'''
     temp="The rolelist is - \n"
@@ -1162,7 +1174,7 @@ async def listroles(ctx):
       await msg.edit(content=temp)
     
 @bot.command(aliases=["cr"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def clearroles(ctx):
     '''Removes all roles from the list. <Helpers>'''
     if (int(gamestate) >= 3):
@@ -1174,7 +1186,7 @@ async def clearroles(ctx):
     dump()
 
 @bot.command(aliases=["eg"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def endgame(ctx):
     '''Ends the game. <Helpers>'''
     global gamestate
@@ -1194,7 +1206,7 @@ async def endgame(ctx):
     dump()
     
 @bot.command(aliases=["k"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def kill(ctx,user:typing.Union[discord.Member,str]):
     '''Sets a person's status as respawning in game. <Helpers>'''
     if int(gamestate)!=3:
@@ -1224,7 +1236,7 @@ async def kill(ctx,user:typing.Union[discord.Member,str]):
     dump()
     
 @bot.command(aliases=["re"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def respawn(ctx,user:typing.Union[discord.Member,str]):
     '''Respawns a person in game <Helpers>'''
     if int(gamestate)!=3:
@@ -1255,7 +1267,7 @@ async def respawn(ctx,user:typing.Union[discord.Member,str]):
     dump()
 
 @bot.command(aliases=["pk"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def pkill(ctx,user:typing.Union[discord.Member,str]):
     '''Kills a person permanently in game. <Helpers>'''
     if int(gamestate)!=3:
@@ -1291,7 +1303,7 @@ async def pkill(ctx,user:typing.Union[discord.Member,str]):
 
 
 @bot.command(aliases=["mg"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def massgive(ctx,cash=100):
   '''Gives a certain amount of cash to everyone who has an account. <Helpers>'''
   global data
@@ -1322,7 +1334,7 @@ async def massgive(ctx,cash=100):
   dump()
 
 @bot.command(aliases=["mbal"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
   '''Allows to see the balance of another player <Helpers>'''
   if (int(gamestate) != 3):
@@ -1344,7 +1356,7 @@ async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
   await ctx.send("{}'s balance is {}.".format(member.mention,data['money'][id]))
 
 @bot.command(aliases=["ca"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def createauction(ctx,name,*,text):
     '''Allows the user to create a auction <Helpers>'''
     if (int(gamestate) != 3):
@@ -1367,7 +1379,7 @@ async def createauction(ctx,name,*,text):
     dump()
 
 @bot.command(aliases=["cla"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def closeauction(ctx):
   '''Allows the user to close a auction <Helpers>'''
   if (int(gamestate) != 3):
@@ -1403,7 +1415,7 @@ async def closeauction(ctx):
   dump()
 
 @bot.command(aliases=["cba"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def createblindauction(ctx,name,*,text):
     '''Allows the user to create a blind auction <Helpers>'''
     if (int(gamestate) != 3):
@@ -1426,7 +1438,7 @@ async def createblindauction(ctx,name,*,text):
     
 
 @bot.command(aliases=["clba"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def closeblindauction(ctx,code):
   '''Allows the user to close a auction <Helpers>'''
   if (int(gamestate) != 3):
@@ -1453,7 +1465,7 @@ async def closeblindauction(ctx,code):
 
 
 @bot.command(aliases=["rmm"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def resetstockmarket(ctx):
   '''Use this to start stock market'''
   if int(gamestate)!=3:
@@ -1489,7 +1501,7 @@ async def resetstockmarket(ctx):
 
 
 @bot.command(aliases=["tmm"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def togglestockmarket(ctx):
   '''Use this to turn on or turn off the stock market <Helpers>'''
   if int(gamestate)!=3:
@@ -1505,7 +1517,7 @@ async def togglestockmarket(ctx):
   dump()
 
 @bot.command(aliases=["cmm"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def createstockmarket(ctx):
   '''Use this to start stock market'''
   if int(gamestate)!=3:
@@ -1535,7 +1547,7 @@ async def createstockmarket(ctx):
   dump()
 
 @bot.command(aliases=["chngmm"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def changestockmarket(ctx):
     '''Use this to manually change stock market prices <Helpers>'''
     global data
@@ -1561,7 +1573,7 @@ async def changestockmarket(ctx):
       return
 
 @bot.command()
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def msgcount(ctx):
   '''Used to check how many messages were sent by who during the duration of the game.'''
   msg = await ctx.send("Loading.")
@@ -1571,7 +1583,7 @@ async def msgcount(ctx):
   await msg.edit(content=count)
 
 @bot.command(aliases=["addinv"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
   '''Use this to add something to a person's inventory <Helpers>'''
   if int(gamestate)!=3:
@@ -1594,7 +1606,7 @@ async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
   await ctx.send("Done.")
 
 @bot.command(aliases=["reminv"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
   '''Use this to remove something from someone's inventory. <Helpers>'''
   if int(gamestate)!=3:
@@ -1621,7 +1633,7 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
   await ctx.send("Done.")
 
 @bot.command(aliases=["endt"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def endtribute(ctx):
   '''Use this to commence the tributing. <Helper>'''
   if int(gamestate)!=3:
@@ -1660,7 +1672,7 @@ async def endtribute(ctx):
   dump()
 
 @bot.command(aliases=["ap"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def advancephase(ctx):
   """ Use this command to advance the game phase.
 
@@ -1690,9 +1702,9 @@ async def advancephase(ctx):
   dump()
 
 @bot.command(aliases=["cp"])
-@commands.has_role("Helpers")
+@commands.has_any_role("Helpers","Host")
 async def createpoll(ctx):
-  '''Allows the host to create a poll.'''
+  '''Allows the host to create a poll. <Helper>'''
   global data
   if int(gamestate) != 3:
     await ctx.send("There is no game going on right now.")
@@ -1748,14 +1760,14 @@ async def createpoll(ctx):
       data['poll'][code]['msgid'].append(str(msgg.id))
   dump()
 
-@bot.command(aliases=["ccp"])
-@commands.has_role("Helpers")
+@bot.command(aliases=["clp"])
+@commands.has_any_role("Helpers","Host")
 async def closepoll(ctx,code):
-    '''Command that allows you to close polls.'''
+    '''Command that allows you to close polls. <Helper>'''
     global data
     number=0
     text=""
-    tempmsg="Results-\n\n"
+    tempmsg=f"Results for {code}-\n\n"
     guildd=bot.get_guild(448888674944548874)
     channel=discord.utils.get(guildd.channels,id=int(data['poll'][code]['chnlid']))
 
@@ -1818,6 +1830,7 @@ async def closepoll(ctx,code):
     data['poll'].pop(code)
     await ctx.send(tempmsg)
     dump()
+
 
 
 
@@ -2056,6 +2069,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     data['money'][str(ctx.author.id)] -= 50
     author = ctx.message.author
     role0 = discord.utils.get(guildd.roles, name="Helpers")
+    rolem1 = discord.utils.get(guildd.roles, name="Host")
     '''role1 = discord.utils.get(guildd.roles, name="Alive")
     role2= discord.utils.get(guildd.roles, name="Spectatators")'''
     role3 = discord.utils.get(guildd.roles, name="Dead")
@@ -2082,6 +2096,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     guildd.me: discord.PermissionOverwrite(read_messages=True),
     author:discord.PermissionOverwrite(read_messages=True,add_reactions=True),
     #member:discord.PermissionOverwrite(read_messages=True,add_reactions=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0:discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role3:discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role4:discord.PermissionOverwrite(read_messages=True,send_messages=False)
