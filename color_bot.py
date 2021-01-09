@@ -284,9 +284,6 @@ async def on_command_error(ctx,error):
 @bot.event
 async def on_member_join(member):
     await spamchannel.send("{} joined the server".format(member.mention))
-    server=bot.get_guild(448888674944548874)
-    role=discord.utils.get(server.roles, name="everyone")
-    await member.add_roles(role)
     
 @bot.event
 async def on_member_remove(member):
