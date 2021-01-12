@@ -708,8 +708,19 @@ async def demote(ctx):
 async def promote(ctx):
   '''To promote yourself. <Helper>'''
   guildd=bot.get_guild(448888674944548874)
-  role = discord.utils.get(guildd.roles, name="Helpers")
   ath = str(ctx.author.id)
+  rolz=[]
+  role1 = discord.utils.get(guildd.roles, name="Alive")
+  role2 = discord.utils.get(guildd.roles, name="Respawning")
+  role3 = discord.utils.get(guildd.roles, name="Signed-Up!")
+  rolz.append(role1)
+  rolz.append(role2)
+  rolz.append(role3)
+  for role in rolz:
+    if role in ctx.author.roles:
+      await ctx.send("It seems you might be in a game. Please wait for the game to get over before you can promote.")
+      return
+  role = discord.utils.get(guildd.roles, name="Helpers")
   await ctx.author.add_roles(role)
   role = discord.utils.get(guildd.roles, name="Helper")
   await ctx.author.remove_roles(role)
@@ -1864,6 +1875,20 @@ async def signup(ctx,emoji="Emoji"):
     ath=str(ctx.author.id) 
     if not ath in data['signedup']:
       if not ath in data['specters']:
+        #check if host
+        guildd=ctx.message.guild
+        rolz=[]
+        role1 = discord.utils.get(guildd.roles, name="Host")
+        role2 = discord.utils.get(guildd.roles, name="Helpers")
+        role3 = discord.utils.get(guildd.roles, name="Signed-Up!")
+        rolz.append(role1)
+        rolz.append(role2)
+        rolz.append(role3)
+        for role in rolz:
+          if role in ctx.author.roles:
+            await ctx.send("It seems you might have roles that are meant to run the game. Please demote before you can play.")
+            return
+        #check emoji
         if emoji not in emj.UNICODE_EMOJI:
           await ctx.send("That is not a valid emoji.")
           return
