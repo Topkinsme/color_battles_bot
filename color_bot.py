@@ -3200,7 +3200,7 @@ async def rolehelp(role,chnl):
     elif role == "finisher" or role =="16" :
         msg="""```16. Finisher-
 - Can delay a person's respawn by 4 phases.
-- Has a ability cooldown of 1 day. Action is instant. Chooses the action during the night.
+- Has a ability cooldown of 1 day. Action is night end after kills. Chooses the action during the night.
 - Respawns in 6 phases.```"""
     elif role == "guard" or role =="17" :
         msg="""```17. Guard-
@@ -3211,12 +3211,12 @@ async def rolehelp(role,chnl):
     elif role == "healer" or role =="18" :
         msg="""```18. Healer-
 - Can reduce a person's respawn by 4 phases.
-- Has a ability cooldown of 1 day. Action is instant. Chooses the action during the night.
+- Has a ability cooldown of 1 day. Action is end phase after kills. Chooses the action during the night.
 - Respawns in 6 phases.```"""
     elif role == "life transferrer" or role =="19" :
         msg="""```19. Life Transferrer-
-- Has the ability to give their life to someone else. Doing so will cause all attacks targeted at the life transferrer to fail. But any attacks towards the person with the life will affect the Transferrer as well.
-- Action is instant. Cannot change targets after initial pick. Picks are only done during the night.
+- Has the ability to give their life to someone else. Doing so will cause all attacks targeted at the life transferrer to fail. But any attacks towards the person with the life will affect the Transferrer as well. (Including poison, and the antidote) (If the target is poisoned, you can't cure yourself, only the target can by curing themselves.)
+- Action is instant. Cannot change targets after initial pick. Picks are only done during the night.Transferring life isn't a visit.
 - Respawns in 4 phases.```"""
     elif role == "magician" or role =="20" :
         msg="""```20. Magician-
@@ -3236,7 +3236,7 @@ async def rolehelp(role,chnl):
         msg="""```23. Negotiator -
 - The negotiator can pick a target at any point, and if the negotiator is attacked, the target will die instead. They cannot change the target after picking, unless the target dies before the ability is used.
 - They can only do this once every life. They regain this ability on death.
-- Action is immediate. The target dies at the time where the negotiator was supposed to die.
+- Action is immediate. The target dies at the time where the negotiator was supposed to die. Redirecting the kill makes the killer visit the target instead of visiting the negotiator. 
 - Respawns in 4 phases.```"""
     elif role == "observer" or role =="24" :
         msg="""```24. Observer-
@@ -3306,13 +3306,13 @@ async def rolehelp(role,chnl):
     elif role== "wizard" or role=="35":
         msg="""```35. Wizard-
 - Can reduce or increase a person's respawn time by 2 phases every night.
-- Action is instant. Has a cooldown of 1 day.
+- Action is night end after kills. Has a cooldown of 1 day.
 - Respawns in 6 phases.```"""
     elif role== "anarchist" or role=="36":
         msg="""```36. Anarchist - SOLO
 - Can kill 2 person every night. If the anarchist kills a king, he can kill 3 people every night that follows, and if he kills another king, he can kill 4 people and so on and so forth.
 - If the Anarchist is attacked, the number of kills he can perform reduces by 1, ticking to 0 and eventually -1 at which point the anarchist will die.
-- Kills are phase end. The Anarchist wins when there are no more kings alive. (They need to kill all princes as well.)
+- Kills are phase end. The Anarchist wins when there are no more kings alive. (They need to kill all princes as well). The anarchist will lose automatically if there is only 1 team alive.
 - Cannot respawn.```"""
     elif role== "cult leader" or role=="37":
         msg="""```37. Cult Leader- SOLO -
@@ -3337,39 +3337,43 @@ async def rolehelp(role,chnl):
 - Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
 - Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. No protection can save you from this.
 - Gems cannot be given to anyone with a gem (Except the gem trader).If attempted to do so, your action will fail. Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
-- The gem trader can also get rid of one of their gems by paying 5000c during night ends. Gems are given to people after attacks.
+- The gem trader can also get rid of one of their gems by paying 5000c during night ends. Gems are given to people after attacks. The gem trader automatically loses if there is only 1 team alive.
 - Cannot respawn.```"""
     elif role== "item agent" or role=="41":
         msg="""```41. Item Agent- SOLO -
 - Has the ability to contact a person anonymously with a choice. The item agent can choose a disguise to show to people if they use their power against them. (This disguise does not work for any other checks) 
 - The contacted person can pay 1000c for the services of the item agent, and can then choose to kill a person or to reveal a person's role and colour, (or to ignore the agent, which is free). If the target picks the item agent, the item agent will show up as the chosen disguise.
 - If the contacted person has less than 200c, they will be killed instantly before day starts.
-- Doesn't have a cooldown. The contacted person is given the choice during the next day. The item agent will win if they complete 5 trades without dying.
+- Doesn't have a cooldown. The contacted person is given the choice during the next day. The item agent will win if they complete 5 trades without dying. They will automatically lose if there is only 1 team alive.
 - Cannot respawn.```"""
     elif role== "kidnapper" or role=="42":
         msg="""```42. Kidnapper- SOLO -
-- Has the ability to kidnap a person once every 3 nights, starting with night 2. Doing so will tell the person's role to the kidnapper. (The person is kidnapped when day starts)
-- The kidnapped person will not be able to talk in their group chat and will not be able to perform any actions. The kidnapper gets all the money that the kidnapped person had.
+- Has the ability to kidnap a person once every night, starting with night 1. Doing so will tell the person's role to the kidnapper. (The person is kidnapped when day starts)
+- The kidnapped person will not be able to talk in their group chat and will not be able to perform any actions, but cannot be killed when they are kidnapped. The kidnapper gets all the money that the kidnapped person had.
 - The team is informed about the person from their team that has been kidnapped. The team can choose to free their teammate by paying a ransom of 1000c. If the kidnapper is killed, all the kidnapped people are released. 
-- Has a cooldown of 2 days. The kidnapper wins when they have kidnapped all kings at least once.
-- Can not respawn.```"""
+- Has a cooldown of 2 days. The kidnapper wins when they have kidnapped all kings at least once. They will automatically lose if there is only 1 team alive.
+- Cannot respawn.```"""
     elif role== "killer" or role=="43":
         msg="""```43. Killer- SOLO -
-- Kills 1 person each night.
-- Has to kill at least 1/4th of the people playing the game to win. Killing the same person doesn't count towards towards kill score.
-- Has no cooldown. Kill happens at night end.
+- Kills 1 person each night. Gets 1 heart for each kill, gets 2 hearts if they kill a solo or a king.
+- Has to get at least a certain number of hearts to win. Killing the same person doesn't give any hearts. Killing a person from the same team back to back gives no hearts.
+- Number of hearts they need to get is Number of players/4, rounded down. Can trade in 2 hearts for 1 night protection any time. The killer has protection until they get 2 hearts for the first time.
+- The killer will automatically die if they can not possibly earn enough hearts to win. They will also lose if there is only 1 team left alive.
+- Has no cooldown. Kill happens at night end. 
 - Doesn't respawn.```"""
     elif role== "postman" or role=="44":
         msg="""```44. Postman - SOLO -
 - Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it. If the package is opened, the postman cannot be killed during that night.
-- The postman wins if 2 of each type of package are opened. Package gets delivered when day start. The target has the entire day to choose. The package will be delivered even if the postman is dead.
+- Package gets delivered when day start. The target has the entire day to choose. The package will be delivered even if the postman is dead. If the package is opened, the postman gets protection for the following night.
+- The postman wins if 2 of each type of package are opened before the game ends.
 - Cannot respawn.```"""
     elif role== "town leader" or role=="45":
         msg="""```45. Town Leader - SOLO
 - As the leader of a powerful town, you have the power to kill a person every night (End Phase action), or protect someone against all attacks for a night. (You cannot protect yourself twice in a row).
-- Once you have used an action on a person, you can never use an action on them again in a game.
+- Once you have used an action on a person other than you, you can never use an action on them again in a game.
 - The town leader has to choose an action on every day that they can. Failing to do so will automatically kill them.
-- You win if you survive till the end, or if you do not have a valid target to use your power on when night starts. The town leader submits actions during the day for the following night.
+- The town leader submits actions during the night. Protecting a person is instant, killing a person is night end. The town leader cannot change his action, if they choose to protect a person.
+- You win if you survive till the end, or if you do not have a valid target to use your power on when night starts.
 - Cannot respawn.```"""
     elif role=="list" or role=="l":
         msg="""All the available roles are-
