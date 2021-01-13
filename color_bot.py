@@ -3152,7 +3152,7 @@ async def rolehelp(role,chnl):
 - Has the ability to kill a person every night until they lose this ability.
 - The assassin will lose their ability to kill after they have died at least once.
 - Kill happens during night end. No cooldown.
-- Respawns in 6 phases the first time they die, then it's 2 phases every after.```"""
+- Respawns in 2 phases.```"""
     elif role == "barricader" or role =="9" :
         msg="""```9. Barricader - 
 - The barricader can protect people with 3 types of shield. 
@@ -3357,7 +3357,7 @@ async def rolehelp(role,chnl):
         msg="""```43. Killer- SOLO -
 - Kills 1 person each night. Gets 1 heart for each kill, gets 2 hearts if they kill a solo or a king.
 - Has to get at least a certain number of hearts to win. Killing the same person doesn't give any hearts. Killing a person from the same team back to back gives no hearts.
-- Number of hearts they need to get is Number of players/4, rounded down. Can trade in 2 hearts for 1 night protection any time. The killer has protection until they get 2 hearts for the first time.
+- Number of hearts they need to get is Number of players/3, rounded down. Can trade in 2 hearts for 1 night protection any time. The killer has protection until they get 2 hearts for the first time.
 - The killer will automatically die if they can not possibly earn enough hearts to win. They will also lose if there is only 1 team left alive.
 - Has no cooldown. Kill happens at night end. 
 - Doesn't respawn.```"""
