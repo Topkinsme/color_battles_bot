@@ -3305,7 +3305,7 @@ async def rolehelp(role,chnl):
 - Respawns in 6 phases.```"""
     elif role== "wizard" or role=="35":
         msg="""```35. Wizard-
-- Can reduce or increase a person's respawn time by 2 phases every night.
+- Can reduce or increase a person's respawn time by 2 phases during the night.
 - Action is night end after kills. Has a cooldown of 1 day.
 - Respawns in 6 phases.```"""
     elif role== "anarchist" or role=="36":
@@ -3351,7 +3351,7 @@ async def rolehelp(role,chnl):
 - Has the ability to kidnap a person once every night, starting with night 1. Doing so will tell the person's role to the kidnapper. (The person is kidnapped when day starts)
 - The kidnapped person will not be able to talk in their group chat and will not be able to perform any actions, but cannot be killed when they are kidnapped. The kidnapper gets all the money that the kidnapped person had.
 - The team is informed about the person from their team that has been kidnapped. The team can choose to free their teammate by paying a ransom of 1000c. If the kidnapper is killed, all the kidnapped people are released. 
-- Has a cooldown of 2 days. The kidnapper wins when they have kidnapped all kings at least once. They will automatically lose if there is only 1 team alive.
+- The kidnapper wins when they have kidnapped all kings at least once. They will automatically lose if there is only 1 team alive.
 - Cannot respawn.```"""
     elif role== "killer" or role=="43":
         msg="""```43. Killer- SOLO -
