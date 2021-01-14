@@ -2891,17 +2891,7 @@ async def market(ctx):
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
-  if team=="red":
-    state=data['building']['red']['market']
-  elif team=="blue":
-    state=data['building']['blue']['market']
-  elif team=="green":
-    state=data['building']['green']['market']
-  elif team=="yellow":
-    state=data['building']['yellow']['market']
-  else:
-    team=str(ctx.author.id)
-    state=4
+  state=data['building'][team]['market']
   msg="__**MARKET**__\n"
   #if state==0:
     #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
