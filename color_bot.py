@@ -1456,7 +1456,6 @@ async def closeblindauction(ctx,code):
   if code not in data['bauction']:
     await ctx.send("Invalid Code.")
     return
-  data['bauction']['state']=0
   cost=0
   whop=""
   for person in data['bauction'][code]['biders']:
@@ -2019,7 +2018,7 @@ async def teamsay(ctx,*,msg):
     if taboo in str(msg):
       await ctx.send("Please don't ping @ everyone.")
     else:
-      if data['money'][str(ctx.author.id)] <25:
+      if data['money'][str(ctx.author.id)] <100:
         await ctx.send("You cannot afford to send this message.")
         return
       ath=str(ctx.author.id)
@@ -2147,6 +2146,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     data['players'][str(ctx.author.id)]['incc'].append(a.id)
     await msg.pin()
     await ctx.message.delete()
+    await ctx.send("Channel created.")
     dump()
 
 @bot.command(aliases=["add"])
@@ -2265,12 +2265,15 @@ async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
   if data['money'][ath] < int(cash):
     await ctx.send("You do not have that many coins in your account.")
     return
+  if data['players'][str(member.id)]['state']==0:
+    await ctx.send("You send money to a dead person.")
+    return
   data['money'][ath]-=int(cash)
   per=str(member.id)
   data['money'][per]+=int(cash)
   await ctx.send("Done. Sent {} to {} from {}'s account.".format(cash,member.mention,ctx.author.mention))
 
-@bot.command(aliases=["al"])
+@bot.command(aliases=["al","alive"])
 async def alivelist(ctx):
   '''Shows all alive players.'''
   if int(gamestate) != 3:
@@ -2350,9 +2353,10 @@ async def bid(ctx,cash:int=0):
   msgid = int(data['auction']['msg'])
   msg = await channel.fetch_message(msgid)
   await msg.edit(content="Current bid - {} by {}".format(cash,who.capitalize()))
+  await ctx.send("Bid Placed.")
   dump()
 
-@bot.command(aliases=["bb"])
+@bot.command(aliases=["bb","bbid"])
 @commands.has_role("Alive")
 async def blindbid(ctx,code,cash:int):
   '''Allows the person to put a in blind bid for the blind auction item.'''
@@ -2406,6 +2410,14 @@ async def blindauctioninfo(ctx,code):
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['bauction'][code]['item']}**",inline="false")
   info.add_field(name="Item Perks-",value=data['bauction'][code]['perks'],inline="false")
+  if str(ctx.message.channel.category) == str(data['code']['gamecode']) + ' factions':
+    try:
+      value=data['bauction'][code]['biders'][str(ctx.author.id)]
+    except:
+      value=0
+    info.add_field(name="Your bid -",value=value,inline="false") 
+  else:
+    pass
   await ctx.send(embed=info)
 
 @bot.command(aliases=["de","dep"])
