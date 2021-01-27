@@ -3222,9 +3222,10 @@ async def rolehelp(role,chnl):
 - Respawns in 4 phases.```"""
     elif role == "magician" or role =="20" :
         msg="""```20. Magician-
-- Is allowed to submit a list of up to 3 guesses of people with their correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed.
+- Is allowed to submit a list of up to 3 guesses of people with their correct roles or correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed.
 - Action is immediate. There is no cooldown.
-- Respawns in 6 phases.```"""
+- Respawns in 6 phases.
+```"""
     elif role == "merchant" or role =="21" :
         msg="""```21. Merchant-
 - Will get back 25% of any cash spent by their team on any auction items.
@@ -3247,9 +3248,9 @@ async def rolehelp(role,chnl):
 - Respawns in 4 phases.```"""
     elif role == "painter" or role =="25" :
         msg="""```25. Painter-
-- Can paint a person every night to a certain colour making the observer get a false result on checking.
+- Can paint a person every night as a certain colour or as a certain role making any inspection roles get a fake result on checking.
 - Action is immediate. Has no cooldowns.
-- Respawns in 4 phases.```"""
+- Respawns in 2 phases.```"""
     elif role == "potion master" or role =="26" :
         msg="""```26. Potion Master-
 - Can craft any of these potions to use in the game:
@@ -3300,8 +3301,8 @@ async def rolehelp(role,chnl):
         msg="""```34. Weapon Smith-
 - Can craft any of these weapons to use in the game:
 -- Sword - 1 day prep time - Allows a person to make x2 kills if used.
+-- Spear - 2 day prep time - Allows a person to make a kill that passes through all protection.
 -- Cannon - 3 day prep time - Allows a person to make x4 kills if used.
--- Robot - 4 day prep time - Allows a person to make a kill that passes through all protection.
 - Any made weapons will kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smith will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
 - Weapons are used instantly when required. 1 person can only use 1 weapon at a time.
 - Respawns in 6 phases.```"""
