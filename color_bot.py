@@ -3242,13 +3242,13 @@ async def rolehelp(role,chnl):
 - Respawns in 4 phases.```"""
     elif role == "magician" or role =="23" :
         msg="""```23. Magician-
-- Is allowed to submit a list of up to 3 guesses of people with their correct roles or correct roles and correct teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed.
+- Is allowed to submit a list of up to 3 guesses consisting of people's roles or both their roles and teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed.
 - Action is immediate. There is no cooldown.
 - Respawns in 6 phases.
 ```"""
     elif role == "merchant" or role =="24" :
         msg="""```24. Merchant-
-- Will get back 25% of any cash spent by their team on any auction items.
+- Will get back 40% of any cash spent by their team on any auction items.
 - The cash is given once the day ends.
 - Respawns in 4 phases.```"""
     elif role == "minister" or role =="25" :
@@ -3661,6 +3661,8 @@ async def score(ath,msg):
             if not str(ath) in lstmsg:
               lstmsg[str(ath)]=" "
             if lstmsg[str(ath)]==msg:
+              return
+            if len(msg)<10:
               return
             else:
               try:
