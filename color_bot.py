@@ -3129,7 +3129,7 @@ async def rolehelp(role,chnl):
 - Has the ability to go camo during the night. They can either pick to go camo themselves, or pick another person to go camo instead of them. They cannot pick the same person twice in a row.
 - The person cannot be killed when they have the camo mode on. (Except with the use of poison)
 - Action is immediate. Has a cooldown of 1 day.
-- Respawns in 6 phases.```"""
+- Respawns in 4 phases.```"""
     elif role == "chief warrior" or role =="4" :
         msg="""```4. Chief Warrior-
 - Chooses 1 person to kill every night.
