@@ -214,9 +214,8 @@ async def on_message(message):
         return
 
     if profanity.contains_profanity(message.content):
-      await message.channel.send(f"Hey {message.author.mention}! Do not swear! 10c has been reduced from your account as a penalty.")
+      await message.channel.send(f"Hey {message.author.mention}! Do not swear!")
       await message.delete()
-      data['money'][str(message.author.id)]-=10
       return
     user=str(message.author.id)
     try:
