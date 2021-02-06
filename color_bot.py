@@ -1097,7 +1097,10 @@ async def assignroles(ctx,code):
         roleinfo.add_field(name="This message has been sent to you to inform you of the role you have in the next up coming game in the Colour Battles server!",value="**Your role for this game is `{}` and you are in the team `{}`!** \n You are **__not__** allowed to share this message! \n You are **__not__** allowed to share the screenshot of this message! \n Breaking any of these rules can result in you being banned from the server.".format(data['players'][user]['role'],data['players'][user]['team']),inline="false")
         roleinfo.add_field(name="If you need help reagrding this role or this game , please make sure to contact the Informers or the Helpers or read the role info from from the #role_info channel.",value="Have a good game!\n *I am a bot and this action has been done automatically. Please contact the informer if anything is unclear.* ",inline="false")
         data['money'][user]=0
-        await userr.send(embed=roleinfo)
+        try:
+          await userr.send(embed=roleinfo)
+        except:
+          print("Dm denied")
         #getchatandsetperm
 
         teamchat=discord.utils.get(guildd.channels,name=data['players'][user]['team'])
