@@ -1142,7 +1142,7 @@ async def addrole(ctx,role,team,soloq=0,*,litrole):
         return
     data['roles'].append(role)
     data['rt'][role]={}
-    data['rt'][role]['team']=team
+    data['rt'][role]['team']=team.lower()
     data['rt'][role]['lirole'] = litrole
     # 0 or not solo, 1 for solo
     data['rt'][role]['soloq'] = soloq
@@ -2806,9 +2806,9 @@ async def gflip(ctx,cash:int,call):
     await ctx.send("You can only gamble what you have.")
     return
   flip=["head","tail"]
-  if call=="h":
+  if call=="h" or call=="heads":
     call="head"
-  if call=="t":
+  if call=="t" or call=="tails":
     call="tail"
   if call not in flip:
     await ctx.send("Call can only be \"head\" or \"tail\" or \"h\" or \"t\".")
@@ -2822,10 +2822,10 @@ async def gflip(ctx,cash:int,call):
     data['money'][ath]-=cash
   dump()
 
-@bot.command(aliases=["smac","slot"])
+@bot.command(aliases=["smac","slot","slots"])
 @commands.has_role("Respawning")
 async def slotmachine(ctx,cash:int):
-  '''Allows the user to gamble a amount in a slot machine with a chance to x10 their bet or double it.<Respawning>'''
+  '''Allows the user to gamble a amount in a slot machine with a chance to x10 their bet.<Respawning>'''
   global data
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
@@ -2857,7 +2857,7 @@ async def slotmachine(ctx,cash:int):
   dump()
 
 #rip roulette
-@bot.command(aliases=["die"])
+@bot.command(aliases=["die","dice"])
 @commands.has_role("Respawning")
 async def dicerolls(ctx,cash:int,dicen:int):
   '''Use this to play dice. Input number of dice after cash. If the total of all the dice is more than 4*number of dice , you will win cash x(the number you go over) of the cash you bet.<Respawning>'''
@@ -3104,6 +3104,9 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
     return
   if cash>data['building'][team]['vault']:
     await ctx.send("You do not have that much cash in your vault. Kindly keep the tribute cash in the vault at all times.")
+    return
+  if data['players'][ath2]['state']==0:
+    await ctx.send("You cannot tribute a dead person.")
     return
   data['building'][team]['trihouse']['who']=ath2
   data['building'][team]['trihouse']['cash']=cash
