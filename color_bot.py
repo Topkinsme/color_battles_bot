@@ -243,7 +243,7 @@ async def on_message(message):
           await message.channel.send("It seems I had trouble accessing your account so I'm just going to have to keep the money with myself....")
         dump()
     elif message.channel.name=="respawning":
-      n = random.randint(45,49)
+      n = random.randint(1,200)
       if n ==49:
         await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.  You have 60 seconds!")
         def check(mo):
@@ -533,12 +533,15 @@ async def reset(ctx):
       for channel in cate.channels:
           await channel.delete()
       await cate.delete()
-    namee= str(data['code']['gamecode']) + ' archive'
-    cate = discord.utils.get(ctx.message.guild.categories, name=namee)
-    #print(cate2.channels)
-    for channel in cate.channels:
-        await channel.delete()
-    await cate.delete()
+    try:
+      namee= str(data['code']['gamecode']) + ' archive'
+      cate = discord.utils.get(ctx.message.guild.categories, name=namee)
+      #print(cate2.channels)
+      for channel in cate.channels:
+          await channel.delete()
+      await cate.delete()
+    except:
+      await ctx.send("No archives found to delete.")
     data = {}
     data['signedup']={}
     data['gamestate']=0
