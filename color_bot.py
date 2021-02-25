@@ -243,36 +243,36 @@ async def on_message(message):
           await message.channel.send("It seems I had trouble accessing your account so I'm just going to have to keep the money with myself....")
         dump()
     elif message.channel.name=="respawning":
-      n = random.randint(1,200)
+      n = random.randint(45,49)
       if n ==49:
         await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.  You have 60 seconds!")
         def check(mo):
-            return mo.content=='good' or mo.content=='bad' and mo.channel == message.channel
+            return mo.content.lower()=='good' or mo.content.lower()=='bad' and mo.channel == message.channel
         try:
           msg = await bot.wait_for('message', timeout=60 ,check=check)
           townc=discord.utils.get(guildd.channels,name="battlefield")
           await townc.send("The dead have sent a package to you! Type 'open' to open it! You have 60 seconds!")
           def checkk(m):
-              return m.content=='open' and m.channel == townc
+              return m.content.lower()=='open' and m.channel == townc
           try:
             msgg = await bot.wait_for('message', timeout=60 ,check=checkk)
             getter=str(msgg.author.id)
-            if msg.content == 'good':
+            if msg.content.lower() == 'good':
                 await townc.send("It was a good package, you have recieved 25c!")
                 await message.channel.send("Your target opened the package, you've recieved 25 as well!")
                 data['money'][getter]+=25
                 data['money'][str(message.author.id)]+=25
-            elif msg.content == 'bad':
+            elif msg.content.lower() == 'bad':
                 await townc.send("It was a bad package, you have lost 100c!")
                 await message.channel.send("Your target opened the package, you've recieved 100!")
                 data['money'][getter]-=100
                 data['money'][str(message.author.id)]+=100
 
           except:
-            await townc.send("That offer has expired!")
+              await townc.send("That offer has expired!")
         except:
-          await message.channel.send("That offer has expired!")
-        dump()
+            await message.channel.send("That offer has expired!")
+    dump()
 
     
 @bot.event
@@ -287,8 +287,8 @@ async def on_member_join(member):
 @bot.event
 async def on_member_remove(member):
     await spamchannel.send("{} left the server".format(member.mention))
-    if gamestate==3:
-      if member.id in data['players']:
+    
+    if str(member.id) in data['players']:
         data['money'].pop(str(member.id))
         data['signedup'].pop(str(member.id))
         data['players'].pop(str(member.id))
@@ -533,6 +533,12 @@ async def reset(ctx):
       for channel in cate.channels:
           await channel.delete()
       await cate.delete()
+    namee= str(data['code']['gamecode']) + ' archive'
+    cate = discord.utils.get(ctx.message.guild.categories, name=namee)
+    #print(cate2.channels)
+    for channel in cate.channels:
+        await channel.delete()
+    await cate.delete()
     data = {}
     data['signedup']={}
     data['gamestate']=0
@@ -828,7 +834,7 @@ async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI:
+    if member in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -851,7 +857,7 @@ async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI:
+    if member in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1044,6 +1050,9 @@ async def assignroles(ctx,code):
       data['building'][team]['trihouse']={}
       data['building'][team]['trihouse']['who']=""
       data['building'][team]['trihouse']['cash']=0
+      '''data['building'][team]['stash']={}
+      data['building'][team]['stash']['items']=[]
+      data['building'][team]['stash']['smoney']=[]'''
       data['building'][team]['marketprices']=[]
       data['building'][team]['marketprices'].append("Placeholder")
       data['building'][team]['marketprices'].append(1000)
@@ -1105,7 +1114,8 @@ async def assignroles(ctx,code):
 
         teamchat=discord.utils.get(guildd.channels,name=data['players'][user]['team'])
         await teamchat.set_permissions(userr, read_messages=True,send_messages=True,add_reactions=True)
-        data['players'][str(user)]['incc'].append(teamchat.id)
+        #this stops them from tam chat talking
+        #data['players'][str(user)]['incc'].append(teamchat.id)
         
         roleid= data['players'][user]['role']
         rolename=data['rt'][roleid]['lirole']
@@ -1223,7 +1233,7 @@ async def kill(ctx,user:typing.Union[discord.Member,str]):
         await ctx.send("There isn't a game going on.")
         return
     guildd=bot.get_guild(448888674944548874)
-    if user in emj.UNICODE_EMOJI:
+    if user in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1253,7 +1263,7 @@ async def respawn(ctx,user:typing.Union[discord.Member,str]):
         await ctx.send("There isn't a game going on.")
         return
     guildd=ctx.message.guild
-    if user in emj.UNICODE_EMOJI:
+    if user in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1284,7 +1294,7 @@ async def pkill(ctx,user:typing.Union[discord.Member,str]):
         await ctx.send("There isn't a game going on.")
         return
     guildd=bot.get_guild(448888674944548874)
-    if user in emj.UNICODE_EMOJI:
+    if user in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1351,7 +1361,7 @@ async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
   guildd=ctx.message.guild
-  if member in emj.UNICODE_EMOJI:
+  if member in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1367,7 +1377,7 @@ async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
 
 @bot.command(aliases=["ca"])
 @commands.has_any_role("Helpers","Host")
-async def createauction(ctx,name,*,text):
+async def createauction(ctx,name,strtbid,*,text):
     '''Allows the user to create a auction <Helpers>'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
@@ -1378,10 +1388,10 @@ async def createauction(ctx,name,*,text):
     data['auction']['state']=1
     await mark.send("__**ITEM - {}**__".format(name))
     await mark.send("Perks - {}".format(text))
-    aucmsg = await mark.send("Current bid - 0")
+    aucmsg = await mark.send(f"Current bid - {strtbid} - Starting Value")
     data['auction']['msg']=str(aucmsg.id)
     data['auction']['chn']=str(aucmsg.channel.id)
-    data['auction']['bid']=0
+    data['auction']['bid']=int(strtbid)
     data['auction']['bider']=""
     data['auction']['bidern']=""
     data['auction']['item']=name
@@ -1405,16 +1415,18 @@ async def closeauction(ctx):
     await asyncio.sleep(30)
     if a==data['auction']['bid']:
       break
-
-  data['auction']['state']=0
-  who=data['auction']['bidern']
-  cost=data['auction']['bid']
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="auction_house")
-  await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
-  whop=data['auction']['bider']
-  data['money'][str(whop)]-=cost
-  data['players'][str(whop)]['inv'].append(data['auction']['item'])
+  if data['auction']['bider'] == "":
+    await mark.send("There were no bids, as such this item has been sold to no one.")
+  else:
+    who=data['auction']['bidern']
+    cost=data['auction']['bid']
+    await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
+    whop=data['auction']['bider']
+    data['money'][str(whop)]-=cost
+    data['players'][str(whop)]['inv'].append(data['auction']['item'])
+  data['auction']['state']=0
   data['auction']['msg']=""
   data['auction']['chn']=""
   data['auction']['bid']=0
@@ -1426,7 +1438,7 @@ async def closeauction(ctx):
 
 @bot.command(aliases=["cba"])
 @commands.has_any_role("Helpers","Host")
-async def createblindauction(ctx,name,*,text):
+async def createblindauction(ctx,name,strtbid,*,text):
     '''Allows the user to create a blind auction <Helpers>'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
@@ -1440,9 +1452,10 @@ async def createblindauction(ctx,name,*,text):
       data['bauction'][code]['biders']={}
       data['bauction'][code]['item']=name
       data['bauction'][code]['perks']=text
+      data['bauction'][code]['minvalue']=int(strtbid)
     auction = discord.Embed(colour=random.randint(0, 0xffffff))
     auction.set_author(name="BLIND AUCTION")
-    auction.add_field(name=f"__**ITEM - {name}**__",value=f"Code- {code}\nPerks - {text}",inline="false")
+    auction.add_field(name=f"__**ITEM - {name}**__",value=f"**Code- {code}**\nPerks - {text}\nMin value - {strtbid}",inline="false")
     await mark.send(embed=auction)
     dump()
     
@@ -1464,11 +1477,15 @@ async def closeblindauction(ctx,code):
     if data['bauction'][code]['biders'][person]>cost:
       cost=data['bauction'][code]['biders'][person]
       whop=person
+  
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="auction_house")
-  await mark.send(f"Congrats! The item auctioned for {cost} ! (Code was {code})")
-  data['money'][str(whop)]-=cost
-  data['players'][str(whop)]['inv'].append(data['bauction'][code]['item'])
+  if whop=="" and cost==0:
+    await mark.send(f"There were no bids on the item with code {code}, as such this item has been sold to no one.")
+  else:
+    await mark.send(f"Congrats! The item auctioned for {cost} ! (Code was {code})")
+    data['money'][str(whop)]-=cost
+    data['players'][str(whop)]['inv'].append(data['bauction'][code]['item'])
   data['bauction'].pop(code)
   dump()
 
@@ -1599,7 +1616,7 @@ async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
       await ctx.send("There is no game going on right now.")
       return
   guildd=ctx.message.guild
-  if user in emj.UNICODE_EMOJI:
+  if user in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1622,7 +1639,7 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
       await ctx.send("There is no game going on right now.")
       return
   guildd=ctx.message.guild
-  if user in emj.UNICODE_EMOJI:
+  if user in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1682,7 +1699,7 @@ async def endtribute(ctx):
 
 @bot.command(aliases=["ap"])
 @commands.has_any_role("Helpers","Host")
-async def advancephase(ctx):
+async def advancephase(ctx,cost=100):
   """ Use this command to advance the game phase.
 
   Use this by typing !advancephase
@@ -1708,6 +1725,7 @@ async def advancephase(ctx):
   msg = await townc.send(f"**__          {text}          __**\n<@&748375810498625597>")
   await msg.pin()
   await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
+  await massgive(ctx,cash=cost)
   dump()
 
 @bot.command(aliases=["cp"])
@@ -1840,7 +1858,47 @@ async def closepoll(ctx,code):
     await ctx.send(tempmsg)
     dump()
 
+@bot.command(aliases=["lc"])
+@commands.has_any_role("Helpers","Host")
+async def lockchat(ctx):
+    '''Use this to lock the chat, to move it into a separate category <Helper>'''
+    global data
+    if int(gamestate) != 3:
+      await ctx.send("There is no game going on right now.")
+      return
+    guildd=ctx.message.guild
+    name=data['code']['gamecode'] +' archive'
+    category=discord.utils.get(guildd.categories, name=name)
 
+    rolem1 = discord.utils.get(guildd.roles, name="Host")
+    role0 = discord.utils.get(guildd.roles, name="Helpers") 
+    role1 = discord.utils.get(guildd.roles, name="Alive")
+    role2 = discord.utils.get(guildd.roles, name="Respawning")
+    role3 = discord.utils.get(guildd.roles, name="Dead")
+    role4 = discord.utils.get(guildd.roles, name="Spectator")
+    archive = {
+    guildd.default_role: discord.PermissionOverwrite(read_messages=False),
+    guildd.me: discord.PermissionOverwrite(read_messages=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
+    role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
+    role1: discord.PermissionOverwrite(read_messages=False),
+    role2: discord.PermissionOverwrite(read_messages=False),
+    role3: discord.PermissionOverwrite(read_messages=True,send_messages=False),
+    role4: discord.PermissionOverwrite(read_messages=True,send_messages=False)
+                 }
+    
+    if category==None:
+      category=await guildd.create_category(name)
+    chnl=ctx.message.channel
+    await chnl.edit(category=category,overwrites=archive)
+    pins=[]
+    async for message in chnl.history(limit=10000):
+        if message.pinned:
+          pins.append(message.content)
+    msg="\n- ".join(pins)
+    await ctx.send(f"Done, Pins are- \n`-{msg}`")
+    dump()
+    
 
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
@@ -1890,7 +1948,7 @@ async def signup(ctx,emoji="Emoji"):
             await ctx.send("It seems you might have roles that are meant to run the game. Please demote before you can play.")
             return
         #check emoji
-        if emoji not in emj.UNICODE_EMOJI:
+        if emoji not in emj.UNICODE_EMOJI["en"]:
           await ctx.send("That is not a valid emoji.")
           return
         for people in data['signedup']:
@@ -2050,7 +2108,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
         await ctx.message.delete()
         return
     for people in member:
-      if people in emj.UNICODE_EMOJI:
+      if people in emj.UNICODE_EMOJI["en"]:
         idd=emjtop(people)
         if idd== None:
           await ctx.send(f"Invalid Emoji {people}.")
@@ -2127,7 +2185,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     plist=""
     plist+="<@{}> \n".format(author.id)
     for people in member:
-      if people in emj.UNICODE_EMOJI:
+      if people in emj.UNICODE_EMOJI["en"]:
         idd=emjtop(people)
         if idd== None:
           await ctx.send(f"Invalid Emoji {people}.")
@@ -2159,7 +2217,7 @@ async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI:
+    if member in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2194,7 +2252,7 @@ async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI:
+    if member in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2250,7 +2308,7 @@ async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
         await ctx.send("There is no game going on.")
         return
   guildd=ctx.message.guild
-  if member in emj.UNICODE_EMOJI:
+  if member in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2342,7 +2400,7 @@ async def bid(ctx,cash:int=0):
     await ctx.send("You can only bid what you have.")
     return
   if cash < data['auction']['bid']+100:
-    await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100.)")
+    await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100, or more.)")
     return
   data['auction']['bid']=cash
   who = f"{data['players'][ath]['team']} team"
@@ -2378,6 +2436,9 @@ async def blindbid(ctx,code,cash:int):
   if cash>data['money'][ath]:
     await ctx.send("You can only bid what you have.")
     return
+  if cash<data['bauction'][code]['minvalue']:
+    await ctx.send("You need to bid more than the minimum value")
+    return
   who=str(ctx.author.id)
   data['bauction'][code]['biders'][who]=cash
   await ctx.send("Done.")
@@ -2412,6 +2473,7 @@ async def blindauctioninfo(ctx,code):
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['bauction'][code]['item']}**",inline="false")
   info.add_field(name="Item Perks-",value=data['bauction'][code]['perks'],inline="false")
+  info.add_field(name="Min Value-",value=data['bauction'][code]['minvalue'],inline="false")
   if str(ctx.message.channel.category) == str(data['code']['gamecode']) + ' factions':
     try:
       value=data['bauction'][code]['biders'][str(ctx.author.id)]
@@ -2462,7 +2524,7 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
     await ctx.send("There is no game going on.")
     return
   guildd=ctx.message.guild
-  if person in emj.UNICODE_EMOJI:
+  if person in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(person)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2501,7 +2563,7 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
     return
   data['building'][team]['vault']+=cash
   data['money'][ath2]-=cash
-  await ctx.send(f"Done! Money transferred. {cash} was deposited.")
+  await ctx.send(f"Done! Money transferred. {cash} was deposited from {person.mention}'s account.")
   dump()
 
 @bot.command(aliases=["w"])
@@ -2910,7 +2972,7 @@ async def market(ctx):
   #if state==0:
     #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
   #if state>0:
-  msg+=f"\n__**LVL 1 (Free, 2.5k for the next level.)**__ \n **1.Poison someone -** They die in 1 day if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
+  msg+=f"\n__**LVL 1 (Free, 2.5k for the next level.)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
   #if state>1:
   msg+=f"\n__**LVL 2 (2.5k, 2.5k for the next level)**__ \n **4.Protection -** Use this to protect someone from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
   #if state>2:
@@ -3079,7 +3141,7 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
     await ctx.send("Cash can't be a negative value or 0.")
     return
   guildd=ctx.message.guild
-  if person in emj.UNICODE_EMOJI:
+  if person in emj.UNICODE_EMOJI["en"]:
       idd=emjtop(person)
       if idd== None:
         await ctx.send("Invalid Emoji")
