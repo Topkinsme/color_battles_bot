@@ -95,6 +95,7 @@ async def on_ready():
             data['smarket']={}
             data['marketalert']=[]
             data['poll']={}
+            data['lottery']=0
             dump()
             await spamchannel.send("Warning! Data.json wasn't found. Please check if anything is wrong.")
     if int(gamestate)==1:
@@ -393,6 +394,7 @@ async def compreset(ctx):
     data['smarket']={}
     data['marketalert']=[]
     data['poll']={}
+    data['lottery']=0
     await ctx.send("A complete erasure of all data has been done.")
     dump()
     
@@ -561,6 +563,7 @@ async def reset(ctx):
     data['smarket']={}
     data['marketalert']=[]
     data['poll']={}
+    data['lottery']=0
     dump()
     await ctx.send("Reset complete!")
     dump()   
@@ -921,6 +924,7 @@ async def start(ctx,code:str,num=0):
     gamestate=3
     data['gamestate']=gamestate
     data['code']['gamecode']=str(code)
+    data['lottery']+=500
     await ctx.send("Game has started with code {} !".format(code))
     await bot.change_presence(activity=discord.Game(name="A game is going on. It's day 0 now.", type=1))
     data['players']={}
@@ -1729,6 +1733,7 @@ async def advancephase(ctx,cost=100):
   await msg.pin()
   await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
   await massgive(ctx,cash=cost)
+  data['lottery']+=500
   dump()
 
 @bot.command(aliases=["cp"])
@@ -1861,7 +1866,7 @@ async def closepoll(ctx,code):
     await ctx.send(tempmsg)
     dump()
 
-@bot.command(aliases=["lc"])
+@bot.command(aliases=["lc","closechat"])
 @commands.has_any_role("Helpers","Host")
 async def lockchat(ctx):
     '''Use this to lock the chat, to move it into a separate category <Helper>'''
@@ -1898,8 +1903,10 @@ async def lockchat(ctx):
     async for message in chnl.history(limit=10000):
         if message.pinned:
           pins.append(message.content)
-    msg="\n- ".join(pins)
-    await ctx.send(f"Done, Pins are- \n`-{msg}`")
+    msg=""
+    for thing in pins[::-1]:
+      msg+="\n- "+thing
+    await ctx.send(f"Done, Pins are- `{msg}`")
     dump()
     
 
@@ -2957,6 +2964,37 @@ async def dicerolls(ctx,cash:int,dicen:int):
     await ctx.send("Oh no! You got {} which is not more than {}! {} was deducted from your account".format(summ,winno,cash))
     data['money'][ath]-=cash
   dump()
+
+@bot.command(aliases=["lottery","jl"])
+@commands.has_role("Respawning")
+async def joinlottery(ctx,tickets=1):
+  '''Use this command to enter the lottery. 
+  
+  The prize pool increases by 500 each phase, and increases by 50 on each failed attempt. The amount in the prize pool is not visible. 
+  
+  You have a 1% chance of winning. If you win, you get the entire prize pool and the pool is set to 0 for everyone. 
+  
+  Type a number after jl (Like !jl 5) to buy multiple tickets at once. <Respawning>'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  ath=str(ctx.author.id)
+  for x in range(tickets):
+    if 50>data['money'][ath]:
+      await ctx.send("You need atleast 50 coins to join the lottery.")
+      return
+    data['money'][ath]-=50
+    n = random.randint(1,101)
+    if n ==49:
+      await ctx.send(f"Congrats! You have won {data['lottery']} coins, {ctx.author.mention}!")
+      data['money'][ath]+=data['lottery']
+      data['lottery']=0
+    else:
+      await ctx.send("Oops, you didn't win!")
+      data['lottery']+=50
+  dump()
+
 
 @bot.command(aliases=["mark"])
 @commands.has_role("Alive")
