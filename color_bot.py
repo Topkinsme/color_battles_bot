@@ -1057,9 +1057,9 @@ async def assignroles(ctx,code):
       data['building'][team]['trihouse']={}
       data['building'][team]['trihouse']['who']=""
       data['building'][team]['trihouse']['cash']=0
-      '''data['building'][team]['stash']={}
+      data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
-      data['building'][team]['stash']['smoney']=[]'''
+      data['building'][team]['stash']['smoney']=0
       data['building'][team]['marketprices']=[]
       data['building'][team]['marketprices'].append("Placeholder")
       data['building'][team]['marketprices'].append(1000)
@@ -1157,6 +1157,9 @@ async def addrole(ctx,role,team,soloq=0,*,litrole):
     if (int(gamestate) >= 3):
         await ctx.send("A game is already going on.")
         return
+    if role in data['roles']:
+      await ctx.send(f"`{role}` already exists. Please use another name.")
+      return
     data['roles'].append(role)
     data['rt'][role]={}
     data['rt'][role]['team']=team.lower()
@@ -1431,8 +1434,11 @@ async def closeauction(ctx):
     cost=data['auction']['bid']
     await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
     whop=data['auction']['bider']
-    data['money'][str(whop)]-=cost
-    data['players'][str(whop)]['inv'].append(data['auction']['item'])
+    #stuff
+    team=data['players'][whop]['team']
+    data['building'][team]['vault']-=cost
+    data['building'][team]['stash']['smoney']-=cost
+    data['building'][team]['stash']['items'].append(data['auction']['item'])
   data['auction']['state']=0
   data['auction']['msg']=""
   data['auction']['chn']=""
@@ -1481,6 +1487,7 @@ async def closeblindauction(ctx,code):
   cost=0
   whop=""
   for person in data['bauction'][code]['biders']:
+    data['building'][str(person)]['stash']['smoney']-=data['bauction'][code]['biders'][person]
     if data['bauction'][code]['biders'][person]>cost:
       cost=data['bauction'][code]['biders'][person]
       whop=person
@@ -1491,8 +1498,10 @@ async def closeblindauction(ctx,code):
     await mark.send(f"There were no bids on the item with code {code}, as such this item has been sold to no one.")
   else:
     await mark.send(f"Congrats! The item auctioned for {cost} ! (Code was {code})")
-    data['money'][str(whop)]-=cost
-    data['players'][str(whop)]['inv'].append(data['bauction'][code]['item'])
+    team=str(whop)
+    data['building'][team]['vault']-=cost
+    
+    data['building'][team]['stash']['items'].append(data['bauction'][code]['item'])
   data['bauction'].pop(code)
   dump()
 
@@ -1700,6 +1709,7 @@ async def endtribute(ctx):
   triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
   for team in data['teams']:
     data['building'][team]['trihouse']['who']=""
+    data['building'][team]['stash']['smoney']-=data['building'][team]['trihouse']['cash']
     data['building'][team]['trihouse']['cash']=0
   await ctx.send(embed=triinfo)
   dump()
@@ -2398,26 +2408,33 @@ async def bid(ctx,cash:int=0):
   if data['auction']['state']==0:
     await ctx.send("There is no auction going on right now.")
     return
-  role = data['players'][ath]['role']
-  rolet=data['rt'][role]['lirole']
-  '''if rolet!="king" and rolet!="prince": #fix
-    await ctx.send("You are not a king. Please only use this command if your role is King.")
-    return'''
+
   await ctx.message.delete()
+  team=data['players'][ath]['team']
+  vaultcash=data['building'][team]['vault']
   if cash==0:
     cash=data['auction']['bid']+100
-  if cash>data['money'][ath]:
-    await ctx.send("You can only bid what you have.")
+  if cash>vaultcash:
+    await ctx.send("You can only bid what you have in your vault.")
     return
   if cash < data['auction']['bid']+100:
     await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100, or more.)")
     return
+
+  oldbidder=data['auction']['bider']
+  
+  if oldbidder != "":
+    oldbid=data['auction']['bid']
+    oldteam=data['players'][oldbidder]['team']
+    data['building'][oldteam]['stash']['smoney']-=oldbid
+    
   data['auction']['bid']=cash
   who = f"{data['players'][ath]['team']} team"
 
   #who=str(ctx.author.id)
   data['auction']['bider']=str(ctx.author.id)
   data['auction']['bidern']=who
+  data['building'][team]['stash']['smoney']+=cash
   guildd=bot.get_guild(448888674944548874)
   channel=bot.get_channel(int(data['auction']['chn']))
   msgid = int(data['auction']['msg'])
@@ -2443,14 +2460,19 @@ async def blindbid(ctx,code,cash:int):
   if cash<=0:
     await ctx.send("Cash has to be positive.")
     return
-  if cash>data['money'][ath]:
-    await ctx.send("You can only bid what you have.")
+  team=data['players'][ath]['team']
+  vaultcash=data['building'][team]['vault']
+  if cash>vaultcash:
+    await ctx.send("You can only bid what you have in your vault.")
     return
   if cash<data['bauction'][code]['minvalue']:
     await ctx.send("You need to bid more than the minimum value")
     return
-  who=str(ctx.author.id)
+  who=team
+  if who in data['bauction'][code]['biders']:
+    data['building'][team]['stash']['smoney']-=data['bauction'][code]['biders'][who]
   data['bauction'][code]['biders'][who]=cash
+  data['building'][team]['stash']['smoney']+=cash
   await ctx.send("Done.")
   dump()
 
@@ -2479,6 +2501,7 @@ async def blindauctioninfo(ctx,code):
   if code not in data['bauction']:
     await ctx.send("Invalid Code.")
     return
+  team=team=data['players'][str(ctx.author.id)]['team']
   info = discord.Embed(colour=random.randint(0, 0xffffff))
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['bauction'][code]['item']}**",inline="false")
@@ -2486,7 +2509,7 @@ async def blindauctioninfo(ctx,code):
   info.add_field(name="Min Value-",value=data['bauction'][code]['minvalue'],inline="false")
   if str(ctx.message.channel.category) == str(data['code']['gamecode']) + ' factions':
     try:
-      value=data['bauction'][code]['biders'][str(ctx.author.id)]
+      value=data['bauction'][code]['biders'][team]
     except:
       value=0
     info.add_field(name="Your bid -",value=value,inline="false") 
@@ -2592,13 +2615,12 @@ async def withdraw(ctx,cash:int):
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
-  try:
-    print(data['building'][team]['vault'])
-  except:
-    await ctx.send("You might not have a vault")
-    return
   if cash>data['building'][team]['vault']:
     await ctx.send("Your vault doesn't hold this much cash.")
+    return
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
+  if cash>leftmoney:
+    await ctx.send("The cash you've requested is more that what you hold in your vault, after subtracting your tribute and bidding costs.")
     return
   data['building'][team]['vault']-=cash
   data['money'][ath]+=cash
@@ -3206,14 +3228,72 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
     await ctx.send("That person is not on your team.")
     return
   if cash>data['building'][team]['vault']:
-    await ctx.send("You do not have that much cash in your vault. Kindly keep the tribute cash in the vault at all times.")
+    await ctx.send("You do not have that much cash in your vault.")
     return
   if data['players'][ath2]['state']==0:
     await ctx.send("You cannot tribute a dead person.")
     return
   data['building'][team]['trihouse']['who']=ath2
+  if data['building'][team]['trihouse']['cash']!=0:
+    data['building'][team]['stash']['smoney']-=data['building'][team]['trihouse']['cash']
+  data['building'][team]['stash']['smoney']+=cash
   data['building'][team]['trihouse']['cash']=cash
   await ctx.send(f"Done! {person.mention} was set as your tribute person and {cash} is set as your price.")
+
+@bot.command(aliases=["store"])
+@commands.has_role("Alive")
+async def storeinstash(ctx,item:str):
+  '''Use this to store items in your team stash <Alive>'''
+  global data
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  try:
+    data['players'][ath]['inv'].remove(item)
+  except ValueError:
+    await ctx.send("That item was not found in your inventory.")
+    return
+  data['building'][team]['stash']['items'].append(item)
+  await ctx.send("Done! Item stored.")
+  dump()
+
+@bot.command(aliases=["take"])
+@commands.has_role("Alive")
+async def removefromstash(ctx,item:str):
+  '''Use this to take items from your team stash <Alive>'''
+  global data
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  try:
+    data['building'][team]['stash']['items'].remove(item)
+  except ValueError:
+    await ctx.send("That item was not found in your stash.")
+    return
+  data['players'][ath]['inv'].append(item)
+  await ctx.send("Done! Item taken.")
+  dump()
+
+@bot.command(aliases=["stash"])
+@commands.has_role("Alive")
+async def viewstash(ctx):
+  '''Use this to view items in your team vault <Alive>'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  msg="You have, in your team stash-\n"
+  for item in data['building'][team]['stash']['items']:
+    msg+="{}\n".format(item)
+  await ctx.send(msg)
 
 @bot.command(aliases=["r"])
 async def role(ctx,*,role="l"):
