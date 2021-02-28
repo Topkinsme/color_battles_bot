@@ -2968,7 +2968,7 @@ async def dicerolls(ctx,cash:int,dicen:int):
 @bot.command(aliases=["lottery","jl"])
 @commands.has_role("Respawning")
 async def joinlottery(ctx,tickets=1):
-  '''Use this command to enter the lottery. 
+  '''Use this command to enter the lottery. This costs 50 coins.
   
   The prize pool increases by 500 each phase, and increases by 50 on each failed attempt. The amount in the prize pool is not visible. 
   
