@@ -1048,15 +1048,17 @@ async def assignroles(ctx,code):
       
       data['building'][team]={}
       data['building'][team]['vault']=0
-      if soloq==1:
-        data['building'][team]['forge']=7
-        data['building'][team]['market']=4
-      else:
-        data['building'][team]['forge']=1
-        data['building'][team]['market']=1
       data['building'][team]['trihouse']={}
       data['building'][team]['trihouse']['who']=""
       data['building'][team]['trihouse']['cash']=0
+      if soloq==1:
+        data['building'][team]['forge']=7
+        data['building'][team]['market']=4
+        data['building'][team]['trihouse']['eligible']=0
+      else:
+        data['building'][team]['forge']=1
+        data['building'][team]['market']=1
+        data['building'][team]['trihouse']['eligible']=1
       data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
       data['building'][team]['stash']['smoney']=0
@@ -1686,12 +1688,12 @@ async def endtribute(ctx):
   lowest=99999
   lowestteam=""
   for team in data['teams']:
-    if data['building'][team]['trihouse']['cash']==0:
+    if data['building'][team]['trihouse']['eligible']==0: 
       pass
     else:
       info[team]=data['building'][team]['trihouse']['cash']
       data['building'][team]['vault']-=data['building'][team]['trihouse']['cash']
-      if  data['building'][team]['trihouse']['cash']>0 and data['building'][team]['trihouse']['cash'] <=lowest:
+      if data['building'][team]['trihouse']['cash'] <=lowest:
         lowestteam=team
         lowest=data['building'][team]['trihouse']['cash']
   sort = sorted(info.items(),key = lambda x:x[1],reverse=True)
@@ -1699,13 +1701,20 @@ async def endtribute(ctx):
   text=""
   for entry in sort:
 	  text+=f"{entry[0]} paid {entry[1]} \n"
-  who=str(data['building'][lowestteam]['trihouse']['who'])
-  guildd=bot.get_guild(448888674944548874)
-  user=discord.utils.get(guildd.members,id=int(who))
-  await kill(ctx,user)
+  
+  try:
+    who=str(data['building'][lowestteam]['trihouse']['who'])
+    guildd=bot.get_guild(448888674944548874)
+    user=discord.utils.get(guildd.members,id=int(who))
+    await kill(ctx,user)
+    who=user.mention
+  except:
+    who="Someone Random"
+    await ctx.send("The lowest team has not set a tribute, got None as a person. Please procede to kill someone random.")
+
   triinfo = discord.Embed(colour=discord.Colour.red())
   triinfo.set_author(name="Tribute Info-")
-  triinfo.add_field(name="Who is dying?-",value=f"**{user.mention}was killed.**",inline="false")
+  triinfo.add_field(name="Who is dying?-",value=f"**{who} was killed.**",inline="false")
   triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
   for team in data['teams']:
     data['building'][team]['trihouse']['who']=""
@@ -1876,7 +1885,7 @@ async def closepoll(ctx,code):
     await ctx.send(tempmsg)
     dump()
 
-@bot.command(aliases=["lc","closechat"])
+@bot.command(aliases=["lc","closechat","archivechat","archat"])
 @commands.has_any_role("Helpers","Host")
 async def lockchat(ctx):
     '''Use this to lock the chat, to move it into a separate category <Helper>'''
@@ -1919,7 +1928,23 @@ async def lockchat(ctx):
     await ctx.send(f"Done, Pins are- `{msg}`")
     dump()
     
-
+@bot.command(aliases=["toggletri","ttri"])
+@commands.has_any_role("Helpers","Host")
+async def toggletribute(ctx,team):
+    global data
+    if int(gamestate) != 3:
+      await ctx.send("There is no game going on right now.")
+      return
+    if team not in data['building']:
+      await ctx.send("That is not a valid team.")
+      return
+    if data['building'][team]['trihouse']['eligible']==1:
+      data['building'][team]['trihouse']['eligible']=0
+      await ctx.send(f"{team}'s tribute eligibility has been set to False. They will no longer be accounted for.")
+    else:
+      data['building'][team]['trihouse']['eligible']=1
+      await ctx.send(f"{team}'s tribute eligibility has been set to True. They will be accounted for in tribute.")
+    dump()
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -2417,6 +2442,10 @@ async def bid(ctx,cash:int=0):
   if cash>vaultcash:
     await ctx.send("You can only bid what you have in your vault.")
     return
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
+  if cash>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs. Wait for someone to outbid you for the cash to be accessible again.")
+    return
   if cash < data['auction']['bid']+100:
     await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100, or more.)")
     return
@@ -2465,6 +2494,17 @@ async def blindbid(ctx,code,cash:int):
   if cash>vaultcash:
     await ctx.send("You can only bid what you have in your vault.")
     return
+
+  try:
+    oldbid=data['bauction'][code]['biders'][who]
+  except:
+    #no old bid
+    oldbid=0
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']+oldbid
+  if cash>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    return
+
   if cash<data['bauction'][code]['minvalue']:
     await ctx.send("You need to bid more than the minimum value")
     return
@@ -3230,6 +3270,17 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   if cash>data['building'][team]['vault']:
     await ctx.send("You do not have that much cash in your vault.")
     return
+
+  try:
+    oldtri=data['building'][team]['trihouse']['cash']
+  except:
+    #no old bid
+    oldtri=0
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']+oldtri
+  if cash>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    return
+  
   if data['players'][ath2]['state']==0:
     await ctx.send("You cannot tribute a dead person.")
     return
