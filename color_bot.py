@@ -1048,30 +1048,32 @@ async def assignroles(ctx,code):
       
       data['building'][team]={}
       data['building'][team]['vault']=0
-      if soloq==1:
-        data['building'][team]['forge']=7
-        data['building'][team]['market']=4
-      else:
-        data['building'][team]['forge']=1
-        data['building'][team]['market']=1
       data['building'][team]['trihouse']={}
       data['building'][team]['trihouse']['who']=""
       data['building'][team]['trihouse']['cash']=0
-      '''data['building'][team]['stash']={}
+      if soloq==1:
+        data['building'][team]['forge']=7
+        data['building'][team]['market']=4
+        data['building'][team]['trihouse']['eligible']=0
+      else:
+        data['building'][team]['forge']=1
+        data['building'][team]['market']=1
+        data['building'][team]['trihouse']['eligible']=1
+      data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
-      data['building'][team]['stash']['smoney']=[]'''
+      data['building'][team]['stash']['smoney']=0
       data['building'][team]['marketprices']=[]
       data['building'][team]['marketprices'].append("Placeholder")
       data['building'][team]['marketprices'].append(1000)
       data['building'][team]['marketprices'].append(1000)
+      data['building'][team]['marketprices'].append(1000)
+      data['building'][team]['marketprices'].append(2000)
+      data['building'][team]['marketprices'].append(2000)
       data['building'][team]['marketprices'].append(2000)
       data['building'][team]['marketprices'].append(3000)
       data['building'][team]['marketprices'].append(3000)
+      data['building'][team]['marketprices'].append(3000)
       data['building'][team]['marketprices'].append(4000)
-      data['building'][team]['marketprices'].append(4000)
-      data['building'][team]['marketprices'].append(5000)
-      data['building'][team]['marketprices'].append(5000)
-      data['building'][team]['marketprices'].append(7000)
 
       teammsg=discord.Embed(colour=random.randint(0, 0xffffff))
       teammsg.set_author(name="Team info!")
@@ -1157,6 +1159,9 @@ async def addrole(ctx,role,team,soloq=0,*,litrole):
     if (int(gamestate) >= 3):
         await ctx.send("A game is already going on.")
         return
+    if role in data['roles']:
+      await ctx.send(f"`{role}` already exists. Please use another name.")
+      return
     data['roles'].append(role)
     data['rt'][role]={}
     data['rt'][role]['team']=team.lower()
@@ -1431,8 +1436,11 @@ async def closeauction(ctx):
     cost=data['auction']['bid']
     await mark.send("Congrats! {} has won the item auctioned for {} ! ".format(who,cost))
     whop=data['auction']['bider']
-    data['money'][str(whop)]-=cost
-    data['players'][str(whop)]['inv'].append(data['auction']['item'])
+    #stuff
+    team=data['players'][whop]['team']
+    data['building'][team]['vault']-=cost
+    data['building'][team]['stash']['smoney']-=cost
+    data['building'][team]['stash']['items'].append(data['auction']['item'])
   data['auction']['state']=0
   data['auction']['msg']=""
   data['auction']['chn']=""
@@ -1481,6 +1489,7 @@ async def closeblindauction(ctx,code):
   cost=0
   whop=""
   for person in data['bauction'][code]['biders']:
+    data['building'][str(person)]['stash']['smoney']-=data['bauction'][code]['biders'][person]
     if data['bauction'][code]['biders'][person]>cost:
       cost=data['bauction'][code]['biders'][person]
       whop=person
@@ -1491,8 +1500,10 @@ async def closeblindauction(ctx,code):
     await mark.send(f"There were no bids on the item with code {code}, as such this item has been sold to no one.")
   else:
     await mark.send(f"Congrats! The item auctioned for {cost} ! (Code was {code})")
-    data['money'][str(whop)]-=cost
-    data['players'][str(whop)]['inv'].append(data['bauction'][code]['item'])
+    team=str(whop)
+    data['building'][team]['vault']-=cost
+    
+    data['building'][team]['stash']['items'].append(data['bauction'][code]['item'])
   data['bauction'].pop(code)
   dump()
 
@@ -1677,12 +1688,12 @@ async def endtribute(ctx):
   lowest=99999
   lowestteam=""
   for team in data['teams']:
-    if data['building'][team]['trihouse']['cash']==0:
+    if data['building'][team]['trihouse']['eligible']==0: 
       pass
     else:
       info[team]=data['building'][team]['trihouse']['cash']
       data['building'][team]['vault']-=data['building'][team]['trihouse']['cash']
-      if  data['building'][team]['trihouse']['cash']>0 and data['building'][team]['trihouse']['cash'] <=lowest:
+      if data['building'][team]['trihouse']['cash'] <=lowest:
         lowestteam=team
         lowest=data['building'][team]['trihouse']['cash']
   sort = sorted(info.items(),key = lambda x:x[1],reverse=True)
@@ -1690,16 +1701,24 @@ async def endtribute(ctx):
   text=""
   for entry in sort:
 	  text+=f"{entry[0]} paid {entry[1]} \n"
-  who=str(data['building'][lowestteam]['trihouse']['who'])
-  guildd=bot.get_guild(448888674944548874)
-  user=discord.utils.get(guildd.members,id=int(who))
-  await kill(ctx,user)
+  
+  try:
+    who=str(data['building'][lowestteam]['trihouse']['who'])
+    guildd=bot.get_guild(448888674944548874)
+    user=discord.utils.get(guildd.members,id=int(who))
+    await kill(ctx,user)
+    who=user.mention
+  except:
+    who="Someone Random"
+    await ctx.send("The lowest team has not set a tribute, got None as a person. Please procede to kill someone random.")
+
   triinfo = discord.Embed(colour=discord.Colour.red())
   triinfo.set_author(name="Tribute Info-")
-  triinfo.add_field(name="Who is dying?-",value=f"**{user.mention}was killed.**",inline="false")
+  triinfo.add_field(name="Who is dying?-",value=f"**{who} was killed.**",inline="false")
   triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
   for team in data['teams']:
     data['building'][team]['trihouse']['who']=""
+    data['building'][team]['stash']['smoney']-=data['building'][team]['trihouse']['cash']
     data['building'][team]['trihouse']['cash']=0
   await ctx.send(embed=triinfo)
   dump()
@@ -1866,7 +1885,7 @@ async def closepoll(ctx,code):
     await ctx.send(tempmsg)
     dump()
 
-@bot.command(aliases=["lc","closechat"])
+@bot.command(aliases=["lc","closechat","archivechat","archat"])
 @commands.has_any_role("Helpers","Host")
 async def lockchat(ctx):
     '''Use this to lock the chat, to move it into a separate category <Helper>'''
@@ -1909,7 +1928,23 @@ async def lockchat(ctx):
     await ctx.send(f"Done, Pins are- `{msg}`")
     dump()
     
-
+@bot.command(aliases=["toggletri","ttri"])
+@commands.has_any_role("Helpers","Host")
+async def toggletribute(ctx,team):
+    global data
+    if int(gamestate) != 3:
+      await ctx.send("There is no game going on right now.")
+      return
+    if team not in data['building']:
+      await ctx.send("That is not a valid team.")
+      return
+    if data['building'][team]['trihouse']['eligible']==1:
+      data['building'][team]['trihouse']['eligible']=0
+      await ctx.send(f"{team}'s tribute eligibility has been set to False. They will no longer be accounted for.")
+    else:
+      data['building'][team]['trihouse']['eligible']=1
+      await ctx.send(f"{team}'s tribute eligibility has been set to True. They will be accounted for in tribute.")
+    dump()
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -2398,26 +2433,37 @@ async def bid(ctx,cash:int=0):
   if data['auction']['state']==0:
     await ctx.send("There is no auction going on right now.")
     return
-  role = data['players'][ath]['role']
-  rolet=data['rt'][role]['lirole']
-  '''if rolet!="king" and rolet!="prince": #fix
-    await ctx.send("You are not a king. Please only use this command if your role is King.")
-    return'''
+
   await ctx.message.delete()
+  team=data['players'][ath]['team']
+  vaultcash=data['building'][team]['vault']
   if cash==0:
     cash=data['auction']['bid']+100
-  if cash>data['money'][ath]:
-    await ctx.send("You can only bid what you have.")
+  if cash>vaultcash:
+    await ctx.send("You can only bid what you have in your vault.")
+    return
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
+  if cash>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs. Wait for someone to outbid you for the cash to be accessible again.")
     return
   if cash < data['auction']['bid']+100:
     await ctx.send("The current bid is higher than what you're currently offering or the increment you are making is less than 100. (You can only make increments of 100, or more.)")
     return
+
+  oldbidder=data['auction']['bider']
+  
+  if oldbidder != "":
+    oldbid=data['auction']['bid']
+    oldteam=data['players'][oldbidder]['team']
+    data['building'][oldteam]['stash']['smoney']-=oldbid
+    
   data['auction']['bid']=cash
   who = f"{data['players'][ath]['team']} team"
 
   #who=str(ctx.author.id)
   data['auction']['bider']=str(ctx.author.id)
   data['auction']['bidern']=who
+  data['building'][team]['stash']['smoney']+=cash
   guildd=bot.get_guild(448888674944548874)
   channel=bot.get_channel(int(data['auction']['chn']))
   msgid = int(data['auction']['msg'])
@@ -2443,14 +2489,30 @@ async def blindbid(ctx,code,cash:int):
   if cash<=0:
     await ctx.send("Cash has to be positive.")
     return
-  if cash>data['money'][ath]:
-    await ctx.send("You can only bid what you have.")
+  team=data['players'][ath]['team']
+  vaultcash=data['building'][team]['vault']
+  if cash>vaultcash:
+    await ctx.send("You can only bid what you have in your vault.")
     return
+
+  try:
+    oldbid=data['bauction'][code]['biders'][who]
+  except:
+    #no old bid
+    oldbid=0
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']+oldbid
+  if cash>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    return
+
   if cash<data['bauction'][code]['minvalue']:
     await ctx.send("You need to bid more than the minimum value")
     return
-  who=str(ctx.author.id)
+  who=team
+  if who in data['bauction'][code]['biders']:
+    data['building'][team]['stash']['smoney']-=data['bauction'][code]['biders'][who]
   data['bauction'][code]['biders'][who]=cash
+  data['building'][team]['stash']['smoney']+=cash
   await ctx.send("Done.")
   dump()
 
@@ -2479,6 +2541,7 @@ async def blindauctioninfo(ctx,code):
   if code not in data['bauction']:
     await ctx.send("Invalid Code.")
     return
+  team=team=data['players'][str(ctx.author.id)]['team']
   info = discord.Embed(colour=random.randint(0, 0xffffff))
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['bauction'][code]['item']}**",inline="false")
@@ -2486,7 +2549,7 @@ async def blindauctioninfo(ctx,code):
   info.add_field(name="Min Value-",value=data['bauction'][code]['minvalue'],inline="false")
   if str(ctx.message.channel.category) == str(data['code']['gamecode']) + ' factions':
     try:
-      value=data['bauction'][code]['biders'][str(ctx.author.id)]
+      value=data['bauction'][code]['biders'][team]
     except:
       value=0
     info.add_field(name="Your bid -",value=value,inline="false") 
@@ -2592,13 +2655,12 @@ async def withdraw(ctx,cash:int):
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
-  try:
-    print(data['building'][team]['vault'])
-  except:
-    await ctx.send("You might not have a vault")
-    return
   if cash>data['building'][team]['vault']:
     await ctx.send("Your vault doesn't hold this much cash.")
+    return
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
+  if cash>leftmoney:
+    await ctx.send("The cash you've requested is more that what you hold in your vault, after subtracting your tribute and bidding costs.")
     return
   data['building'][team]['vault']-=cash
   data['money'][ath]+=cash
@@ -3013,12 +3075,12 @@ async def market(ctx):
   #if state==0:
     #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
   #if state>0:
-  msg+=f"\n__**LVL 1 (Free, 2.5k for the next level.)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
+  msg+=f"\n__**LVL 1 (Free)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
   #if state>1:
-  msg+=f"\n__**LVL 2 (2.5k, 2.5k for the next level)**__ \n **4.Protection -** Use this to protect someone from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
+  msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect someone from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
   #if state>2:
-  msg+=f"\n__**LVL 3 (2.5k, 1k for the next level)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the next night. *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
-  msg+=f"\n__**LVL 4 (1k, There is no next level)**__ \n **10.GOD -** Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
+  msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the next night. *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
+  msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   await ctx.send(msg)
 
 @bot.command(aliases=["dim"])
@@ -3060,11 +3122,11 @@ async def upmarket(ctx):
   state=data['building'][team]['market']
 
   if state==0:
-    cost=2500
+    cost=1000
   elif state==1:
-    cost=2500
+    cost=1000
   elif state==2:
-    cost=2500
+    cost=1000
   elif state==3:
     cost=1000
   else:
@@ -3206,14 +3268,83 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
     await ctx.send("That person is not on your team.")
     return
   if cash>data['building'][team]['vault']:
-    await ctx.send("You do not have that much cash in your vault. Kindly keep the tribute cash in the vault at all times.")
+    await ctx.send("You do not have that much cash in your vault.")
     return
+
+  try:
+    oldtri=data['building'][team]['trihouse']['cash']
+  except:
+    #no old bid
+    oldtri=0
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']+oldtri
+  if cash>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    return
+  
   if data['players'][ath2]['state']==0:
     await ctx.send("You cannot tribute a dead person.")
     return
   data['building'][team]['trihouse']['who']=ath2
+  if data['building'][team]['trihouse']['cash']!=0:
+    data['building'][team]['stash']['smoney']-=data['building'][team]['trihouse']['cash']
+  data['building'][team]['stash']['smoney']+=cash
   data['building'][team]['trihouse']['cash']=cash
   await ctx.send(f"Done! {person.mention} was set as your tribute person and {cash} is set as your price.")
+
+@bot.command(aliases=["store"])
+@commands.has_role("Alive")
+async def storeinstash(ctx,item:str):
+  '''Use this to store items in your team stash <Alive>'''
+  global data
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  try:
+    data['players'][ath]['inv'].remove(item)
+  except ValueError:
+    await ctx.send("That item was not found in your inventory.")
+    return
+  data['building'][team]['stash']['items'].append(item)
+  await ctx.send("Done! Item stored.")
+  dump()
+
+@bot.command(aliases=["take"])
+@commands.has_role("Alive")
+async def removefromstash(ctx,item:str):
+  '''Use this to take items from your team stash <Alive>'''
+  global data
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  try:
+    data['building'][team]['stash']['items'].remove(item)
+  except ValueError:
+    await ctx.send("That item was not found in your stash.")
+    return
+  data['players'][ath]['inv'].append(item)
+  await ctx.send("Done! Item taken.")
+  dump()
+
+@bot.command(aliases=["stash"])
+@commands.has_role("Alive")
+async def viewstash(ctx):
+  '''Use this to view items in your team vault <Alive>'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  msg="You have, in your team stash-\n"
+  for item in data['building'][team]['stash']['items']:
+    msg+="{}\n".format(item)
+  await ctx.send(msg)
 
 @bot.command(aliases=["r"])
 async def role(ctx,*,role="l"):
