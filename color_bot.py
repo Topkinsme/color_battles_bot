@@ -981,7 +981,7 @@ async def assignroles(ctx,code):
     rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role1: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True),
-    role2: discord.PermissionOverwrite(read_messages=True,send_messages=False),
+    role2: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role3: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role4: discord.PermissionOverwrite(read_messages=True,send_messages=False)
                  }
@@ -3207,7 +3207,7 @@ async def tmbuy(ctx,num:int):
       await ctx.send("You need to upgrade your market to buy this item.")
       return
     item="GOD"
-    data['building'][team]['marketprices'][num]+=89000
+    data['building'][team]['marketprices'][num]+=95000
   data['money'][ath]-=cost
   data['building'][team]['marketprices'][num]+=1000
   data['players'][ath]['inv'].append(item)
