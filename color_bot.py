@@ -309,11 +309,10 @@ async def on_user_update(before,after):
 
 @bot.event
 async def on_raw_reaction_add(payload):
-    if int(gamestate)!=3:
-      return
     userid=payload.user_id
     msgid=payload.message_id
     channelid=payload.channel_id
+
     guildd=bot.get_guild(448888674944548874)
     channel=bot.get_channel(channelid)
     userr=discord.utils.get(guildd.members,id=userid)
@@ -325,9 +324,24 @@ async def on_raw_reaction_add(payload):
     role3 = discord.utils.get(guildd.roles, name="Dead")
     role4 = discord.utils.get(guildd.roles, name="Spectator")
     if role2 in userr.roles or role3 in userr.roles or role4 in userr.roles:
+      if int(gamestate)!=3:
+        return
       await msg.remove_reaction(emoji,userr)
-    elif role1 in userr.roles and emoji=="📌":
+    elif role1 in userr.roles and emoji=="📌" and int(gamestate)==3:
       await msg.pin()
+    elif emoji=="⭐":
+      n=0
+      for reaction in msg.reactions:
+        if str(reaction)=="⭐":
+          users = await reaction.users().flatten()
+          n+=len(users)
+      if n==4:
+        chnl=bot.get_channel(749274900966932531)
+        mem = discord.Embed(colour=random.randint(0, 0xffffff))
+        mem.set_author(name=userr.name,icon_url=userr.avatar_url)
+        mem.add_field(name="Message -",value=msg.content,inline="false")
+        await chnl.send(f"<#{channelid}>",embed=mem)
+
 
 @bot.event
 async def on_raw_reaction_remove(payload):
@@ -1386,6 +1400,31 @@ async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
       return
   id=str(member.id)
   await ctx.send("{}'s balance is {}.".format(member.mention,data['money'][id]))
+
+@bot.command(aliases=["minv"])
+@commands.has_any_role("Helpers","Host")
+async def masterinventory(ctx,member:typing.Union[discord.Member,str]):
+  '''Allows to see the inventory of another player <Helpers>'''
+  if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+  guildd=ctx.message.guild
+  if member in emj.UNICODE_EMOJI["en"]:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(member,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
+      return
+  ath=str(member.id)
+  msg="That inventory contains-\n"
+  for item in data['players'][ath]['inv']:
+    msg+=f"{item}\n"
+  await ctx.send(msg)
 
 @bot.command(aliases=["ca"])
 @commands.has_any_role("Helpers","Host")
