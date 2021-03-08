@@ -338,7 +338,7 @@ async def on_raw_reaction_add(payload):
       if n==4:
         chnl=bot.get_channel(749274900966932531)
         mem = discord.Embed(colour=random.randint(0, 0xffffff))
-        mem.set_author(name=userr.name,icon_url=userr.avatar_url)
+        mem.set_author(name=msg.author.name,icon_url=msg.author.avatar_url)
         mem.add_field(name="Message -",value=msg.content,inline="false")
         await chnl.send(f"<#{channelid}>",embed=mem)
 
