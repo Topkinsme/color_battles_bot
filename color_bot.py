@@ -3527,8 +3527,8 @@ async def rolehelp(role,chnl):
     elif role == "merchant" or role =="24" :
         msg="""```24. Merchant-
 - Will get back 40% of any cash spent by their team on any auction items.
-- The cash is given once the day ends.
-- Respawns in 4 phases.```"""
+- The cash is given once the day ends. Does not receive any cash by this ability when dead.
+- Respawns in 4 phases.```""
     elif role == "minister" or role =="25" :
         msg="""```25. Minister-
 - If the minister is alive when the king dies , Everyone will be able to respawn again once before losing their ability to respawn.
