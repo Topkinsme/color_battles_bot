@@ -115,7 +115,7 @@ async def on_ready():
         await bot.change_presence(activity=discord.Game(name=" Colour battles!", type=1))
     my_loop.start()
     my_looptwo.start()
-    my_loopthree.start()
+    #my_loopthree.start()
 
 
 @tasks.loop(minutes=5)
@@ -214,10 +214,10 @@ async def on_message(message):
     if int(gamestate) != 3:
         return
 
-    if profanity.contains_profanity(message.content):
+    '''if profanity.contains_profanity(message.content):
       await message.channel.send(f"Hey {message.author.mention}! Do not swear!")
       await message.delete()
-      return
+      return'''
     user=str(message.author.id)
     try:
       data['players'][user]['msg']+=1
@@ -259,11 +259,17 @@ async def on_message(message):
             msgg = await bot.wait_for('message', timeout=60 ,check=checkk)
             getter=str(msgg.author.id)
             if msg.content.lower() == 'good':
+                if getter==str(message.author.id):
+                  await townc.send("The dead has cancelled the package!")
+                  return
                 await townc.send("It was a good package, you have recieved 25c!")
                 await message.channel.send("Your target opened the package, you've recieved 25 as well!")
                 data['money'][getter]+=25
                 data['money'][str(message.author.id)]+=25
             elif msg.content.lower() == 'bad':
+                if getter==str(message.author.id):
+                  await townc.send("The dead has cancelled the package!")
+                  return
                 await townc.send("It was a bad package, you have lost 100c!")
                 await message.channel.send("Your target opened the package, you've recieved 100!")
                 data['money'][getter]-=100
@@ -2544,7 +2550,7 @@ async def blindbid(ctx,code,cash:int):
     return
 
   try:
-    oldbid=data['bauction'][code]['biders'][who]
+    oldbid=data['bauction'][code]['biders'][team]
   except:
     #no old bid
     oldbid=0
@@ -3146,11 +3152,11 @@ async def dismarket(ctx):
   state=data['building'][team]['market']
 
   if state==0:
-    text= "The next upgrade costs 2500."
+    text= "The next upgrade costs 1000."
   elif state==1:
-    text= "The next upgrade costs 2500."
+    text= "The next upgrade costs 1000."
   elif state==2:
-    text= "The next upgrade costs 2500."
+    text= "The next upgrade costs 1000."
   elif state==3:
     text= "The nest upgrade costs 1000."
   else:
