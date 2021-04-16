@@ -65,6 +65,7 @@ async def on_ready():
     global gamestate
     global lstmsg
     global gifted
+    global svari
     spamchannel=bot.get_channel(450698253508542474)
     await spamchannel.send("The bot is online!")
     lstmsg={}
@@ -113,6 +114,19 @@ async def on_ready():
         await bot.change_presence(activity=discord.Game(name="Game concluded!", type=1))
     else:
         await bot.change_presence(activity=discord.Game(name=" Colour battles!", type=1))
+    try:
+      if data['smarket']['state']==0:
+          pass
+      else:
+        svari={}
+        stocks=["sun","smirk","smile","joy","pens"]
+        for thing in stocks:
+          svari[thing]={}
+          svari[thing]["mui"]=0
+          svari[thing]["sigi"]=0
+    except:
+      pass
+
     my_loop.start()
     my_looptwo.start()
     #my_loopthree.start()
@@ -122,6 +136,29 @@ async def on_ready():
 async def my_loop():
     global earnd
     global lstmsg
+    try:
+      global svari
+      for ath in earnd:
+        if data['players'][ath]['state']==0:
+          stocks=["sun","smirk","smile","joy","pens"]
+          stock=random.choice(stocks)
+          if stock=="sun":
+            svari[stock]["mui"]+=0.20
+            svari[stock]["sigi"]+=0.45
+          elif stock=="smirk":
+            svari[stock]["mui"]+=0.15
+            svari[stock]["sigi"]+=0.32
+          elif stock=="smile":
+            svari[stock]["mui"]+=0.10
+            svari[stock]["sigi"]+=0.20
+          elif stock=="joy":
+            svari[stock]["mui"]+=0.05
+            svari[stock]["sigi"]+=0.12
+          elif stock=="pens":
+            svari[stock]["mui"]+=0.03
+            svari[stock]["sigi"]+=0.07
+    except Exception as e:
+      pass
     earnd=[]
 
 
@@ -259,17 +296,11 @@ async def on_message(message):
             msgg = await bot.wait_for('message', timeout=60 ,check=checkk)
             getter=str(msgg.author.id)
             if msg.content.lower() == 'good':
-                if getter==str(message.author.id):
-                  await townc.send("The dead has cancelled the package!")
-                  return
                 await townc.send("It was a good package, you have recieved 25c!")
                 await message.channel.send("Your target opened the package, you've recieved 25 as well!")
                 data['money'][getter]+=25
                 data['money'][str(message.author.id)]+=25
             elif msg.content.lower() == 'bad':
-                if getter==str(message.author.id):
-                  await townc.send("The dead has cancelled the package!")
-                  return
                 await townc.send("It was a bad package, you have lost 100c!")
                 await message.channel.send("Your target opened the package, you've recieved 100!")
                 data['money'][getter]-=100
@@ -1010,7 +1041,7 @@ async def assignroles(ctx,code):
     rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role1: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True),
-    role2: discord.PermissionOverwrite(read_messages=True,send_messages=True),
+    role2: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role3: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role4: discord.PermissionOverwrite(read_messages=True,send_messages=False)
                  }
@@ -1045,7 +1076,7 @@ async def assignroles(ctx,code):
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
     await msg.pin()
-    msg = await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)")
+    msg = await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)\n\nUse !die !slot !flip and !lottery to gamble for money. Use !help <command> to learn more about any command.")
     await msg.pin()
     #
     rolem1 = discord.utils.get(guildd.roles, name="Host")
@@ -1153,7 +1184,7 @@ async def assignroles(ctx,code):
         teamchat=discord.utils.get(guildd.channels,name=data['players'][user]['team'])
         await teamchat.set_permissions(userr, read_messages=True,send_messages=True,add_reactions=True)
         #this stops them from tam chat talking
-        #data['players'][str(user)]['incc'].append(teamchat.id)
+        data['players'][str(user)]['incc'].append(teamchat.id)
         
         roleid= data['players'][user]['role']
         rolename=data['rt'][roleid]['lirole']
@@ -1622,6 +1653,7 @@ async def createstockmarket(ctx):
     await ctx.send("There is no game going on right now.")
     return
   global data
+  global svari
   data['smarket']['state']=1
   data['smarket']['inv']={}
   data['smarket']['stocks']={}
@@ -1636,6 +1668,12 @@ async def createstockmarket(ctx):
   data['smarket']['trades']['smile']=0
   data['smarket']['trades']['joy']=0
   data['smarket']['trades']['pens']=0
+  svari={}
+  stocks=["sun","smirk","smile","joy","pens"]
+  for thing in stocks:
+    svari[thing]={}
+    svari[thing]["mui"]=0
+    svari[thing]["sigi"]=0
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="auction_house")
   smarket = await mark.send("Cost of :sunglasses: is 1000 \nCost of :smirk: is 500 \nCost of :smiley: is 250 \nCost of :joy: is 100 \nCost of :pensive: is 50 \n")
@@ -1666,8 +1704,8 @@ async def changestockmarket(ctx):
       e=data['smarket']['stocks']['pens']
       await msg.edit(content="Cost of :sunglasses: is {} \nCost of :smirk: is {} \nCost of :smiley: is {} \nCost of :joy: is {} \nCost of :pensive: is {} \n".format(a,b,c,d,e))
       await ctx.send("Changed.")
-    except:
-      await ctx.send("Failed")
+    except Exception as e:
+      await ctx.send(f"Failed {e}")
       return
 
 @bot.command()
@@ -2595,7 +2633,7 @@ async def blindauctioninfo(ctx,code):
   if code not in data['bauction']:
     await ctx.send("Invalid Code.")
     return
-  team=team=data['players'][str(ctx.author.id)]['team']
+
   info = discord.Embed(colour=random.randint(0, 0xffffff))
   info.set_author(name="Auction Info-")
   info.add_field(name="Item Name-",value=f"**{data['bauction'][code]['item']}**",inline="false")
@@ -2603,6 +2641,7 @@ async def blindauctioninfo(ctx,code):
   info.add_field(name="Min Value-",value=data['bauction'][code]['minvalue'],inline="false")
   if str(ctx.message.channel.category) == str(data['code']['gamecode']) + ' factions':
     try:
+      team=data['players'][str(ctx.author.id)]['team']
       value=data['bauction'][code]['biders'][team]
     except:
       value=0
@@ -2771,10 +2810,16 @@ async def upforge(ctx):
   team=str(data['players'][ath]['team'])
   forglvl=data['building'][team]['forge']
   cost=int((forglvl*forglvl)*100)
-  if data['money'][ath]<cost:
-    await ctx.send("You cannot afford this upgrade.")
+
+  if cost>data['building'][team]['vault']:
+    await ctx.send("You do not have that much cash in your vault.")
     return
-  data['money'][ath]-=cost
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
+  if cost>leftmoney:
+    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    return
+
+  data['building'][team]['vault']-=cost
   team=data['players'][ath]['team']
   data['building'][team]['forge']+=1
   await ctx.send("Upgrade successful.")
@@ -3633,11 +3678,11 @@ async def rolehelp(role,chnl):
 - Respawns in 4 phases.```"""
     elif role == "weapon smith" or role=="40":
         msg="""```40. Weapon Smith-
-- Can craft any of these weapons to use in the game:
+- Can craft any of these weapons to use in the game: (All the weapons are multipliers, they only work on roles that can already kill) 
 -- Sword - 1 day prep time - Allows a person to make x2 kills if used.
--- Spear - 2 day prep time - Allows a person to make a kill that passes through all protection.
--- Cannon - 3 day prep time - Allows a person to make x4 kills if used.
-- Any made weapons will kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smith will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
+-- Spear - 2 days prep time - Allows a person to make a kill that passes through all protection.
+-- Cannon - 3 days prep time - Allows a person to make x4 kills if used.
+- Any made weapons will be kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smith will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
 - Weapons are used instantly when required. 1 person can only use 1 weapon at a time.
 - Respawns in 6 phases.```"""
     elif role== "wizard" or role=="41":
@@ -3830,11 +3875,31 @@ SOLOS-
 
 async def change():
   global data
-  sun=int(random.gauss(6,18))
-  smirk=int(random.gauss(4,15))
-  smile=int(random.gauss(3,10))
-  joy=int(random.gauss(2,7))
-  pens=int(random.gauss(1,5))
+  global svari
+
+  stocks=["sun","smirk","smile","joy","pens"]
+  for stock in stocks:
+      if stock=="sun":
+        svari[stock]["mui"]+=5.2
+        svari[stock]["sigi"]+=20
+      elif stock=="smirk":
+        svari[stock]["mui"]+=3.6
+        svari[stock]["sigi"]+=15
+      elif stock=="smile":
+        svari[stock]["mui"]+=2.1
+        svari[stock]["sigi"]+=10
+      elif stock=="joy":
+        svari[stock]["mui"]+=1
+        svari[stock]["sigi"]+=6
+      elif stock=="pens":
+        svari[stock]["mui"]+=0.6
+        svari[stock]["sigi"]+=4
+
+  sun=int(random.gauss(svari["sun"]["mui"],svari["sun"]["sigi"]))
+  smirk=int(random.gauss(svari["smirk"]["mui"],svari["smirk"]["sigi"]))
+  smile=int(random.gauss(svari["smile"]["mui"],svari["smile"]["sigi"]))
+  joy=int(random.gauss(svari["joy"]["mui"],svari["joy"]["sigi"]))
+  pens=int(random.gauss(svari["pens"]["mui"],svari["pens"]["sigi"]))
   #
   data['smarket']['trades']['sun']=0
   data['smarket']['trades']['smirk']=0
@@ -3858,79 +3923,11 @@ async def change():
     data['smarket']['stocks']['joy']=7
   if data['smarket']['stocks']['pens']<=0:
     data['smarket']['stocks']['pens']=5
-
-
-
-  '''
-  if data['smarket']['trades']['sun']>20:
-    data['smarket']['stocks']['sun']+=25
-    data['smarket']['trades']['sun']=0
-  elif data['smarket']['trades']['sun']<0:
-    data['smarket']['stocks']['sun']-=25
-    data['smarket']['trades']['sun']=0
-    if data['smarket']['stocks']['sun']<=0:
-      data['smarket']['stocks']['sun']=25
-  else:
-    mylist=[25,0,-25]
-    data['smarket']['stocks']['sun']+=random.choice(mylist)
-    if data['smarket']['stocks']['sun']<=0:
-      data['smarket']['stocks']['sun']=25
-#
-  if data['smarket']['trades']['smirk']>20:
-    data['smarket']['stocks']['smirk']+=20
-    data['smarket']['trades']['smirk']=0
-  elif data['smarket']['trades']['smirk']<0:
-    data['smarket']['stocks']['smirk']-=20
-    data['smarket']['trades']['smirk']=0
-    if data['smarket']['stocks']['smirk']<=0:
-      data['smarket']['stocks']['smirk']=20
-  else:
-    mylist=[20,0,-20]
-    data['smarket']['stocks']['smirk']+=random.choice(mylist)
-    if data['smarket']['stocks']['smirk']<=0:
-      data['smarket']['stocks']['smirk']=20
-#
-  if data['smarket']['trades']['smile']>0:
-    data['smarket']['stocks']['smile']+=10
-    data['smarket']['trades']['smile']=0
-  elif data['smarket']['trades']['smile']<0:
-    data['smarket']['stocks']['smile']-=10
-    data['smarket']['trades']['smile']=0
-    if data['smarket']['stocks']['smile']<=0:
-      data['smarket']['stocks']['smile']=10
-  else:
-    mylist=[10,0,-10]
-    data['smarket']['stocks']['smile']+=random.choice(mylist)
-    if data['smarket']['stocks']['smile']<=0:
-      data['smarket']['stocks']['smile']=10
-#
-  if data['smarket']['trades']['joy']>0:
-    data['smarket']['stocks']['joy']+=5
-    data['smarket']['trades']['joy']=0
-  elif data['smarket']['trades']['joy']<0:
-    data['smarket']['stocks']['joy']-=5
-    data['smarket']['trades']['joy']=0
-    if data['smarket']['stocks']['joy']<=0:
-      data['smarket']['stocks']['joy']=5 
-  else:
-    mylist=[5,0,-5]
-    data['smarket']['stocks']['joy']+=random.choice(mylist)
-    if data['smarket']['stocks']['joy']<=0:
-      data['smarket']['stocks']['joy']=5
-#
-  if data['smarket']['trades']['pens']>15:
-    data['smarket']['stocks']['pens']+=5
-    data['smarket']['trades']['pens']=0
-  elif data['smarket']['trades']['pens']<5:
-    data['smarket']['stocks']['pens']-=5
-    data['smarket']['trades']['pens']=0
-    if data['smarket']['stocks']['pens']<=0:
-      data['smarket']['stocks']['pens']=5
-  else:
-    mylist=[5,0,-5]
-    data['smarket']['stocks']['pens']+=random.choice(mylist)
-    if data['smarket']['stocks']['pens']<=0:
-      data['smarket']['stocks']['pens']=5'''
+  
+  stocks=["sun","smirk","smile","joy","pens"]
+  for thing in stocks:
+    svari[thing]["mui"]=0
+    svari[thing]["sigi"]=0
   dump()
 
 
@@ -3945,7 +3942,6 @@ async def score(ath,msg):
       else:
             data['money'][ath]=0
             dump()
-            #data[ath])
     else:
           coins=[10,20]
           dcoins=[5,10]
@@ -3959,7 +3955,6 @@ async def score(ath,msg):
               return
             else:
               try:
-
                 if data['players'][ath]['state'] ==0:
                     add= random.choice(dcoins)
                     data['money'][ath]+=int(add)
