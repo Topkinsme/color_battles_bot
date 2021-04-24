@@ -3619,7 +3619,7 @@ async def rolehelp(role,chnl):
 - Respawns in 6 phases.```"""
     elif role == "priest" or role =="30" :
         msg="""```30. Priest-
-- Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice , they will be protected from all attacks on them for a night. (Does not expire if not attacked)
+- Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice, they will be protected from all attacks on them until it expires. (Protection expires if they are attacked.)
 - They need to pray only twice if there is a curse caster in the game. Else, they need to pray thrice.
 - Prayer is completed instantly. Has no cooldown on abilities. Target is informed if they were prayed for.
 - Respawns in 4 phases.```"""
@@ -3666,9 +3666,9 @@ async def rolehelp(role,chnl):
 - Respawns in 6 phases.```"""
     elif role == "tank master" or role=="38":
         msg="""```38. Tank Master -
-- The tank master owns a tank which can only kill specific people from a list every night. Each night, a new list is generated from which they can choose.
-- Each time they kill someone, the number of people in the list reduces by 1. At the start, there will be [(no. of people)/5 rounded down] people. This list will not include their teammates.  The list count increases to the original number upon the tank master's death.
-- Alternatively, the tank master can use their tank to protect someone once in the game as  protection till they're attacked, but consequently losing the ability to use the tank forever.
+- The tank master owns a tank that can only kill specific people from a list every night. Each night, a new list is generated from which they can choose.
+- Each time they kill someone, the number of people on the list reduces by 1. At the start, there will be [(no. of people)/5 rounded down] people. This list will not include their teammates.  The list count increases to the original number upon the tank master's death.
+- Alternatively, the tank master can use their tank to protect someone once in the game as protection till they're attacked but consequently losing the ability to use the tank till they die and respawn.
 - Kill is night end. Protection is instant.
 - Respawns in 6 phases.```"""
     elif role == "truth seeker" or role=="39":
@@ -3699,9 +3699,10 @@ async def rolehelp(role,chnl):
     elif role== "cult leader" or role=="43":
         msg="""```43. Cult Leader- SOLO -
 - The cult leader leads their own team that wants to end all other teams in the name of peace.
-- They have the ability to add a random alive person to their team chat every night. The added person is now on the cult's team and has the same win goal as the cult leader (The cult  leader is now their new king).
+- At the start of the game, they have (players/3, rounded down) curses. They can mark any person in-game for the cost of a curse. When a person with a curse dies, the person instead of dying joins the cult leader's team.
+- The added person is now on the cult's team and has the same win goal as the cult leader (The cult leader is now their new leader).
 - The added person will not lose their abilities and will still have access to their old team chat.
-- Everyone in the cult will stop respawning if the cult leader dies. The old king is irrelevant after they join the new team.
+- No one can respawn after they join the cult. The old king is irrelevant after they join the new team.
 - Can't respawn. Wins if the cult is the only team alive.```"""
     elif role== "double agent" or role=="44":
         msg="""```44. Double Agent- SOLO -
@@ -3728,29 +3729,39 @@ async def rolehelp(role,chnl):
 - If the contacted person has less than 200c, they will be killed instantly before day starts.
 - Doesn't have a cooldown. The contacted person is given the choice during the next day. The item agent will win if they complete 5 trades without dying. They will automatically lose if there is only 1 team alive.
 - Cannot respawn.```"""
-    elif role== "kidnapper" or role=="48":
-        msg="""```48. Kidnapper- SOLO -
+    elif role== "joker" or role=="48":
+        msg="""```48. Joker - Solo -
+- May choose between 4 different abilities. Must cycle through every ability before they can use an already used ability. An ability has to be used each night (cannot choose to abstain from performing any action).
+-- Diamonds - Take money from a player or a color vault. Stealing from a player will take 20% of the currency the player has. Stealing from a vault will take 10% of the currency the vault contains.
+-- Clubs - Disable all protections on a specific color for the night.
+-- Hearts - Protect yourself from an incoming attack.
+-- Spades - Kill up to 2 people.  May choose to target 1 player, which will cause it to be a strong attack.
+- The joker wins when at least [players/3] (rounded down) people have died permanently before they die.
+- Robbing and killing is end phase, while protection and disabling protection is instant.
+- Doesn't respawn.```"""
+    elif role== "kidnapper" or role=="49":
+        msg="""```49. Kidnapper- SOLO -
 - Has the ability to kidnap a person once every night, starting with night 1. Doing so will tell the person's role to the kidnapper. (The person is kidnapped when day starts)
 - The kidnapped person will not be able to talk in their group chat and will not be able to perform any actions, but cannot be killed when they are kidnapped. The kidnapper gets all the money that the kidnapped person had.
 - The team is informed about the person from their team that has been kidnapped. The team can choose to free their teammate by paying a ransom of 1000c. If the kidnapper is killed, all the kidnapped people are released. 
 - The kidnapper wins when they have kidnapped all kings at least once. They will automatically lose if there is only 1 team alive.
 - Cannot respawn.```"""
-    elif role== "killer" or role=="49":
-        msg="""```49. Killer- SOLO -
+    elif role== "killer" or role=="50":
+        msg="""```50. Killer- SOLO -
 - Kills 1 person each night. Gets 1 heart for each kill, gets 2 hearts if they kill a solo or a king.
 - Has to get at least a certain number of hearts to win. Killing the same person doesn't give any hearts. Killing a person from the same team back to back gives no hearts.
 - Number of hearts they need to get is Number of players/3, rounded down. Can trade in 2 hearts for 1 night protection any time. The killer has protection until they get 2 hearts for the first time.
 - The killer will automatically die if they can not possibly earn enough hearts to win. They will also lose if there is only 1 team left alive.
 - Has no cooldown. Kill happens at night end. 
 - Doesn't respawn.```"""
-    elif role== "postman" or role=="50":
-        msg="""```50. Postman - SOLO -
+    elif role== "postman" or role=="51":
+        msg="""```51. Postman - SOLO -
 - Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it. If the package is opened, the postman cannot be killed during that night.
 - Package gets delivered when day start. The target has the entire day to choose. The package will be delivered even if the postman is dead. If the package is opened, the postman gets protection for the following night.
 - The postman wins if 2 of each type of package are opened before the game ends.
 - Cannot respawn.```"""
-    elif role== "town leader" or role=="51":
-        msg="""```51. Town Leader - SOLO
+    elif role== "town leader" or role=="52":
+        msg="""```52. Town Leader - SOLO
 - As the leader of a powerful town, you have the power to kill a person every night (End Phase action), or protect someone against all attacks for a night. (You cannot protect yourself twice in a row).
 - Once you have used an action on a person other than you, you can never use an action on them again in a game.
 - The town leader has to choose an action on every day that they can. Failing to do so will automatically kill them.
