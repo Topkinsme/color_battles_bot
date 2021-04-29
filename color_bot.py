@@ -24,6 +24,8 @@ import io
 import emoji as emj
 import typing
 import math
+import github3
+import difflib
 
 
 token = str(os.environ.get("tokeno"))
@@ -324,7 +326,7 @@ async def on_member_join(member):
     
 @bot.event
 async def on_member_remove(member):
-    await spamchannel.send("{} left the server".format(member.mention))
+    await spamchannel.send(f"{member.mention} ({member.name}) left the server")
     
     if str(member.id) in data['players']:
         data['money'].pop(str(member.id))
@@ -757,6 +759,33 @@ async def evall(ctx,*,thing:str):
                 #self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
     
+@bot.command()
+@commands.has_role("Informer")
+async def genroles(ctx):
+    king=["king"]
+    power=["assassin","barricader","bomber","builder","chief_knight","curse_caster","death_swapper","demolitionist","disabler","disguiser","finisher","guard","healer","jailor","life_transferrer","magician","merchant","minister","negotiator","observer","painter","potion_master","priest","prince","protector_knight","rich_person","robber","role_copier","seer","supreme_knight","tank_master","truth_seeker","weapon_smith","wizard"]
+    solo=["anarchist","cult_leader","double_agent","evil_prince","gem_trader","item_agent","joker","kidnapper","killer","postman","town_leader"]
+    warriors=["alert_warrior","camo_warrior","chief_warrior","ex-warrior","strong_warrior","warrior"]
+    mafia=["godfather","goon"]
+    gl=king+warriors+power+solo+mafia
+    for role in gl:
+      if role in king:
+        cat="king"
+      elif role in power:
+        cat="power"
+      elif role in solo:
+        cat="solo"
+      elif role in warriors:
+        cat="warriors"
+      elif role in mafia:
+        cat="mafia"
+    
+      g=github3.login(token=str(os.environ.get("gitkey")))
+      r=g.repository("Topkinsme","Color-Battle-Roles")
+      msg="** **\n```\n"+r.file_contents(f"{cat}/{role}").decoded.decode("utf-8")+"```"
+
+      msg = await ctx.send(msg)
+
 
 
 #moderator/helper
@@ -3451,436 +3480,56 @@ async def role(ctx,*,role="l"):
     await rolehelp(role,ctx)
 
 async def rolehelp(role,chnl):
-    if role == "king" or role == "1":
-          msg="""```1. King-
-- Is the leader of the team. Has no abilities.
-- The team will stop respawning after the king's death. Chooses a person from the team for tribute , every morning. 
-- Doesn't respawn.```"""
-    elif role == "alert warrior" or role =="2":
-        msg="""```2. Alert Warrior-
-- Has the ability to go alert during the night.
-- Any person attacking the alert warrior when they're alert will result in the death of the attacker.
-- Action is instant. Has a cooldown of 1 day.
-- Respawns in 4 phases.```"""
-    elif role == "camo warrior" or role =="3" :
-        msg="""```3. Camo Warrior-
-- Has the ability to go camo during the night. They can either pick to go camo themselves, or pick another person to go camo instead of them. They cannot pick the same person twice in a row.
-- The person cannot be killed when they have the camo mode on. (Except with the use of poison)
-- Action is immediate. Has a cooldown of 1 day.
-- Respawns in 4 phases.```"""
-    elif role == "chief warrior" or role =="4" :
-        msg="""```4. Chief Warrior-
-- Chooses 1 person to kill every night.
-- Kill happens at night end. Has no cooldown.
-- Respawns in 2 phases on the first death , then 4 phases ever after.```"""
-    elif role == "ex warrior" or role =="5" :
-        msg="""```5. Ex-Warrior-
-- This role is allowed to kill 1 person during the game at any time. This kill bypasses any and all forms of protection.
-- Kill is instant, can be used even during day, cannot be used if dead. This ability can only be used once after which it cannot be used again. 
-- Respawns in 2 phases.```"""
-    elif role == "strong warrior" or role =="6" :
-        msg="""```6. Strong Warrior-
-- This role does not die the first night they get attacked after respawning. This ability resets after they respawn.
-- They have no other abilities.
-- Respawns in 6 phases.```"""
-    elif role == "warrior" or role =="7" :
-        msg="""```7. Warrior-
-- Has no powers.
-- Respawns in 2 phases.```"""
-    elif role == "assassin" or role =="8" :
-        msg="""```8. Assassin-
-- Has the ability to kill a person every night until they lose this ability.
-- The assassin will lose their ability to kill after they have died at least once.
-- Kill happens during night end. No cooldown.
-- Respawns in 2 phases.```"""
-    elif role == "barricader" or role =="9" :
-        msg="""```9. Barricader - 
-- The barricader can protect people with 3 types of shield. 
--- The Divine Shield, protects the person for a night, and reveals the name of the attacker if they are attacked.
--- The Strong Shield, protects the person for a night, and has no special effects.
--- The Weak Shield, protects the person for a night, but kills you as well if the person is attacked.
-- Each of the shields can be used only once, regardless of if the person is attacked or not. Gets back all the shields if they die and respawn.
-- Cannot use more than 1 shield every night. Can be role blocked. Protection is instant.
-- Respawns in 6 phases.```"""
-    elif role == "bomber" or role =="10":
-        msg="""```10. Bomber
-- The bomber, when ever killed by a member of another faction, kills a certain number people of their choice.
-- The bomber can pick Total people/5, rounded down, targets to kill at any point after the start of the game, and cannot change these targets at any time. They can take their time in deciding their targets, but once picked, it cannot be changed.
-- If the Bomber is ever killed by a member of another faction, all the other people they have chosen will die immediately. These kills are not counted as a visit.
-- The bombed can pick new targets once they have died and come back to life. The bomber dying because of tribute will not trigger their ability.
-- Picking a target is immediate, and the targets are killed at the same time as when the bomber is killed.
-- Respawns in 6 phases.```"""
-    elif role == "builder" or role =="11" :
-        msg="""```11. Builder-
-- The builder gets building parts when any opponents die. Each person killed by their team gives them 2 pieces, any non team kills from outside the team gives him 1 piece. The builder can then use these parts to build the structures given below:
--- Wall - 12 parts - Protects all members of their team from all attacks for a night. Structure will remain if not attacked.
--- Fort - 21 parts - Protects all members of their team from all attacks for 2 nights. Structure will remain if not attacked.
--- Spikes - 7 parts - The builder can choose to add spiked to any already existing structures, which will kill the first attacker who tries to attack the structure. Note that spikes do not stop the structure from breaking. The attacks will still break the structures. Any kills using the spiked do not award any parts.
-- The builder continues to get parts even when dead. However, they can only build when alive. Structures take 1 night to get built and only get built after the attacks occur. Two structures cannot exist at once.
-- Respawns in 6 phases.```"""
-    elif role == "chief knight" or role =="12":
-        msg="""```12. Chief Knight
-- Has the ability to kill a person every night.
-- Kill is night end, and has no cooldown.
-- Respawns in 6 phases.```"""
-    elif role == "curse caster" or role =="13" :
-        msg="""```13. Curse Caster-
-- Has the ability to cast a curse on someone every night. A curse resets all prayer progress on the chosen person. 
-- If the selected person is being protected by 2 prayers, it will take 2 curses to undo the protection.
-- Curse casting is instant. The target is informed about what happened. Has no cooldown on abilities.
-- Respawns in 4 phases.```"""
-    elif role == "death swapper" or role =="14" :
-        msg="""```14. Death Swapper-
-- Has the ability to make anyone respawn instantly for the cost of killing themselves. 
-- Action is instant. 
-- Respawns in 4 phases.```"""
-    elif role == "demolitionist" or role =="15" :
-        msg="""```15. Demolitionist -
-- Can visit someone and place a bomb in their house every night. This bomb will explode only if someone visits the target that night. The bomb will kill the person and everyone visiting.
-- Placing the bomb is end night before kills and thus instant actions aren't affected but kills are.
-- Respawns in 6 phases.```"""
-    elif role == "disabler" or role =="16" :
-        msg="""```16. Disabler-
-- Can role-block a person for 1 night. Target is informed they were role-blocked.
-- Has a cool down of 1 day. Picks action during the day for the following night.
-- Respawns in 6 phases.```"""
-    elif role == "desguiser" or role =="17" :
-        msg="""```17. Disguiser-
-- Has the ability to make anyone appear as any other role to all checks. 
-- The targeted person is informed if they were disguised, but are not told what they are disguised as. Any applied disguises will stay until the person is killed.
-- Action is instant. No cooldown.
-- Respawns in 4 phases.```"""
-    elif role == "finisher" or role =="18" :
-        msg="""```18. Finisher-
-- Can delay a person's respawn by 4 phases.
-- Has a ability cooldown of 1 day. Action is night end after kills. Chooses the action during the night.
-- Respawns in 6 phases.```"""
-    elif role == "guard" or role =="19" :
-        msg="""```19. Guard-
-- Can protect someone from all attacks at all times. They will die instead of the person they protect. 
-- Cannot change their target after initially picking it (Unless target somehow dies before guard). Protecting is immediate. 
-- The guard cannot be role-blocked. The guard is the last layer of protection, any other protection comes first in effect before this.
-- Respawns in 4 phases.```"""
-    elif role == "healer" or role =="20" :
-        msg="""```20. Healer-
-- Can reduce a person's respawn by 4 phases.
-- Has a ability cooldown of 1 day. Action is end phase after kills. Chooses the action during the night.
-- Respawns in 6 phases.```"""
-    elif role == "jailor" or role =="21":
-        msg="""```21. Jailor
-- Can pick a person every day end to imprison, for 2 phases.
-- Any jailed person is protected from all attacks, is role blocked for that duration, and cannot be tributed by the team. The person is informed they were jailed.
-- The jailor cannot jail the same person twice in a row.
-- Action is phase end (Day end). Has no cooldown. Cannot jail themselves.
-- Respawns in 6 phases.```"""
-    elif role == "life transferrer" or role =="22" :
-        msg="""```22. Life Transferrer-
-- Has the ability to give their life to someone else. Doing so will cause all attacks targeted at the life transferrer to fail. But any attacks towards the person with the life will affect the Transferrer as well. (Including poison, and the antidote) (If the target is poisoned, you can't cure yourself, only the target can by curing themselves.)
-- Action is instant. Cannot change targets after initial pick. Picks are only done during the night.Transferring life isn't a visit.
-- Respawns in 4 phases.```"""
-    elif role == "magician" or role =="23" :
-        msg="""```23. Magician-
-- Is allowed to submit a list of up to 3 guesses consisting of people's roles or both their roles and teams. If all three guesses are correct , they will be informed. But even if one of the guesses is wrong , the rest will not be confirmed.
-- Action is immediate. There is no cooldown.
-- Respawns in 6 phases.
-```"""
-    elif role == "merchant" or role =="24" :
-        msg="""```24. Merchant-
-- Will get back 40% of any cash spent by their team on any auction items.
-- The cash is given once the day ends. Does not receive any cash by this ability when dead.
-- Respawns in 4 phases.```"""
-    elif role == "minister" or role =="25" :
-        msg="""```25. Minister-
-- If the minister is alive when the king dies , Everyone will be able to respawn again once before losing their ability to respawn.
-- Respawns in 4 phases.```"""
-    elif role == "negotiator" or role =="26" :
-        msg="""```26. Negotiator -
-- The negotiator can pick a target at any point, and if the negotiator is attacked, the target will die instead. They cannot change the target after picking, unless the target dies before the ability is used.
-- They can only do this once every life. They regain this ability on death.
-- Action is immediate. The target dies at the time where the negotiator was supposed to die. Redirecting the kill makes the killer visit the target instead of visiting the negotiator. 
-- Respawns in 4 phases.```"""
-    elif role == "observer" or role =="27" :
-        msg="""```27. Observer-
-- Can get the team of a person by checking them during the night.
-- Action is immediate. Has no cooldown.
-- Respawns in 4 phases.```"""
-    elif role == "painter" or role =="28" :
-        msg="""```28. Painter-
-- Can paint a person every night as a certain colour or as a certain role making any inspection roles get a fake result on checking.
-- Action is immediate. Has no cooldowns.
-- Respawns in 2 phases.```"""
-    elif role == "potion master" or role =="29" :
-        msg="""```29. Potion Master-
-- Can craft any of these potions to use in the game:
--- Kill potion - Use this to kill 2 people at the end of phase.
--- Protection potion - Use this to protect someone from all attacks for a night. (Doesn't expire till attacked)
--- Revive Potion - Use this to bring back a non-permanently dead teammate back to life instantly.
-- All potions take 2 days to make. The potion master does not lose progress on death. The potion will be added to a person's inventory upon completion and can be used at any time. (Even Day) 
-- Respawns in 6 phases.```"""
-    elif role == "priest" or role =="30" :
-        msg="""```30. Priest-
-- Has the ability to pray for someone (even for people outside their team) every night. Once they have prayed for someone twice/thrice, they will be protected from all attacks on them until it expires. (Protection expires if they are attacked.)
-- They need to pray only twice if there is a curse caster in the game. Else, they need to pray thrice.
-- Prayer is completed instantly. Has no cooldown on abilities. Target is informed if they were prayed for.
-- Respawns in 4 phases.```"""
-    elif role == "prince" or role =="31" :
-        msg="""```31. Prince-
-- Takes the place of the king, if they are alive when the king dies.
-- Has no other abilities.
-- Respawns in 2 phases as a prince, cannot respawn as a king.```"""
-    elif role == "protector knight" or role =="32":
-        msg="""```32. Protector Knight
-- Has the ability to protect a person from all attacks during the night.
-- Can pick a different target every night, and cannot change the target after picking for the night. Cannot pick the same person twice in a row.
-- Action is immediate, and has no cooldown.
-- Respawns in 6 phases.```"""
-    elif role == "rich person" or role =="33" :
-        msg="""```33. Rich Person-
-- If the rich person is selected as tribute, any cash used for the rich person is counted as x1.5.
-- Respawns in 6 phases.```"""
-    elif role == "robber" or role =="34":
-        msg="""```34. Robber
-- Has the ability to steal money from any individual person or any team's vault, every night.
-- The robber can take some of the money present inside any 1 person's balance or 1 team's vault, by winning a game against them. Winning the game would give the robber 15%, a draw would give the robber 5%, and a loss would give the robber nothing.
-- The game is played by both the robber and the target picking a choice between a Bow, Shield and a Cannon. The winning order is Bow > Cannon > Shield > Bow
-- In case the robber is robbing a team vault, the team can collectively decide on a choice between themselves, collectively.
-- Failure to pick a choice will make them lose 15% by default. The robber can't rob a person/team twice in a row.
-- The robber picks the target (Either a Person or a Team) during the day, and the target has the entire night to decide a choice. The robber gets the money when the night comes to an end. 
-- Respawns in 4 phases.```"""
-    elif role == "role copier" or role =="35":
-        msg="""```35. Role Copier-
-- Has the ability to copy the role of any dead person.
-- Once copied, the role copier can choose to use the role as long as they wish. Each night they can use the role they have copied earlier, or try to copy a new role. The role copier will know the copied role immediately but cannot use it's powers till the next night (If it's a action). 
-- Copying is instant. Other conditions are ported from the copied role. The copier cannot copy their dead teammates. The role copier cannot copy the same person twice in a game. 
-- Respawns in 6 phases.```"""
-    elif role == "seer" or role=="36":
-        msg="""```36. Seer-
-- Can get the role of a person by checking them during the night.
-- Action is immediate. Has a cooldown of 1 day.
-- Respawns in 6 phases.```"""
-    elif role == "supreme knight" or role =="37":
-        msg="""```37. Supreme Knight 
-- Has the abilities of both Protector Knight and Chief Knight.
-- Can kill 1 person at night end, or protect a person every night (Can protect same person twice in a row), but cannot kill or protect twice in a row. 
-- Kill is night end, Protection is immediate and none of the actions have a cooldown.
-- Respawns in 6 phases.```"""
-    elif role == "tank master" or role=="38":
-        msg="""```38. Tank Master -
-- The tank master owns a tank that can only kill specific people from a list every night. Each night, a new list is generated from which they can choose.
-- Each time they kill someone, the number of people on the list reduces by 1. At the start, there will be [(no. of people)/5 rounded down] people. This list will not include their teammates.  The list count increases to the original number upon the tank master's death.
-- Alternatively, the tank master can use their tank to protect someone once in the game as protection till they're attacked but consequently losing the ability to use the tank till they die and respawn.
-- Kill is night end. Protection is instant.
-- Respawns in 6 phases.```"""
-    elif role == "truth seeker" or role=="39":
-        msg="""```39. Truth Seeker-
-- Can get the role of anyone that is dead at the moment of checking.
-- Can use ability once every night. Action is immediate. No cooldowns.
-- Respawns in 4 phases.```"""
-    elif role == "weapon smith" or role=="40":
-        msg="""```40. Weapon Smith-
-- Can craft any of these weapons to use in the game: (All the weapons are multipliers, they only work on roles that can already kill) 
--- Sword - 1 day prep time - Allows a person to make x2 kills if used.
--- Spear - 2 days prep time - Allows a person to make a kill that passes through all protection.
--- Cannon - 3 days prep time - Allows a person to make x4 kills if used.
-- Any made weapons will be kept in the weapon smith's inventory until they use/give it on/to someone. The weapon smith will not lose progress if killed when making a weapon. But the weapon smith will lose the weapons in their inventory if killed.
-- Weapons are used instantly when required. 1 person can only use 1 weapon at a time.
-- Respawns in 6 phases.```"""
-    elif role== "wizard" or role=="41":
-        msg="""```41. Wizard-
-- Can reduce or increase a person's respawn time by 2 phases during the night.
-- Action is night end after kills. Has a cooldown of 1 day.
-- Respawns in 6 phases.```"""
-    elif role== "anarchist" or role=="42":
-        msg="""```42. Anarchist - SOLO
-- Can kill 2 person every night. If the anarchist kills a king, he can kill 3 people every night that follows, and if he kills another king, he can kill 4 people and so on and so forth.
-- If the Anarchist is attacked, the number of kills he can perform reduces by 1, ticking to 0 and eventually -1 at which point the anarchist will die.
-- Kills are phase end. The Anarchist wins when there are no more kings alive. (They need to kill all princes as well). The anarchist will lose automatically if there is only 1 team alive.
-- Cannot respawn.```"""
-    elif role== "cult leader" or role=="43":
-        msg="""```43. Cult Leader- SOLO -
-- The cult leader leads their own team that wants to end all other teams in the name of peace.
-- At the start of the game, they have (players/3, rounded down) curses. They can mark any person in-game for the cost of a curse. When a person with a curse dies, the person instead of dying joins the cult leader's team.
-- The added person is now on the cult's team and has the same win goal as the cult leader (The cult leader is now their new leader).
-- The added person will not lose their abilities and will still have access to their old team chat.
-- No one can respawn after they join the cult. The old king is irrelevant after they join the new team.
-- Can't respawn. Wins if the cult is the only team alive.```"""
-    elif role== "double agent" or role=="44":
-        msg="""```44. Double Agent- SOLO -
--  Appears like a warrior to any two factions. They can switch to any one fraction in the game and at that point they turn into an regular warrior. If they don't switch fast enough, and get killed before they switch, they will lose the game.
-- Switching is instant. The teams will be informed of the same.
-- Can't respawn before picking a side, after they switch they can respawn in 2 phases.```"""
-    elif role== "evil prince" or role=="45":
-        msg="""```45. Evil Prince- SOLO -
-- The evil prince is actually a traitor to the team. The evil prince's goal is to just get their King killed.
-- Is disguised as a regular prince in role list and all checks.
-- Can't respawn but wins immediately if their team king is eliminated.```"""
-    elif role== "gem trader" or role=="46":
-        msg="""```46. Gem Trader- SOLO -
-- Starts off the game with a certain number of gems. (Number of gems = Number of people/4 , Rounded down) Can give a gem to a person every night. If a person with a gem is attacked , the attack is cancelled. Gems are permanent protection for the holder.
-- Anyone with a gem can pass it to others. If the gem trader survives 1 full day with 0 gems , they win. 
-- Anyone with a gem the night prior to the gem trader winning , will die. These deaths are counted as NIGHT KILLS and not day kills. No protection can save you from this.
-- Gems cannot be given to anyone with a gem (Except the gem trader).If attempted to do so, your action will fail. Holding a gem disables you from performing any actions. If you are killed by the daily tribute while holding a gem , you will be killed and the gem will be returned to the gem trader.
-- The gem trader can also get rid of one of their gems by paying 5000c during night ends. Gems are given to people after attacks. The gem trader automatically loses if there is only 1 team alive.
-- Cannot respawn.```"""
-    elif role== "item agent" or role=="47":
-        msg="""```47. Item Agent- SOLO -
-- Has the ability to contact a person anonymously with a choice. The item agent can choose a disguise to show to people if they use their power against them. (This disguise does not work for any other checks) 
-- The contacted person can pay 1000c for the services of the item agent, and can then choose to kill a person or to reveal a person's role and colour, (or to ignore the agent, which is free). If the target picks the item agent, the item agent will show up as the chosen disguise.
-- If the contacted person has less than 200c, they will be killed instantly before day starts.
-- Doesn't have a cooldown. The contacted person is given the choice during the next day. The item agent will win if they complete 5 trades without dying. They will automatically lose if there is only 1 team alive.
-- Cannot respawn.```"""
-    elif role== "joker" or role=="48":
-        msg="""```48. Joker - Solo -
-- May choose between 4 different abilities. Must cycle through every ability before they can use an already used ability. An ability has to be used each night (cannot choose to abstain from performing any action).
--- Diamonds - Take money from a player or a color vault. Stealing from a player will take 20% of the currency the player has. Stealing from a vault will take 10% of the currency the vault contains.
--- Clubs - Disable all protections on a specific color for the night.
--- Hearts - Protect yourself from an incoming attack.
--- Spades - Kill up to 2 people.  May choose to target 1 player, which will cause it to be a strong attack.
-- The joker wins when at least [players/3] (rounded down) people have died permanently before they die.
-- Robbing and killing is end phase, while protection and disabling protection is instant.
-- Doesn't respawn.```"""
-    elif role== "kidnapper" or role=="49":
-        msg="""```49. Kidnapper- SOLO -
-- Has the ability to kidnap a person once every night, starting with night 1. Doing so will tell the person's role to the kidnapper. (The person is kidnapped when day starts)
-- The kidnapped person will not be able to talk in their group chat and will not be able to perform any actions, but cannot be killed when they are kidnapped. The kidnapper gets all the money that the kidnapped person had.
-- The team is informed about the person from their team that has been kidnapped. The team can choose to free their teammate by paying a ransom of 1000c. If the kidnapper is killed, all the kidnapped people are released. 
-- The kidnapper wins when they have kidnapped all kings at least once. They will automatically lose if there is only 1 team alive.
-- Cannot respawn.```"""
-    elif role== "killer" or role=="50":
-        msg="""```50. Killer- SOLO -
-- Kills 1 person each night. Gets 1 heart for each kill, gets 2 hearts if they kill a solo or a king.
-- Has to get at least a certain number of hearts to win. Killing the same person doesn't give any hearts. Killing a person from the same team back to back gives no hearts.
-- Number of hearts they need to get is Number of players/3, rounded down. Can trade in 2 hearts for 1 night protection any time. The killer has protection until they get 2 hearts for the first time.
-- The killer will automatically die if they can not possibly earn enough hearts to win. They will also lose if there is only 1 team left alive.
-- Has no cooldown. Kill happens at night end. 
-- Doesn't respawn.```"""
-    elif role== "postman" or role=="51":
-        msg="""```51. Postman - SOLO -
-- Can choose to give their target a Poison package (Which kills them if they open the package) or a Kill package (Which they can use to kill 1 person that night). The target isn't informed what package they receive. The target can choose to open it or dispose it. If the package is opened, the postman cannot be killed during that night.
-- Package gets delivered when day start. The target has the entire day to choose. The package will be delivered even if the postman is dead. If the package is opened, the postman gets protection for the following night.
-- The postman wins if 2 of each type of package are opened before the game ends.
-- Cannot respawn.```"""
-    elif role== "town leader" or role=="52":
-        msg="""```52. Town Leader - SOLO
-- As the leader of a powerful town, you have the power to kill a person every night (End Phase action), or protect someone against all attacks for a night. (You cannot protect yourself twice in a row).
-- Once you have used an action on a person other than you, you can never use an action on them again in a game.
-- The town leader has to choose an action on every day that they can. Failing to do so will automatically kill them.
-- The town leader submits actions during the night. Protecting a person is instant, killing a person is night end. The town leader cannot change his action, if they choose to protect a person.
-- You win if you survive till the end, or if you do not have a valid target to use your power on when night starts.
-- Cannot respawn.```"""
-    elif role=="list" or role=="l":
-        msg="""All the available roles are-
-```1. king
-WARRIORS-
-2. alert warrior
-3. camo warrior
-4. chief warrior
-5. ex warrior
-6. strong warrior
-7. warrior
-POWER ROLES-
-8. assassin
-9. barricader
-10. bomber
-11. builder
-12. chief knight
-13. curse caster
-14. death swapper 
-15. demolitionist
-16. disabler 
-17. disguiser
-18. finisher
-19. guard
-20. healer
-21. jailor
-22. life transferrer
-23. magician
-24. merchant
-25. minister
-26. negotiator
-27. observer
-28. painter 
-29. potion master
-30. priest
-31. prince
-32. protector knight
-33. rich person
-34. robber
-35. role copier
-36. seer
-37. supreme knight
-38. tank master
-39. truth seeker
-40. weapon smith
-41. wizard
-SOLOS-
-42. anarchist
-43. cult leader
-44. double agent
-45. evil prince
-46. gem trader 
-47. item agent
-48. kidnapper
-49. killer
-50. postman
-51. town leader```"""
+    role=role.lower() 
+    king=["king"]
+    power=["assassin","barricader","bomber","builder","chief_knight","curse_caster","death_swapper","demolitionist","disabler","disguiser","finisher","guard","healer","jailor","life_transferrer","magician","merchant","minister","negotiator","observer","painter","potion_master","priest","prince","protector_knight","rich_person","robber","role_copier","seer","supreme_knight","tank_master","truth_seeker","weapon_smith","wizard"]
+    solo=["anarchist","cult_leader","double_agent","evil_prince","gem_trader","item_agent","joker","kidnapper","killer","postman","town_leader"]
+    warriors=["alert_warrior","camo_warrior","chief_warrior","ex-warrior","strong_warrior","warrior"]
+    mafia=["godfather","goon"]
+
+    gl=king+warriors+power+solo+mafia
+    if role in king:
+      cat="king"
+    elif role in power:
+      cat="power"
+    elif role in solo:
+      cat="solo"
+    elif role in warriors:
+      cat="warriors"
+    elif role in mafia:
+      cat="mafia"
+    elif role=="l" or role=="list":
+      msg="The roles are-\n```\n"
+      for thing in gl:
+        msg+=thing
+        msg+="\n"
+      msg+="```"
+      msg = await chnl.send(msg)
+      return msg
     else:
-        msg="""Error! Role not found.Do not capitalise role names. You can also use the number (Found in #game-role-info) to represent the role.
-All the available roles are-
-```1. king
-WARRIORS-
-2. alert warrior
-3. camo warrior
-4. chief warrior
-5. ex warrior
-6. strong warrior
-7. warrior
-POWER ROLES-
-8. assassin
-9. barricader
-10. bomber
-11. builder
-12. chief knight
-13. curse caster
-14. death swapper 
-15. demolitionist
-16. disabler 
-17. disguiser
-18. finisher
-19. guard
-20. healer
-21. jailor
-22. life transferrer
-23. magician
-24. merchant
-25. minister
-26. negotiator
-27. observer
-28. painter 
-29. potion master
-30. priest
-31. prince
-32. protector knight
-33. rich person
-34. robber
-35. role copier
-36. seer
-37. supreme knight
-38. tank master
-39. truth seeker
-40. weapon smith
-41. wizard
-SOLOS-
-42. anarchist
-43. cult leader
-44. double agent
-45. evil prince
-46. gem trader 
-47. item agent
-48. kidnapper
-49. killer
-50. postman
-51. town leader```"""
+      for thing in gl:
+        l=difflib.get_close_matches(role,gl)
+      if len(l)==0:
+        msg="No such role found."
+        msg = await chnl.send(msg)
+        return msg
+      else:
+        role=l[0]
+        if role in king:
+          cat="king"
+        elif role in power:
+          cat="power"
+        elif role in solo:
+          cat="solo"
+        elif role in warriors:
+          cat="warriors"
+        elif role in mafia:
+          cat="mafia"
+      
+    g=github3.login(token=str(os.environ.get("gitkey")))
+    r=g.repository("Topkinsme","Color-Battle-Roles")
+    msg="```\n"+r.file_contents(f"{cat}/{role}").decoded.decode("utf-8")+"```"
+
     msg = await chnl.send(msg)
     return msg
 
