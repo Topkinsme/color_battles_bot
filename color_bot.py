@@ -491,6 +491,7 @@ async def nuke(ctx):
     '''Empties the entire channel <Nuke>'''
     chnl=ctx.message.channel
     async for message in chnl.history(limit=10000):
+        await asyncio.sleep(1)
         await message.delete()
     tempc = await ctx.send("Cleared.")
     await asyncio.sleep(30)
@@ -764,35 +765,6 @@ async def evall(ctx,*,thing:str):
                 #self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
     
-@bot.command()
-@commands.has_role("Informer")
-async def genroles(ctx):
-    king=["king"]
-    power=["assassin","barricader","bomber","builder","chief_knight","curse_caster","death_swapper","demolitionist","disabler","disguiser","finisher","guard","healer","jailor","life_transferrer","magician","merchant","minister","negotiator","observer","painter","potion_master","priest","prince","protector_knight","rich_person","robber","role_copier","seer","supreme_knight","tank_master","truth_seeker","weapon_smith","wizard"]
-    solo=["anarchist","cult_leader","double_agent","evil_prince","gem_trader","item_agent","joker","kidnapper","killer","postman","town_leader"]
-    warriors=["alert_warrior","camo_warrior","chief_warrior","ex-warrior","strong_warrior","warrior"]
-    mafia=["godfather","goon"]
-    gl=king+warriors+power+solo+mafia
-    for role in gl:
-      if role in king:
-        cat="king"
-      elif role in power:
-        cat="power"
-      elif role in solo:
-        cat="solo"
-      elif role in warriors:
-        cat="warriors"
-      elif role in mafia:
-        cat="mafia"
-    
-      g=github3.login(token=str(os.environ.get("gitkey")))
-      r=g.repository("Topkinsme","Color-Battle-Roles")
-      msg="** **\n```\n"+r.file_contents(f"{cat}/{role}").decoded.decode("utf-8")+"```"
-
-      msg = await ctx.send(msg)
-
-
-
 #moderator/helper
 
 @bot.command(aliases=["v","dem"])
@@ -845,6 +817,33 @@ async def ban(ctx,member:discord.Member):
     await member.ban()
     await ctx.send("{} has been banned from the server.".format(member.mention))
 
+@bot.command()
+@commands.has_role("Helpers")
+async def genroles(ctx):
+    '''Allows you to generate all roles in a chat. <Helpers>'''
+    king=["king"]
+    power=["assassin","barricader","bomber","builder","chief_knight","curse_caster","death_swapper","demolitionist","disabler","disguiser","finisher","guard","healer","jailor","life_transferrer","magician","merchant","minister","negotiator","observer","painter","potion_master","priest","prince","protector_knight","rich_person","robber","role_copier","seer","supreme_knight","tank_master","truth_seeker","weapon_smith","wizard"]
+    solo=["anarchist","cult_leader","double_agent","evil_prince","gem_trader","item_agent","joker","kidnapper","killer","postman","town_leader"]
+    warriors=["alert_warrior","camo_warrior","chief_warrior","ex-warrior","strong_warrior","warrior"]
+    mafia=["godfather","goon"]
+    gl=king+warriors+power+solo+mafia
+    for role in gl:
+      if role in king:
+        cat="king"
+      elif role in power:
+        cat="power"
+      elif role in solo:
+        cat="solo"
+      elif role in warriors:
+        cat="warriors"
+      elif role in mafia:
+        cat="mafia"
+    
+      g=github3.login(token=str(os.environ.get("gitkey")))
+      r=g.repository("Topkinsme","Color-Battle-Roles")
+      msg="** **\n```\n"+r.file_contents(f"{cat}/{role}").decoded.decode("utf-8")+"```"
+      await asyncio.sleep(1)
+      msg = await ctx.send(msg)
 #host
 
 
@@ -1102,6 +1101,7 @@ async def assignroles(ctx,code):
     namee = str(data['code']['gamecode'])
     await guildd.create_category(namee)
     cate = discord.utils.get(ctx.message.guild.categories, name=namee)
+    info = await guildd.create_text_channel('information',overwrites=storymark,category=cate)
     story = await guildd.create_text_channel('story-time',overwrites=storymark,category=cate)
     batlec = await guildd.create_text_channel('battlefield',overwrites=batle,category=cate)
     markc = await guildd.create_text_channel('auction_house',overwrites=storymark,category=cate)
@@ -1800,7 +1800,7 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
   except ValueError:
     await ctx.send("That item was not found in their inventory.")
     return
-  await ctx.send("Done.")
+  await ctx.send(f"Done. Removed {item}.")
 
 @bot.command(aliases=["endt"])
 @commands.has_any_role("Helpers","Host")
@@ -1840,7 +1840,7 @@ async def endtribute(ctx):
 
   triinfo = discord.Embed(colour=discord.Colour.red())
   triinfo.set_author(name="Tribute Info-")
-  triinfo.add_field(name="Who is dying?-",value=f"**{who} was killed.**",inline="false")
+  triinfo.add_field(name="Who is dying?",value=f"**{who} was killed.**",inline="false")
   triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
   for team in data['teams']:
     data['building'][team]['trihouse']['who']=""
@@ -2050,13 +2050,15 @@ async def lockchat(ctx):
           pins.append(message.content)
     msg=""
     for thing in pins[::-1]:
-      msg+="\n- "+thing
-    await ctx.send(f"Done, Pins are- `{msg}`")
+      msg+="\n "+thing+"\n"
+    tmsg = await ctx.send("​")
+    await tmsg.edit(content=f"Done, Pins are- {msg}")
     dump()
     
 @bot.command(aliases=["toggletri","ttri"])
 @commands.has_any_role("Helpers","Host")
 async def toggletribute(ctx,team):
+    '''Use this to enable or disable tribute for a team <Host>'''
     global data
     if int(gamestate) != 3:
       await ctx.send("There is no game going on right now.")
@@ -2071,6 +2073,69 @@ async def toggletribute(ctx,team):
       data['building'][team]['trihouse']['eligible']=1
       await ctx.send(f"{team}'s tribute eligibility has been set to True. They will be accounted for in tribute.")
     dump()
+
+@bot.command(aliases=["vb"])
+@commands.has_any_role("Helpers","Host")
+async def viewallbids(ctx,code):
+  '''Use this to view all bids of a item. <Host>'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if code not in data['bauction']:
+    await ctx.send("Invalid Code.")
+    return
+  msg="Bids-\n"
+  winner=""
+  wincash=0
+  for team in data['bauction'][code]['biders']:
+    msg+=f"{team} - {data['bauction'][code]['biders'][team]}\n"
+    if data['bauction'][code]['biders'][team]>wincash:
+      wincash=data['bauction'][code]['biders'][team]
+      winner=f"\nWinner is {team} - {wincash}"
+  msg+=winner
+  await ctx.send(msg)
+
+@bot.command(aliases=["vt"])
+@commands.has_any_role("Helpers","Host")
+async def viewalltributes(ctx):
+  '''Use this to view all tribute standings. <Host>'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+    
+  info={}
+  lowest=99999
+  lowestteam=""
+  for team in data['teams']:
+    if data['building'][team]['trihouse']['eligible']==0: 
+      pass
+    else:
+      info[team]=data['building'][team]['trihouse']['cash']
+      data['building'][team]['vault']-=data['building'][team]['trihouse']['cash']
+      if data['building'][team]['trihouse']['cash'] <=lowest:
+        lowestteam=team
+        lowest=data['building'][team]['trihouse']['cash']
+  sort = sorted(info.items(),key = lambda x:x[1],reverse=True)
+  print(sort)
+  text=""
+  for entry in sort:
+	  text+=f"{entry[0]} is paying {entry[1]} \n"
+  
+  try:
+    who=str(data['building'][lowestteam]['trihouse']['who'])
+    guildd=bot.get_guild(448888674944548874)
+    user=discord.utils.get(guildd.members,id=int(who))
+    who=user.mention
+  except:
+    who="Someone Random"
+    await ctx.send("The lowest team has not set a tribute, got None as a person.")
+
+  triinfo = discord.Embed(colour=discord.Colour.red())
+  triinfo.set_author(name="Tribute Info-")
+  triinfo.add_field(name="Who is dying?",value=f"**{who} is going to die.**",inline="false")
+  triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
+  await ctx.send(embed=triinfo)
+
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -2143,7 +2208,7 @@ async def signup(ctx,emoji="Emoji"):
         await ctx.author.remove_roles(role)
         dump()
     
-@bot.command(aliases=["sl"])
+@bot.command(aliases=["sl","list"])
 async def slist(ctx):
     '''Shows a list of everyone signed up.'''
     guildd=bot.get_guild(448888674944548874)
@@ -2450,7 +2515,7 @@ async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
 @bot.command(aliases=["rename"])
 @commands.has_role("Alive")
 async def renamechannel(ctx,*,newname):
-    '''Adds a person to the channel'''
+    '''Renames the channel name. Note that using this multiple times will not work due to rate-limit issues.'''
     if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
         return
@@ -2470,10 +2535,11 @@ async def renamechannel(ctx,*,newname):
         await ctx.send("You probably aren't the owner of this cc.")
 
 
-@bot.command(aliases=["sm"])
+@bot.command(aliases=["sm","give"])
 @commands.has_role("Alive")
 async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
   '''Allows alive players to send money to others.'''
+  global data
   ath=str(ctx.message.author.id)
   if (int(gamestate) != 3):
         await ctx.send("There is no game going on.")
@@ -2503,6 +2569,7 @@ async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
   per=str(member.id)
   data['money'][per]+=int(cash)
   await ctx.send("Done. Sent {} to {} from {}'s account.".format(cash,member.mention,ctx.author.mention))
+  dump()
 
 @bot.command(aliases=["al","alive"])
 async def alivelist(ctx):
@@ -2783,8 +2850,9 @@ async def withdraw(ctx,cash:int):
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
   if cash>data['building'][team]['vault']:
-    await ctx.send("Your vault doesn't hold this much cash.")
-    return
+    #await ctx.send("Your vault doesn't hold this much cash.")
+    raise Exception("Your vault doesn't hold this much cash.")
+    #return
   leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
   if cash>leftmoney:
     await ctx.send("The cash you've requested is more that what you hold in your vault, after subtracting your tribute and bidding costs.")
@@ -2795,7 +2863,6 @@ async def withdraw(ctx,cash:int):
   dump()
 
 @bot.command(aliases=["va"])
-@commands.has_role("Alive")
 async def vault(ctx):
   '''Displays the amount of cash in your team's vault'''
   if int(gamestate)!=3:
@@ -2805,6 +2872,9 @@ async def vault(ctx):
     await ctx.send("You can only use this command in faction channels.")
     return
   ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
   team=data['players'][ath]['team']
   try:
     money=data['building'][team]['vault']
@@ -2813,7 +2883,6 @@ async def vault(ctx):
   await ctx.send("Your team's vault has {}".format(money))
 
 @bot.command(aliases=["dif"])
-@commands.has_role("Alive")
 async def disforge(ctx):
   '''Displays your team's forge level.'''
   if int(gamestate)!=3:
@@ -2823,7 +2892,9 @@ async def disforge(ctx):
     await ctx.send("You can only use this command in faction channels.")
     return
   ath=str(ctx.author.id)
-
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
   team=str(data['players'][ath]['team'])
   forglvl=data['building'][team]['forge']
   cost=int((forglvl*forglvl)*100)
@@ -3192,7 +3263,6 @@ async def joinlottery(ctx,tickets=1):
 
 
 @bot.command(aliases=["mark"])
-@commands.has_role("Alive")
 async def market(ctx):
   '''Use this to display market.'''
   if int(gamestate)!=3:
@@ -3202,6 +3272,9 @@ async def market(ctx):
     await ctx.send("You can only use this command in faction channels.")
     return
   ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
   team=data['players'][ath]['team']
   state=data['building'][team]['market']
   msg="__**MARKET**__\n"
@@ -3210,14 +3283,13 @@ async def market(ctx):
   #if state>0:
   msg+=f"\n__**LVL 1 (Free)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
   #if state>1:
-  msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect someone from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
+  msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
   #if state>2:
-  msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the next night. *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
-  msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the night and make all dead teammates alive instantly (Only if they're in the state respawning.) (This can be only bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
+  msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
+  msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night.) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   await ctx.send(msg)
 
 @bot.command(aliases=["dim"])
-@commands.has_role("Alive")
 async def dismarket(ctx):
   '''Displays your team's market level.'''
   if int(gamestate)!=3:
@@ -3227,6 +3299,9 @@ async def dismarket(ctx):
     await ctx.send("You can only use this command in faction channels.")
     return
   ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
   team=data['players'][ath]['team']
   state=data['building'][team]['market']
 
@@ -3276,7 +3351,7 @@ async def upmarket(ctx):
 @bot.command(aliases=["tbuy"])
 @commands.has_role("Alive")
 async def tmbuy(ctx,num:int):
-  '''Use this to buy something from the market. Use item number to buy.'''
+  '''Use this to buy something from the market. Only use item number to buy.'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
       return
@@ -3288,8 +3363,11 @@ async def tmbuy(ctx,num:int):
   state=data['building'][team]['market']
   cost=data['building'][team]['marketprices'][num]
   if cost>data['money'][ath]:
-    await ctx.send("You cannot afford this.")
-    return
+    try:
+      await withdraw(ctx,cost)
+    except:  
+      await ctx.send("You cannot afford this.")
+      return
   if num==1:
     if state<1:
       await ctx.send("You need to upgrade your market to buy this item.")
@@ -3319,7 +3397,7 @@ async def tmbuy(ctx,num:int):
     if state<2:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
-    item="Respawn Tortem"
+    item="Respawn Totem"
   elif num==7:
     if state<3:
       await ctx.send("You need to upgrade your market to buy this item.")
@@ -3403,7 +3481,9 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   if cash>data['building'][team]['vault']:
     await ctx.send("You do not have that much cash in your vault.")
     return
-
+  if data['building'][team]['trihouse']['eligible']==0:
+    await ctx.send("Your team is not required to set a tribute.")
+    return
   try:
     oldtri=data['building'][team]['trihouse']['cash']
   except:
@@ -3424,6 +3504,28 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   data['building'][team]['trihouse']['cash']=cash
   await ctx.send(f"Done! {person.mention} was set as your tribute person and {cash} is set as your price.")
 
+@bot.command(aliases=["trii","tributeinfo","ct"])
+@commands.has_role("Alive")
+async def checktribute(ctx):
+  '''Allows the king of a team to pick the tribute and cash <King Only.>'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  team=data['players'][ath]['team']
+  if data['building'][team]['trihouse']['eligible']==0:
+    await ctx.send("Your team is not required to set a tribute.")
+  elif data['building'][team]['trihouse']['cash']==0:
+    await ctx.send("Your team has no tribute set.")
+  else:
+    who=str(data['building'][team]['trihouse']['who'])
+    guildd=bot.get_guild(448888674944548874)
+    user=discord.utils.get(guildd.members,id=int(who))
+    await ctx.send(f"Your team's tribute person is {user.name} and the cash is {data['building'][team]['trihouse']['cash']}")
+
 @bot.command(aliases=["store"])
 @commands.has_role("Alive")
 async def storeinstash(ctx,item:str):
@@ -3434,16 +3536,20 @@ async def storeinstash(ctx,item:str):
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
+  l=difflib.get_close_matches(item,data['players'][ath]['inv'])
+  if len(l)==0:
+    await ctx.send("No such item found.")
+    return
   try:
-    data['players'][ath]['inv'].remove(item)
+    data['players'][ath]['inv'].remove(l[0])
   except ValueError:
     await ctx.send("That item was not found in your inventory.")
     return
-  data['building'][team]['stash']['items'].append(item)
-  await ctx.send("Done! Item stored.")
+  data['building'][team]['stash']['items'].append(l[0])
+  await ctx.send(f"Done! Item {l[0]} stored.")
   dump()
 
-@bot.command(aliases=["take"])
+@bot.command(aliases=["take","takefromstash"])
 @commands.has_role("Alive")
 async def removefromstash(ctx,item:str):
   '''Use this to take items from your team stash <Alive>'''
@@ -3453,17 +3559,20 @@ async def removefromstash(ctx,item:str):
     return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
+  l=difflib.get_close_matches(item,data['building'][team]['stash']['items'])
+  if len(l)==0:
+    msg="No such item found."
+    return
   try:
-    data['building'][team]['stash']['items'].remove(item)
+    data['building'][team]['stash']['items'].remove(l[0])
   except ValueError:
     await ctx.send("That item was not found in your stash.")
     return
-  data['players'][ath]['inv'].append(item)
-  await ctx.send("Done! Item taken.")
+  data['players'][ath]['inv'].append(l[0])
+  await ctx.send(f"Done! Item {l[0]} taken.")
   dump()
 
 @bot.command(aliases=["stash"])
-@commands.has_role("Alive")
 async def viewstash(ctx):
   '''Use this to view items in your team vault <Alive>'''
   if int(gamestate)!=3:
@@ -3473,6 +3582,9 @@ async def viewstash(ctx):
     await ctx.send("You can only use this command in faction channels.")
     return
   ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
   team=data['players'][ath]['team']
   msg="You have, in your team stash-\n"
   for item in data['building'][team]['stash']['items']:
