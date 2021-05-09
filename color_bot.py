@@ -38,7 +38,12 @@ intents.presences = True
 profanity.load_censor_words(whitelist_words=['damn'])
 
 bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=intents)
-logging.basicConfig(level=logging.INFO)
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 
 
@@ -339,12 +344,12 @@ async def on_message_delete(message):
       return
     await spamchannel.send("{}'s message `{}` was deleted in <#{}>".format(message.author.name,message.content,message.channel.id))
     
-@bot.event
+'''@bot.event
 async def on_user_update(before,after):
     if before.name==after.name:
         return
     else:
-        await spamchannel.send("'{}' has changed their name to '{}' .".format(before.name,after.name))
+        await spamchannel.send("'{}' has changed their name to '{}' .".format(before.name,after.name))'''
 
 @bot.event
 async def on_raw_reaction_add(payload):
