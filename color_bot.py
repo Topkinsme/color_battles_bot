@@ -2277,9 +2277,19 @@ async def freeghostsay(ctx,*,fmsg):
         fmsg=fmsg.replace(random.choice(alpha),'.')
       for a in range(num):
         fmsg=fmsg.replace(random.choice(alpha),'OOOO')
-      await townc.send("<Ghost> {}".format(fmsg))
-    '''ghosthook = Webhook('https://discordapp.com/api/webhooks/723763897764675616/9c5GmG9WKemUjWv4cEMGVfHrjjmExGvV36JmS38Hep5KqK4nOKYfayzr6OTIQa2rgZ_O')
-    ghosthook.send(msg)'''
+      r=await townc.webhooks()
+      if len(r)<1:
+        await townc.create_webhook(name="Ghost")
+        townc=discord.utils.get(guildd.channels,name="battlefield")
+        r=await townc.webhooks()
+      else:
+        pass
+      id=r[0].id
+      token=r[0].token
+      url=f"https://discord.com/api/webhooks/{id}/{token}"
+      hook = Webhook(url,avatar_url=str(bot.user.avatar_url))#,username=str(member.name),
+      hook.send(fmsg)
+      #await townc.send("<Ghost> {}".format(fmsg))
    
 @bot.command(aliases=["ghs"])
 @commands.has_role("Respawning")
@@ -2300,7 +2310,18 @@ async def ghostsay(ctx,*,msg):
         return
       ath=str(ctx.author.id)
       data['money'][ath]-=25
-      await townc.send("<Ghost> {}".format(msg))
+      r=await townc.webhooks()
+      if len(r)<1:
+        await townc.create_webhook(name="Ghost")
+        townc=discord.utils.get(guildd.channels,name="battlefield")
+        r=await townc.webhooks()
+      else:
+        pass
+      id=r[0].id
+      token=r[0].token
+      url=f"https://discord.com/api/webhooks/{id}/{token}"
+      hook = Webhook(url,avatar_url=str(bot.user.avatar_url))#,username=str(member.name),
+      hook.send(msg)
     dump()
 
 @bot.command(aliases=["tghs"])
@@ -2309,7 +2330,6 @@ async def teamsay(ctx,*,msg):
     '''Use this to send messages to your team as a ghost for 100c.<Respawning>'''
     global data
     guildd=bot.get_guild(448888674944548874)
-    #townc=discord.utils.get(guildd.channels,name="battlefield")
     taboo = "@everyone"
     if taboo in str(msg):
       await ctx.send("Please don't ping @ everyone.")
@@ -2322,7 +2342,18 @@ async def teamsay(ctx,*,msg):
       try:
         team=data['players'][str(ctx.author.id)]['team'] 
         teamc=discord.utils.get(guildd.channels,name=team)
-        await teamc.send("<Ghost> {}".format(msg))
+        r=await teamc.webhooks()
+        if len(r)<1:
+          await teamc.create_webhook(name="Ghost")
+          teamc=discord.utils.get(guildd.channels,name=team)
+          r=await teamc.webhooks()
+        else:
+          pass
+        id=r[0].id
+        token=r[0].token
+        url=f"https://discord.com/api/webhooks/{id}/{token}"
+        hook = Webhook(url,avatar_url=str(bot.user.avatar_url))#,username=str(member.name),
+        hook.send(msg)
       except:
         print("There was some error.")
     dump()
