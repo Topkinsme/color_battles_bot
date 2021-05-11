@@ -638,12 +638,19 @@ async def reset(ctx):
      
 @bot.command(aliases=["sub"])
 @commands.has_role("Informer")
-async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
+async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="Emoji"):
   '''Use this command to sub people in the game. <Informer>'''
   global data
   if (int(gamestate) != 3):
       await ctx.send("There is no game going on.")
       return
+  if emoji not in emj.UNICODE_EMOJI["en"]:
+          await ctx.send("That is not a valid emoji.")
+          return
+  for people in data['signedup']:
+      if emoji == data['signedup'][people]['emoji']:
+            await ctx.send("That emoji has already been used. Please pick another one.")
+            return
   athiap=str(inactivep.id)
   athap=str(activep.id)
   if athiap not in data['signedup']:
@@ -661,7 +668,8 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   await activep.add_roles(role)
   role = discord.utils.get(guildd.roles, name="Alive")
   await activep.add_roles(role)
-  data['signedup'][athap] = 1
+  data['signedup'][athap]={}
+  data['signedup'][athap]['emoji'] = emoji
   data['signedup'].pop(athiap)
   data['money'][athap]=data['money'][athiap]
   data['players'][athap]['role']=data['players'][athiap]['role']
@@ -669,6 +677,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   data['players'][athap]['state']=1
   data['players'][athap]['msg']=0
   data['players'][athap]['inv']=[]
+  data['players'][athap]['emoji']=data['signedup'][athap]['emoji']
   for item in data['players'][athiap]['inv']:
       data['players'][athap]['inv'].append(item)
   #
@@ -692,12 +701,15 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member):
   chnl = discord.utils.get(guildd.channels,name=chnlname)
   await chnl.set_permissions(activep, read_messages=True,send_messages=True,add_reactions=True)
   await chnl.set_permissions(inactivep, read_messages=True,send_messages=False,add_reactions=True)
-  data['smarket']['inv'][athap]={}
-  data['smarket']['inv'][athap]['sun']=data['smarket']['inv'][athiap]['sun']
-  data['smarket']['inv'][athap]['smirk']=data['smarket']['inv'][athiap]['smirk']
-  data['smarket']['inv'][athap]['smile']=data['smarket']['inv'][athiap]['smile']
-  data['smarket']['inv'][athap]['joy']=data['smarket']['inv'][athiap]['joy']
-  data['smarket']['inv'][athap]['pens']=data['smarket']['inv'][athiap]['pens']
+  try:
+    data['smarket']['inv'][athap]={}
+    data['smarket']['inv'][athap]['sun']=data['smarket']['inv'][athiap]['sun']
+    data['smarket']['inv'][athap]['smirk']=data['smarket']['inv'][athiap]['smirk']
+    data['smarket']['inv'][athap]['smile']=data['smarket']['inv'][athiap]['smile']
+    data['smarket']['inv'][athap]['joy']=data['smarket']['inv'][athiap]['joy']
+    data['smarket']['inv'][athap]['pens']=data['smarket']['inv'][athiap]['pens']
+  except:
+    await ctx.send("The inactive person either had no market, or that part had some issue.")
   dump()
   await ctx.send("Done.")
 
@@ -1632,7 +1644,7 @@ async def closeblindauction(ctx,code):
 @bot.command(aliases=["rmm"])
 @commands.has_any_role("Helpers","Host")
 async def resetstockmarket(ctx):
-  '''Use this to start stock market'''
+  '''Use this to reset stock market'''
   if int(gamestate)!=3:
     await ctx.send("There is no game going on right now.")
     return
@@ -2980,7 +2992,7 @@ async def stockinventory(ctx):
   c=data['smarket']['inv'][ath]['smile']
   d=data['smarket']['inv'][ath]['joy']
   e=data['smarket']['inv'][ath]['pens']
-  await ctx.send("You have- \n {} of :sunglasses: \n {} of :smirk: \n {} of :smiley: \n {} of :joy: \n {} of :pensive: ".format(a,b,c,d,e))
+  await ctx.send("You have these stocks- \n {} of :sunglasses: \n {} of :smirk: \n {} of :smiley: \n {} of :joy: \n {} of :pensive: ".format(a,b,c,d,e))
   dump()
 
 @bot.command(aliases=["sbuy","by"])
@@ -3467,8 +3479,9 @@ async def inventory(ctx):
   if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
     await ctx.send("You can only use this command in faction channels.")
     return
+  await stockinventory(ctx)
   ath=str(ctx.author.id)
-  msg="You have-\n"
+  msg="You have these items-\n"
   for item in data['players'][ath]['inv']:
     msg+="{}\n".format(item)
   await ctx.send(msg)
@@ -3657,7 +3670,7 @@ async def rolehelp(role,chnl):
       if rolen in a[b]:
         folder=b
     msg="```\n"+repo.get_contents(f"{folder}/{rolen}").decoded_content.decode("utf-8")+"\n```"
-    await chnl.send(msg)
+    msg = await chnl.send(msg)
     return msg
 
 async def change():
