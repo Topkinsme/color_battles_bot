@@ -24,8 +24,8 @@ import io
 import emoji as emj
 import typing
 import math
-import github3
 import difflib
+from github import Github
 
 
 token = str(os.environ.get("tokeno"))
@@ -821,29 +821,31 @@ async def ban(ctx,member:discord.Member):
 @commands.has_role("Helpers")
 async def genroles(ctx):
     '''Allows you to generate all roles in a chat. <Helpers>'''
-    king=["king"]
-    power=["assassin","barricader","bomber","builder","chief_knight","curse_caster","death_swapper","demolitionist","disabler","disguiser","finisher","guard","healer","jailor","life_transferrer","magician","merchant","minister","negotiator","observer","painter","potion_master","priest","prince","protector_knight","rich_person","robber","role_copier","seer","supreme_knight","tank_master","truth_seeker","weapon_smith","wizard"]
-    solo=["anarchist","cult_leader","double_agent","evil_prince","gem_trader","item_agent","joker","kidnapper","killer","postman","town_leader"]
-    warriors=["alert_warrior","camo_warrior","chief_warrior","ex-warrior","strong_warrior","warrior"]
-    mafia=["godfather","goon"]
-    gl=king+warriors+power+solo+mafia
+    g = Github(str(os.environ.get("gitkey")))
+    repo = g.get_repo("Topkinsme/Color-Battle-Roles")
+    l=repo.get_contents("")
+    a={}
+    for thing in l:
+      if thing.name=="README.md":
+        continue
+      a[thing.name]=[]
+      for thingg in repo.get_contents(thing.name):
+        a[thing.name].append(thingg.name)
+
+    gl=[]
+    for b in a.keys():
+      gl.extend(a[b])
+
     for role in gl:
-      if role in king:
-        cat="king"
-      elif role in power:
-        cat="power"
-      elif role in solo:
-        cat="solo"
-      elif role in warriors:
-        cat="warriors"
-      elif role in mafia:
-        cat="mafia"
-    
-      g=github3.login(token=str(os.environ.get("gitkey")))
-      r=g.repository("Topkinsme","Color-Battle-Roles")
-      msg="** **\n```\n"+r.file_contents(f"{cat}/{role}").decoded.decode("utf-8")+"```"
+      folder=""
+      rolen=role
+      for b in a.keys():
+        if rolen in a[b]:
+          folder=b
+      msg="** **\n```\n"+repo.get_contents(f"{folder}/{rolen}").decoded_content.decode("utf-8")+"```"
       await asyncio.sleep(1)
       msg = await ctx.send(msg)
+
 #host
 
 
@@ -3629,56 +3631,33 @@ async def role(ctx,*,role="l"):
 
 async def rolehelp(role,chnl):
     role=role.lower() 
-    king=["king"]
-    power=["assassin","barricader","bomber","builder","chief_knight","curse_caster","death_swapper","demolitionist","disabler","disguiser","finisher","guard","healer","jailor","life_transferrer","magician","merchant","minister","negotiator","observer","painter","potion_master","priest","prince","protector_knight","rich_person","robber","role_copier","seer","supreme_knight","tank_master","truth_seeker","weapon_smith","wizard"]
-    solo=["anarchist","cult_leader","double_agent","evil_prince","gem_trader","item_agent","joker","kidnapper","killer","postman","town_leader"]
-    warriors=["alert_warrior","camo_warrior","chief_warrior","ex-warrior","strong_warrior","warrior"]
-    mafia=["godfather","goon"]
 
-    gl=king+warriors+power+solo+mafia
-    if role in king:
-      cat="king"
-    elif role in power:
-      cat="power"
-    elif role in solo:
-      cat="solo"
-    elif role in warriors:
-      cat="warriors"
-    elif role in mafia:
-      cat="mafia"
-    elif role=="l" or role=="list":
-      msg="The roles are-\n```\n"
-      for thing in gl:
-        msg+=thing
-        msg+="\n"
-      msg+="```"
-      msg = await chnl.send(msg)
-      return msg
-    else:
-      for thing in gl:
-        l=difflib.get_close_matches(role,gl)
-      if len(l)==0:
+    g = Github(str(os.environ.get("gitkey")))
+    repo = g.get_repo("Topkinsme/Color-Battle-Roles")
+    l=repo.get_contents("")
+    a={}
+    for thing in l:
+      if thing.name=="README.md":
+        continue
+      a[thing.name]=[]
+      for thingg in repo.get_contents(thing.name):
+        a[thing.name].append(thingg.name)
+
+    gl=[]
+    for b in a.keys():
+      gl.extend(a[b])
+    l=difflib.get_close_matches(role,gl)
+    if len(l)==0:
         msg="No such role found."
-        msg = await chnl.send(msg)
-        return msg
-      else:
-        role=l[0]
-        if role in king:
-          cat="king"
-        elif role in power:
-          cat="power"
-        elif role in solo:
-          cat="solo"
-        elif role in warriors:
-          cat="warriors"
-        elif role in mafia:
-          cat="mafia"
-      
-    g=github3.login(token=str(os.environ.get("gitkey")))
-    r=g.repository("Topkinsme","Color-Battle-Roles")
-    msg="```\n"+r.file_contents(f"{cat}/{role}").decoded.decode("utf-8")+"```"
-
-    msg = await chnl.send(msg)
+        await chnl.send(msg)
+        return
+    folder=""
+    rolen=l[0]
+    for b in a.keys():
+      if rolen in a[b]:
+        folder=b
+    msg="```\n"+repo.get_contents(f"{folder}/{rolen}").decoded_content.decode("utf-8")+"\n```"
+    await chnl.send(msg)
     return msg
 
 async def change():
