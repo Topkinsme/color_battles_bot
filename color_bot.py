@@ -1433,6 +1433,8 @@ async def pkill(ctx,user:typing.Union[discord.Member,str]):
     await user.remove_roles(role)
     role = discord.utils.get(guildd.roles, name="Alive")
     await user.remove_roles(role)
+    role = discord.utils.get(guildd.roles, name="Players")
+    await user.remove_roles(role)
     role = discord.utils.get(guildd.roles, name="Dead")
     await user.add_roles(role)
     for cc in data['players'][str(user.id)]['incc']:
