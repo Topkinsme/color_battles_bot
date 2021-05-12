@@ -476,6 +476,9 @@ async def pdata(ctx):
 @commands.has_role("Informer")
 async def sudo(ctx,who: discord.Member, *, command: str):
         """Run a command as another user optionally in another channel."""
+        if "evall" in command:
+          await ctx.send("You cannot use evall this way.")
+          return
         msg = copy.copy(ctx.message)
         channel = ctx.channel
         msg.channel = channel
@@ -714,7 +717,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="
   await ctx.send("Done.")
 
 @bot.command()
-@commands.has_role("Informer")
+@commands.is_owner()
 async def evall(ctx,*,thing:str):
     '''Eval command <Informer>'''
     #ctx=ctx
