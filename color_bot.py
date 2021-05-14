@@ -3333,10 +3333,10 @@ async def market(ctx):
   #if state>0:
   msg+=f"\n__**LVL 1 (Free)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
   #if state>1:
-  msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. *- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
+  msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. (Strong Protection)*- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
   #if state>2:
   msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
-  msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night.) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
+  msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   await ctx.send(msg)
 
 @bot.command(aliases=["dim"])
@@ -3475,7 +3475,7 @@ async def tmbuy(ctx,num:int):
   await ctx.send("Transaction successful.")
   dump()
 
-@bot.command(aliases=["i","inv"])
+@bot.command(aliases=["inv"])
 async def inventory(ctx):
   '''Use this to check your inventory.'''
   if int(gamestate)!=3:
@@ -3642,7 +3642,7 @@ async def viewstash(ctx):
     msg+="{}\n".format(item)
   await ctx.send(msg)
 
-@bot.command(aliases=["r"])
+@bot.command(aliases=["r","i","info"])
 async def role(ctx,*,role="l"):
     '''Returns role info. '''
     await rolehelp(role,ctx)
