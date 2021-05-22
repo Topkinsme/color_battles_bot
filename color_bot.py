@@ -69,11 +69,13 @@ async def on_ready():
     global data
     global annchannel
     global spamchannel
+    global welcomechannel
     global gamestate
     global lstmsg
     global gifted
     global svari
     spamchannel=bot.get_channel(450698253508542474)
+    welcomechannel=bot.get_channel(448889376634830859)
     await spamchannel.send("The bot is online!")
     lstmsg={}
     try:
@@ -328,6 +330,8 @@ async def on_command_error(ctx,error):
 @bot.event
 async def on_member_join(member):
     await spamchannel.send("{} joined the server".format(member.mention))
+    await welcomechannel.send(f"Welcome to the server, {member.mention}!")
+    await member.send("Thank you for joining Colour Battles discord mini-game server! We gladly welcome you here.:smile: \n Before you play , do read the rules and what you need to know before you play the game. \n Have fun! :tada:")
     
 @bot.event
 async def on_member_remove(member):
