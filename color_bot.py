@@ -2134,7 +2134,6 @@ async def viewalltributes(ctx):
       pass
     else:
       info[team]=data['building'][team]['trihouse']['cash']
-      data['building'][team]['vault']-=data['building'][team]['trihouse']['cash']
       if data['building'][team]['trihouse']['cash'] <=lowest:
         lowestteam=team
         lowest=data['building'][team]['trihouse']['cash']
@@ -2872,7 +2871,7 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
   team=data['players'][ath]['team']
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
-  rolet=data['rt'][role]['lirole']
+  rolet=(data['rt'][role]['lirole']).lower()
   if rolet!="king" and rolet!="prince": 
     await ctx.send("You are not a king or a prince. Please only use this command if your role is King or a prince.")
     return
@@ -3526,7 +3525,7 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   team=data['players'][ath]['team']
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
-  rolet=data['rt'][role]['lirole']
+  rolet=(data['rt'][role]['lirole']).lower()
   if rolet!="king" and rolet!="prince": 
     await ctx.send("You are not a king or a prince. Please only use this command if your role is King or a prince.")
     return
