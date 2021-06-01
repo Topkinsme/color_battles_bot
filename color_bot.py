@@ -2742,7 +2742,7 @@ async def blindbid(ctx,code,cash:int):
     return
 
   try:
-    oldbid=data['bauction'][code]['biders'][team]
+    oldbid=int(data['bauction'][code]['biders'][team])
   except:
     #no old bid
     oldbid=0
@@ -3338,7 +3338,7 @@ async def market(ctx):
   #if state>1:
   msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. (Strong Protection)*- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
   #if state>2:
-  msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make 1 of your attacks pass through any form of protection for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
+  msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
   msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   await ctx.send(msg)
 
@@ -3615,7 +3615,7 @@ async def removefromstash(ctx,item:str):
   team=data['players'][ath]['team']
   l=difflib.get_close_matches(item,data['building'][team]['stash']['items'])
   if len(l)==0:
-    msg="No such item found."
+    await ctx.send("No such item found.")
     return
   try:
     data['building'][team]['stash']['items'].remove(l[0])
