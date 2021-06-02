@@ -41,9 +41,9 @@ bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=i
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-logger.addHandler(handler)
+#handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+#handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+#logger.addHandler(handler)
 
 
 
@@ -325,6 +325,10 @@ async def on_message(message):
 @bot.event
 async def on_command_error(ctx,error):
     await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')
+
+@bot.event
+async def on_command(ctx):
+    await spamchannel.send(f"`{ctx.message.content}` was used in <#{ctx.message.channel.id}> by {ctx.message.author.name}.")
 
 
 @bot.event
@@ -1266,8 +1270,13 @@ async def listallr(ctx):
     msg = await ctx.send("​")
     await msg.edit(content=temp)
 
+@bot.group(invoke_without_command=True,aliases=["rl"])
+async def rolelist(ctx):
+    '''Main command group of rolelist.'''
+    await ctx.send("You did not type in any sub command. Type `!help rolelist` to learn about the possible subcommands.")
 
-@bot.command(aliases=["ar"])
+
+@rolelist.command(aliases=["ar","add"])
 @commands.has_any_role("Helpers","Host")
 async def addrole(ctx,role,team,soloq=0,*,litrole):
     '''Adds roles to the role list.(Similar roles must be entered with a number after them , teams can anything, but repeat teams will make them have the same teams. Solos need to have a different team. <Helpers>'''
@@ -1286,7 +1295,7 @@ async def addrole(ctx,role,team,soloq=0,*,litrole):
     await ctx.send("{} added for the team {}.".format(role,team))
     dump()
     
-@bot.command(aliases=["rr"])
+@rolelist.command(aliases=["rr","remove"])
 @commands.has_any_role("Helpers","Host")
 async def removerole(ctx,role,team):
     '''Removes a role from the role list. <Helpers>'''
@@ -1299,7 +1308,7 @@ async def removerole(ctx,role,team):
     await ctx.send("{} removed.".format(role))
     dump()
    
-@bot.command(aliases=["lr"])
+@rolelist.command(aliases=["lr","view"])
 @commands.has_any_role("Helpers","Host")
 async def listroles(ctx):
     '''Prints the entire role list. <Helpers>'''
@@ -1320,7 +1329,7 @@ async def listroles(ctx):
       msg = await ctx.send("​")
       await msg.edit(content=temp)
     
-@bot.command(aliases=["cr"])
+@rolelist.command(aliases=["cr","clear"])
 @commands.has_any_role("Helpers","Host")
 async def clearroles(ctx):
     '''Removes all roles from the list. <Helpers>'''
@@ -1825,7 +1834,13 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
     return
   await ctx.send(f"Done. Removed {item}.")
 
-@bot.command(aliases=["endt"])
+@bot.group(invoke_without_command=True,aliases=["tri"])
+async def tribute(ctx):
+    '''Main command group of tribute.'''
+    await ctx.send("You did not type in any sub command. Type `!help tribute` to learn about the possible subcommands.")
+
+
+@tribute.command(aliases=["endt","end"])
 @commands.has_any_role("Helpers","Host")
 async def endtribute(ctx):
   '''Use this to commence the tributing. <Helper>'''
@@ -1849,7 +1864,7 @@ async def endtribute(ctx):
   print(sort)
   text=""
   for entry in sort:
-	  text+=f"{entry[0]} paid {entry[1]} \n"
+	  text+=f"{entry[0]} paid {entry[1]} for {data['building'][entry[0]]['trihouse']['who']}\n"
   
   try:
     who=str(data['building'][lowestteam]['trihouse']['who'])
@@ -1871,6 +1886,65 @@ async def endtribute(ctx):
     data['building'][team]['trihouse']['cash']=0
   await ctx.send(embed=triinfo)
   dump()
+
+@tribute.command(aliases=["toggletri","ttri","toggle"])
+@commands.has_any_role("Helpers","Host")
+async def toggletribute(ctx,team):
+    '''Use this to enable or disable tribute for a team <Host>'''
+    global data
+    if int(gamestate) != 3:
+      await ctx.send("There is no game going on right now.")
+      return
+    if team not in data['building']:
+      await ctx.send("That is not a valid team.")
+      return
+    if data['building'][team]['trihouse']['eligible']==1:
+      data['building'][team]['trihouse']['eligible']=0
+      await ctx.send(f"{team}'s tribute eligibility has been set to False. They will no longer be accounted for.")
+    else:
+      data['building'][team]['trihouse']['eligible']=1
+      await ctx.send(f"{team}'s tribute eligibility has been set to True. They will be accounted for in tribute.")
+    dump()
+
+@tribute.command(aliases=["vt","all"])
+@commands.has_any_role("Helpers","Host")
+async def viewalltributes(ctx):
+  '''Use this to view all tribute standings. <Host>'''
+  #if int(gamestate)!=3:
+    #await ctx.send("There is no game going on.")
+    #return
+    
+  info={}
+  lowest=99999
+  lowestteam=""
+  for team in data['teams']:
+    if data['building'][team]['trihouse']['eligible']==0: 
+      pass
+    else:
+      info[team]=data['building'][team]['trihouse']['cash']
+      if data['building'][team]['trihouse']['cash'] <=lowest:
+        lowestteam=team
+        lowest=data['building'][team]['trihouse']['cash']
+  sort = sorted(info.items(),key = lambda x:x[1],reverse=True)
+  print(sort)
+  text=""
+  for entry in sort:
+	  text+=f"{entry[0]} is paying {entry[1]} for {data['building'][entry[0]]['trihouse']['who']}\n"
+  
+  try:
+    who=str(data['building'][lowestteam]['trihouse']['who'])
+    guildd=bot.get_guild(448888674944548874)
+    user=discord.utils.get(guildd.members,id=int(who))
+    who=user.mention
+  except:
+    who="Someone Random"
+    await ctx.send("The lowest team has not set a tribute, got None as a person.")
+
+  triinfo = discord.Embed(colour=discord.Colour.red())
+  triinfo.set_author(name="Tribute Info-")
+  triinfo.add_field(name="Who is dying?",value=f"**{who} is going to die.**",inline="false")
+  triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
+  await ctx.send(embed=triinfo)
 
 @bot.command(aliases=["ap"])
 @commands.has_any_role("Helpers","Host")
@@ -1904,7 +1978,12 @@ async def advancephase(ctx,cost=100):
   data['lottery']+=500
   dump()
 
-@bot.command(aliases=["cp"])
+@bot.group(invoke_without_command=True,aliases=["peopoll","mpoll"])
+async def peoplepoll(ctx):
+    '''Main command group of poll.'''
+    await ctx.send("You did not type in any sub command. Type `!help poll` to learn about the possible subcommands.")
+
+@peoplepoll.command(aliases=["cp","create"])
 @commands.has_any_role("Helpers","Host")
 async def createpoll(ctx):
   '''Allows the host to create a poll. <Helper>'''
@@ -1963,7 +2042,7 @@ async def createpoll(ctx):
       data['poll'][code]['msgid'].append(str(msgg.id))
   dump()
 
-@bot.command(aliases=["clp"])
+@peoplepoll.command(aliases=["clp","close"])
 @commands.has_any_role("Helpers","Host")
 async def closepoll(ctx,code):
     '''Command that allows you to close polls. <Helper>'''
@@ -2077,25 +2156,6 @@ async def lockchat(ctx):
     tmsg = await ctx.send("​")
     await tmsg.edit(content=f"Done, Pins are- {msg}")
     dump()
-    
-@bot.command(aliases=["toggletri","ttri"])
-@commands.has_any_role("Helpers","Host")
-async def toggletribute(ctx,team):
-    '''Use this to enable or disable tribute for a team <Host>'''
-    global data
-    if int(gamestate) != 3:
-      await ctx.send("There is no game going on right now.")
-      return
-    if team not in data['building']:
-      await ctx.send("That is not a valid team.")
-      return
-    if data['building'][team]['trihouse']['eligible']==1:
-      data['building'][team]['trihouse']['eligible']=0
-      await ctx.send(f"{team}'s tribute eligibility has been set to False. They will no longer be accounted for.")
-    else:
-      data['building'][team]['trihouse']['eligible']=1
-      await ctx.send(f"{team}'s tribute eligibility has been set to True. They will be accounted for in tribute.")
-    dump()
 
 @bot.command(aliases=["vb"])
 @commands.has_any_role("Helpers","Host")
@@ -2118,45 +2178,19 @@ async def viewallbids(ctx,code):
   msg+=winner
   await ctx.send(msg)
 
-@bot.command(aliases=["vt"])
+@bot.command(aliases=["d"])
 @commands.has_any_role("Helpers","Host")
-async def viewalltributes(ctx):
-  '''Use this to view all tribute standings. <Host>'''
-  if int(gamestate)!=3:
-    await ctx.send("There is no game going on.")
-    return
-    
-  info={}
-  lowest=99999
-  lowestteam=""
-  for team in data['teams']:
-    if data['building'][team]['trihouse']['eligible']==0: 
-      pass
-    else:
-      info[team]=data['building'][team]['trihouse']['cash']
-      if data['building'][team]['trihouse']['cash'] <=lowest:
-        lowestteam=team
-        lowest=data['building'][team]['trihouse']['cash']
-  sort = sorted(info.items(),key = lambda x:x[1],reverse=True)
-  print(sort)
-  text=""
-  for entry in sort:
-	  text+=f"{entry[0]} is paying {entry[1]} \n"
-  
-  try:
-    who=str(data['building'][lowestteam]['trihouse']['who'])
-    guildd=bot.get_guild(448888674944548874)
-    user=discord.utils.get(guildd.members,id=int(who))
-    who=user.mention
-  except:
-    who="Someone Random"
-    await ctx.send("The lowest team has not set a tribute, got None as a person.")
-
-  triinfo = discord.Embed(colour=discord.Colour.red())
-  triinfo.set_author(name="Tribute Info-")
-  triinfo.add_field(name="Who is dying?",value=f"**{who} is going to die.**",inline="false")
-  triinfo.add_field(name="Who paid the most and the least?",value=text,inline="false")
-  await ctx.send(embed=triinfo)
+async def delay(ctx,timee:int,*,command:str):
+  '''Use this command to delay commands'''
+  await ctx.send(f"Will execute `{command}` in `{timee}` seconds.")
+  await asyncio.sleep(timee)
+  msg = copy.copy(ctx.message)
+  channel = ctx.channel
+  msg.channel = channel
+  msg.author = ctx.author
+  msg.content = ctx.prefix + command
+  new_ctx = await bot.get_context(msg, cls=type(ctx))
+  await bot.invoke(new_ctx)
 
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
@@ -2279,7 +2313,7 @@ async def bal(ctx):
 @bot.command(aliases=["fghs"])
 @commands.has_role("Respawning")
 async def freeghostsay(ctx,*,fmsg):
-    '''Use to send messages into town hall as a ghost for free!! <Respawning>'''
+    '''Use to send messages into battlefield as a ghost for free!! <Respawning>'''
     guildd=bot.get_guild(448888674944548874)
     townc=discord.utils.get(guildd.channels,name="battlefield")
     taboo = "@everyone"
@@ -2316,7 +2350,7 @@ async def freeghostsay(ctx,*,fmsg):
 @bot.command(aliases=["ghs"])
 @commands.has_role("Respawning")
 async def ghostsay(ctx,*,msg):
-    '''Use this to send messages into town hall as a ghost for a price of 25c <Respawning>'''
+    '''Use this to send messages into battlefield as a ghost for a price of 25c <Respawning>'''
     global data
     guildd=bot.get_guild(448888674944548874)
     townc=discord.utils.get(guildd.channels,name="battlefield")
@@ -2380,7 +2414,12 @@ async def teamsay(ctx,*,msg):
         print("There was some error.")
     dump()
 
-@bot.command(aliases=["cc"])
+@bot.group(invoke_without_command=True,aliases=["cc"])
+async def channel(ctx):
+    '''Main command group of channel.'''
+    await ctx.send("You did not type in any sub command. Type `!help cc` to learn about the possible subcommands.")
+
+@channel.command(aliases=["create"])
 @commands.has_role("Alive")
 async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     '''Used to create a communication channel. Costs 50c.'''
@@ -2498,7 +2537,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     await ctx.send("Channel created.")
     dump()
 
-@bot.command(aliases=["add"])
+@channel.command(aliases=["add"])
 @commands.has_role("Alive")
 async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Adds a person to the channel'''
@@ -2533,7 +2572,7 @@ async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
     else:
         await ctx.send("You probably aren't the owner of this cc.")
         
-@bot.command(aliases=["remove"])
+@channel.command(aliases=["remove"]) 
 @commands.has_role("Alive")
 async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Removes a person from the channel'''
@@ -2565,7 +2604,7 @@ async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
     else:
         await ctx.send("You probably aren't the owner of this cc.")
 
-@bot.command(aliases=["rename"])
+@channel.command(aliases=["rename"])
 @commands.has_role("Alive")
 async def renamechannel(ctx,*,newname):
     '''Renames the channel name. Note that using this multiple times will not work due to rate-limit issues.'''
@@ -2933,7 +2972,7 @@ async def vault(ctx):
     money=data['building'][team]['vault']
   except:
     money=0
-  await ctx.send("Your team's vault has {}".format(money))
+  await ctx.send(f"Your team's vault has {money}, out of which {money-data['building'][team]['stash']['smoney']} can be used.")
 
 @bot.command(aliases=["dif"])
 async def disforge(ctx):
@@ -2974,7 +3013,7 @@ async def upforge(ctx):
     return
   leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
   if cost>leftmoney:
-    await ctx.send("The cash you've tried to bid with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    await ctx.send("The cash you've tried to upgrade your forge with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
     return
 
   data['building'][team]['vault']-=cost
@@ -3365,7 +3404,7 @@ async def dismarket(ctx):
   elif state==2:
     text= "The next upgrade costs 1000."
   elif state==3:
-    text= "The nest upgrade costs 1000."
+    text= "The next upgrade costs 1000."
   else:
     text= "Your market has been maxed out."
   await ctx.send(f"Your team's market is on level {state}.{text}")
@@ -3494,7 +3533,7 @@ async def inventory(ctx):
     msg+="{}\n".format(item)
   await ctx.send(msg)
 
-@bot.command(aliases=["tri","tribute"])
+@tribute.command(aliases=["tri","tribute","pick"])
 @commands.has_role("Alive")
 async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   '''Allows the king of a team to pick the tribute and cash <King Only.>'''
@@ -3558,7 +3597,7 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   data['building'][team]['trihouse']['cash']=cash
   await ctx.send(f"Done! {person.mention} was set as your tribute person and {cash} is set as your price.")
 
-@bot.command(aliases=["trii","tributeinfo","ct"])
+@tribute.command(aliases=["tributeinfo","ct","check"])
 @commands.has_role("Alive")
 async def checktribute(ctx):
   '''Allows the king of a team to pick the tribute and cash <King Only.>'''
@@ -3752,8 +3791,6 @@ async def score(ath,msg):
             dump()
     else:
           coins=[10,20]
-          dcoins=[5,10]
-          
           if not ath in earnd:
             if not str(ath) in lstmsg:
               lstmsg[str(ath)]=" "
@@ -3762,18 +3799,6 @@ async def score(ath,msg):
             if len(msg)<10:
               return
             else:
-              try:
-                if data['players'][ath]['state'] ==0:
-                    add= random.choice(dcoins)
-                    data['money'][ath]+=int(add)
-                    earnd.append(ath)
-                    lstmsg[str(ath)]=msg
-                else:
-                  add= random.choice(coins)
-                  data['money'][ath]+=int(add)
-                  earnd.append(ath)
-                  lstmsg[str(ath)]=msg
-              except KeyError:
                 add= random.choice(coins)
                 data['money'][ath]+=int(add)
                 earnd.append(ath)
