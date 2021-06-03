@@ -790,7 +790,30 @@ async def evall(ctx,*,thing:str):
             else:
                 #self._last_result = ret
                 await ctx.send(f'```py\n{value}{ret}\n```')
-    
+
+@bot.command()
+@commands.has_role("Informer")
+async def reroll(ctx):
+  '''Use this to reroll game without resigning up or any of that. Note that this will not change anything, so any mistakes when inputing roles cannot be fixed this way. Use evall to fix that before rerolling.'''
+  global data
+  signeduptemp=data['signedup'].copy()
+  rolestemp=data['roles'].copy()
+  rttemo=data['rt'].copy()
+  codetemp=data['code']['gamecode']
+  await endgame(ctx)
+  await reset(ctx)
+  await opensignups(ctx)
+  data['signedup']=signeduptemp
+  await closesignups(ctx)
+  data['roles']=rolestemp
+  data['rt']=rttemo
+  await start(ctx,codetemp,2)
+  dump()
+
+
+
+
+
 #moderator/helper
 
 @bot.command(aliases=["v","dem"])
