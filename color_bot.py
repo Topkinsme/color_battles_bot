@@ -21,7 +21,6 @@ import copy, inspect
 from better_profanity import profanity
 import textwrap
 import io
-import emoji as emj
 import typing
 import math
 import difflib
@@ -273,7 +272,7 @@ async def on_message(message):
     fath=message.author
     channel = message.channel
     guildd=message.guild
-    await score(ath,message.content)
+    await score(ath,message.content,message.channel.category)
     if message.channel.name=="battlefield":
       n = random.randint(1,500)
       cash = random.randint(300,500)
@@ -655,9 +654,13 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="
   if (int(gamestate) != 3):
       await ctx.send("There is no game going on.")
       return
-  if emoji not in emj.UNICODE_EMOJI["en"]:
+  #check
+  try:
+          await ctx.message.add_reaction(emoji)
+  except:
           await ctx.send("That is not a valid emoji.")
           return
+  await ctx.message.clear_reactions()
   for people in data['signedup']:
       if emoji == data['signedup'][people]['emoji']:
             await ctx.send("That emoji has already been used. Please pick another one.")
@@ -949,8 +952,18 @@ async def advancedpoll(ctx,timee:int,*,message):
     if other>0:
        cont+=f" {other} ({otherp}) voted something that wasn't even an option."
     await a.edit(content=cont)
-    
-@bot.command(aliases=["rc"])
+
+@bot.group(invoke_without_command=True,aliases=["mdy"])
+async def modify(ctx):
+    '''Main command group of modify.'''
+    await ctx.send("That is not a valid subcommand. Type `!help mdy` to learn about the possible subcommands.")
+
+@modify.group(invoke_without_command=True)
+async def cash(ctx):
+    '''Sub-Main command group of modify.'''
+    await ctx.send("That is not a valid subcommand. Type `!help mdy cash` to learn about the possible subcommands.")
+
+@cash.command(aliases=["rc"])
 @commands.has_any_role("Helpers","Host")
 async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Removes a certain amount of cash from a person. <Helper>'''
@@ -958,7 +971,10 @@ async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -973,7 +989,7 @@ async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     data['money'][str(member.id)]-=int(cash)
     await ctx.send("{} has been reduced from {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
     
-@bot.command(aliases=["ac"])
+@cash.command(aliases=["ac"])
 @commands.has_any_role("Helpers","Host")
 async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Adds a certain amount of cash to a person's balance. <Helper>'''
@@ -981,7 +997,10 @@ async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -998,10 +1017,10 @@ async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
 @bot.group(invoke_without_command=True,aliases=["gs"])
 async def signups(ctx):
     '''Main command group of signups.'''
-    await ctx.send("You did not type in any sub command. Type `!help gs` to learn about the possible subcommands.")
+    await ctx.send("That is not a valid subcommand. Type `!help gs` to learn about the possible subcommands.")
 
 
-@signups.command(aliases=["gso"])
+@signups.command(aliases=["gso","open","o"])
 @commands.has_any_role("Helpers","Host")
 async def opensignups(ctx):
     '''Opens signups. <Helpers>'''
@@ -1017,7 +1036,7 @@ async def opensignups(ctx):
     await bot.change_presence(activity=discord.Game(name="Signups open!", type=1))
     dump()
     
-@signups.command(aliases=["gsc"])
+@signups.command(aliases=["gsc","close","c"])
 @commands.has_any_role("Helpers","Host")
 async def closesignups(ctx):
     '''Closes signups. <Helpers>'''
@@ -1184,6 +1203,7 @@ async def assignroles(ctx,code):
         data['building'][team]['forge']=1
         data['building'][team]['market']=1
         data['building'][team]['trihouse']['eligible']=1
+      data['building'][team]['office']=1
       data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
       data['building'][team]['stash']['smoney']=0
@@ -1264,7 +1284,7 @@ async def assignroles(ctx,code):
     await listallr(ctx)
     dump()    
     
-@bot.command(aliases=["a"])
+@bot.command(aliases=["lar"])
 @commands.has_any_role("Helpers","Host")
 async def listallr(ctx):
     '''Lists everyone's roles. <Helpers>'''
@@ -1279,7 +1299,7 @@ async def listallr(ctx):
 @bot.group(invoke_without_command=True,aliases=["rl"])
 async def rolelist(ctx):
     '''Main command group of rolelist.'''
-    await ctx.send("You did not type in any sub command. Type `!help rolelist` to learn about the possible subcommands.")
+    await ctx.send("That is not a valid subcommand. Type `!help rolelist` to learn about the possible subcommands.")
 
 
 @rolelist.command(aliases=["ar","add"])
@@ -1375,7 +1395,10 @@ async def kill(ctx,user:typing.Union[discord.Member,str]):
         await ctx.send("There isn't a game going on.")
         return
     guildd=bot.get_guild(448888674944548874)
-    if user in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if user in emjlist:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1405,7 +1428,10 @@ async def respawn(ctx,user:typing.Union[discord.Member,str]):
         await ctx.send("There isn't a game going on.")
         return
     guildd=ctx.message.guild
-    if user in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if user in emjlist:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1436,7 +1462,10 @@ async def pkill(ctx,user:typing.Union[discord.Member,str]):
         await ctx.send("There isn't a game going on.")
         return
     guildd=bot.get_guild(448888674944548874)
-    if user in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if user in emjlist:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1497,7 +1526,12 @@ async def massgive(ctx,cash=100):
   await ctx.send("Added the cash to everyone who had an account.")
   dump()
 
-@bot.command(aliases=["mbal"])
+@bot.group(invoke_without_command=True,aliases=["m"])
+async def master(ctx):
+    '''Main command group of rolelist.'''
+    await ctx.send("That is not a valid subcommand. Type `!help m` to learn about the possible subcommands.")
+
+@master.command(aliases=["mbal","bal"])
 @commands.has_any_role("Helpers","Host")
 async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
   '''Allows to see the balance of another player <Helpers>'''
@@ -1505,7 +1539,10 @@ async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
   guildd=ctx.message.guild
-  if member in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1519,7 +1556,7 @@ async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
   id=str(member.id)
   await ctx.send("{}'s balance is {}.".format(member.mention,data['money'][id]))
 
-@bot.command(aliases=["minv"])
+@master.command(aliases=["minv","inv"])
 @commands.has_any_role("Helpers","Host")
 async def masterinventory(ctx,member:typing.Union[discord.Member,str]):
   '''Allows to see the inventory of another player <Helpers>'''
@@ -1527,7 +1564,10 @@ async def masterinventory(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
   guildd=ctx.message.guild
-  if member in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1544,7 +1584,22 @@ async def masterinventory(ctx,member:typing.Union[discord.Member,str]):
     msg+=f"{item}\n"
   await ctx.send(msg)
 
-@bot.command(aliases=["ca"])
+@bot.group(invoke_without_command=True,aliases=["a"])
+async def auction(ctx):
+    '''Main command group of auction.'''
+    await ctx.send("That is not a valid subcommand. Type `!help a` to learn about the possible subcommands.")
+
+@auction.group(invoke_without_command=True,aliases=["n"])
+async def normal(ctx):
+    '''Sub-Main command group of auction.'''
+    await ctx.send("That is not a valid subcommand. Type `!help a n` to learn about the possible subcommands.")
+
+@auction.group(invoke_without_command=True,aliases=["b"])
+async def blind(ctx):
+    '''Sub-Main command group of auction.'''
+    await ctx.send("That is not a valid subcommand. Type `!help a b` to learn about the possible subcommands.")
+
+@normal.command(aliases=["ca","create"])
 @commands.has_any_role("Helpers","Host")
 async def createauction(ctx,name,strtbid,*,text):
     '''Allows the user to create a auction <Helpers>'''
@@ -1567,7 +1622,7 @@ async def createauction(ctx,name,strtbid,*,text):
     data['auction']['perks']=text
     dump()
 
-@bot.command(aliases=["cla"])
+@normal.command(aliases=["cla","close"])
 @commands.has_any_role("Helpers","Host")
 async def closeauction(ctx):
   '''Allows the user to close a auction <Helpers>'''
@@ -1608,7 +1663,7 @@ async def closeauction(ctx):
   data['auction']['perks']=""
   dump()
 
-@bot.command(aliases=["cba"])
+@blind.command(aliases=["cba","create"])
 @commands.has_any_role("Helpers","Host")
 async def createblindauction(ctx,name,strtbid,*,text):
     '''Allows the user to create a blind auction <Helpers>'''
@@ -1631,8 +1686,7 @@ async def createblindauction(ctx,name,strtbid,*,text):
     await mark.send(embed=auction)
     dump()
     
-
-@bot.command(aliases=["clba"])
+@blind.command(aliases=["clba","close"])
 @commands.has_any_role("Helpers","Host")
 async def closeblindauction(ctx,code):
   '''Allows the user to close a auction <Helpers>'''
@@ -1664,8 +1718,12 @@ async def closeblindauction(ctx,code):
   data['bauction'].pop(code)
   dump()
 
+@bot.group(invoke_without_command=True,aliases=["sm"])
+async def stockmarket(ctx):
+    '''Main command group of stockmarket.'''
+    await ctx.send("That is not a valid subcommand. Type `!help sm` to learn about the possible subcommands.")
 
-@bot.command(aliases=["rmm"])
+@stockmarket.command(aliases=["rmm","reset"])
 @commands.has_any_role("Helpers","Host")
 async def resetstockmarket(ctx):
   '''Use this to reset stock market'''
@@ -1700,8 +1758,7 @@ async def resetstockmarket(ctx):
   await ctx.send("I've reset the stock market.")
   dump()
 
-
-@bot.command(aliases=["tmm"])
+@stockmarket.command(aliases=["tmm","toggle"])
 @commands.has_any_role("Helpers","Host")
 async def togglestockmarket(ctx):
   '''Use this to turn on or turn off the stock market <Helpers>'''
@@ -1717,7 +1774,7 @@ async def togglestockmarket(ctx):
     await ctx.send("Opened.")
   dump()
 
-@bot.command(aliases=["cmm"])
+@stockmarket.command(aliases=["cmm","create","start"])
 @commands.has_any_role("Helpers","Host")
 async def createstockmarket(ctx):
   '''Use this to start stock market'''
@@ -1754,7 +1811,7 @@ async def createstockmarket(ctx):
   data['smarket']['chn']=str(smarket.channel.id)
   dump()
 
-@bot.command(aliases=["chngmm"])
+@stockmarket.command(aliases=["chngmm","change"])
 @commands.has_any_role("Helpers","Host")
 async def changestockmarket(ctx):
     '''Use this to manually change stock market prices <Helpers>'''
@@ -1790,7 +1847,12 @@ async def msgcount(ctx):
     count+="<@{}> has sent {}.\n".format(ath,data['players'][ath]['msg'])
   await msg.edit(content=count)
 
-@bot.command(aliases=["addinv"])
+@modify.group(invoke_without_command=True,aliases=["inv"])
+async def inventory(ctx):
+    '''Sub-Main command group of modify.'''
+    await ctx.send("That is not a valid subcommand. Type `!help mdy inv` to learn about the possible subcommands.")
+
+@inventory.command(aliases=["addinv","add"])
 @commands.has_any_role("Helpers","Host")
 async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
   '''Use this to add something to a person's inventory <Helpers>'''
@@ -1798,7 +1860,10 @@ async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
       await ctx.send("There is no game going on right now.")
       return
   guildd=ctx.message.guild
-  if user in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if user in emjlist:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1813,7 +1878,7 @@ async def addtoinv(ctx,user:typing.Union[discord.Member,str],*,item):
   data['players'][ath]['inv'].append(item)
   await ctx.send("Done.")
 
-@bot.command(aliases=["reminv"])
+@inventory.command(aliases=["reminv","remove","rem"])
 @commands.has_any_role("Helpers","Host")
 async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
   '''Use this to remove something from someone's inventory. <Helpers>'''
@@ -1821,7 +1886,10 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
       await ctx.send("There is no game going on right now.")
       return
   guildd=ctx.message.guild
-  if user in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if user in emjlist:
       idd=emjtop(user)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -1843,7 +1911,7 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
 @bot.group(invoke_without_command=True,aliases=["tri"])
 async def tribute(ctx):
     '''Main command group of tribute.'''
-    await ctx.send("You did not type in any sub command. Type `!help tribute` to learn about the possible subcommands.")
+    await ctx.send("That is not a valid subcommand. Type `!help tribute` to learn about the possible subcommands.")
 
 
 @tribute.command(aliases=["endt","end"])
@@ -1987,7 +2055,7 @@ async def advancephase(ctx,cost=100):
 @bot.group(invoke_without_command=True,aliases=["peopoll","mpoll"])
 async def peoplepoll(ctx):
     '''Main command group of poll.'''
-    await ctx.send("You did not type in any sub command. Type `!help poll` to learn about the possible subcommands.")
+    await ctx.send("That is not a valid subcommand. Type `!help poll` to learn about the possible subcommands.")
 
 @peoplepoll.command(aliases=["cp","create"])
 @commands.has_any_role("Helpers","Host")
@@ -2163,7 +2231,7 @@ async def lockchat(ctx):
     await tmsg.edit(content=f"Done, Pins are- {msg}")
     dump()
 
-@bot.command(aliases=["vb"])
+@blind.command(aliases=["vb","allbids"])
 @commands.has_any_role("Helpers","Host")
 async def viewallbids(ctx,code):
   '''Use this to view all bids of a item. <Host>'''
@@ -2246,9 +2314,12 @@ async def signup(ctx,emoji="Emoji"):
             await ctx.send("It seems you might have roles that are meant to run the game. Please demote before you can play.")
             return
         #check emoji
-        if emoji not in emj.UNICODE_EMOJI["en"]:
+        try:
+          await ctx.message.add_reaction(emoji)
+        except:
           await ctx.send("That is not a valid emoji.")
           return
+        await ctx.message.clear_reactions()
         for people in data['signedup']:
           if emoji == data['signedup'][people]['emoji']:
             await ctx.send("That emoji has already been used. Please pick another one.")
@@ -2423,7 +2494,7 @@ async def teamsay(ctx,*,msg):
 @bot.group(invoke_without_command=True,aliases=["cc"])
 async def channel(ctx):
     '''Main command group of channel.'''
-    await ctx.send("You did not type in any sub command. Type `!help cc` to learn about the possible subcommands.")
+    await ctx.send("That is not a valid subcommand. Type `!help cc` to learn about the possible subcommands.")
 
 @channel.command(aliases=["create"])
 @commands.has_role("Alive")
@@ -2441,8 +2512,11 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
         await ctx.send("You cannot afford to make a cc....")
         await ctx.message.delete()
         return
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
     for people in member:
-      if people in emj.UNICODE_EMOJI["en"]:
+      if people in emjlist:
         idd=emjtop(people)
         if idd== None:
           await ctx.send(f"Invalid Emoji {people}.")
@@ -2518,8 +2592,11 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     a = await guildd.create_text_channel(str(ccname),overwrites=overwrites,category=cate)
     plist=""
     plist+="<@{}> \n".format(author.id)
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
     for people in member:
-      if people in emj.UNICODE_EMOJI["en"]:
+      if people in emjlist:
         idd=emjtop(people)
         if idd== None:
           await ctx.send(f"Invalid Emoji {people}.")
@@ -2551,7 +2628,10 @@ async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2586,7 +2666,10 @@ async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("There is no game going on.")
         return
     guildd=ctx.message.guild
-    if member in emj.UNICODE_EMOJI["en"]:
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2633,7 +2716,7 @@ async def renamechannel(ctx,*,newname):
         await ctx.send("You probably aren't the owner of this cc.")
 
 
-@bot.command(aliases=["sm","give"])
+@bot.command(aliases=["sendm","give"])
 @commands.has_role("Alive")
 async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
   '''Allows alive players to send money to others.'''
@@ -2643,7 +2726,10 @@ async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
         await ctx.send("There is no game going on.")
         return
   guildd=ctx.message.guild
-  if member in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if member in emjlist:
       idd=emjtop(member)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2711,7 +2797,7 @@ async def alivenonteamlist(ctx):
   msg = await ctx.send("​")
   await msg.edit(content=temp)
 
-@bot.command(aliases=["b"])
+@normal.command(aliases=["b"])
 @commands.has_role("Alive")
 async def bid(ctx,cash:int=0):
   '''Allows the person to bid in the auction. Typing 0 bids 100 more than the current bid.'''
@@ -2763,7 +2849,7 @@ async def bid(ctx,cash:int=0):
   await ctx.send("Bid Placed.")
   dump()
 
-@bot.command(aliases=["bb","bbid"])
+@blind.command(aliases=["bb","bbid","bid"])
 @commands.has_role("Alive")
 async def blindbid(ctx,code,cash:int):
   '''Allows the person to put a in blind bid for the blind auction item.'''
@@ -2807,7 +2893,7 @@ async def blindbid(ctx,code,cash:int):
   await ctx.send("Done.")
   dump()
 
-@bot.command(aliases=["ai"])
+@normal.command(aliases=["ai","info"])
 async def auctioninfo(ctx):
   '''Use this to get info on auction items'''
   if int(gamestate)!=3:
@@ -2823,7 +2909,7 @@ async def auctioninfo(ctx):
   info.add_field(name="Current bid-",value=f"{data['auction']['bid']} by {data['auction']['bidern']}",inline="false")
   await ctx.send(embed=info)
 
-@bot.command(aliases=["bai"])
+@blind.command(aliases=["bai","info"])
 async def blindauctioninfo(ctx,code):
   '''Use this to get info on blind auction items'''
   if int(gamestate)!=3:
@@ -2849,7 +2935,12 @@ async def blindauctioninfo(ctx,code):
     pass
   await ctx.send(embed=info)
 
-@bot.command(aliases=["de","dep"])
+@bot.group(invoke_without_command=True,aliases=["vlt"])
+async def vault(ctx):
+    '''Main command group of vault.'''
+    await ctx.send("That is not a valid subcommand. Type `!help vlt` to learn about the possible subcommands.")
+
+@vault.command(aliases=["de","dep"])
 @commands.has_role("Alive")
 async def deposit(ctx,cash:int=0):
   '''Helps you to deposit cash to your team's vault. Typing 0 deposits your entire balance.'''
@@ -2880,7 +2971,7 @@ async def deposit(ctx,cash:int=0):
   await ctx.send(f"Done! Money transferred. {cash} was deposited.")
   dump()
 
-@bot.command(aliases=["forcedep","fdep"])
+@vault.command(aliases=["forcedep","fdep"])
 @commands.has_role("Alive")
 async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
   '''Allows the king of a team to force a teammate to deposit cash.'''
@@ -2889,7 +2980,10 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
     await ctx.send("There is no game going on.")
     return
   guildd=ctx.message.guild
-  if person in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if person in emjlist:
       idd=emjtop(person)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -2931,7 +3025,7 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
   await ctx.send(f"Done! Money transferred. {cash} was deposited from {person.mention}'s account.")
   dump()
 
-@bot.command(aliases=["w"])
+@vault.command(aliases=["w"])
 @commands.has_role("Alive")
 async def withdraw(ctx,cash:int):
   '''Helps you to withdraw cash from your team's vault'''
@@ -2960,8 +3054,8 @@ async def withdraw(ctx,cash:int):
   await ctx.send(f"Done! Money transferred. {cash} was withdrawn.")
   dump()
 
-@bot.command(aliases=["va"])
-async def vault(ctx):
+@vault.command(aliases=["va","view"])
+async def viewvault(ctx):
   '''Displays the amount of cash in your team's vault'''
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
@@ -2980,7 +3074,13 @@ async def vault(ctx):
     money=0
   await ctx.send(f"Your team's vault has {money}, out of which {money-data['building'][team]['stash']['smoney']} can be used.")
 
-@bot.command(aliases=["dif"])
+@bot.group(invoke_without_command=True,aliases=["frg"])
+async def forge(ctx):
+    '''Main command group of forge.'''
+    await ctx.send("That is not a valid subcommand. Type `!help frg` to learn about the possible subcommands.")
+
+
+@forge.command(aliases=["dif","view"])
 async def disforge(ctx):
   '''Displays your team's forge level.'''
   if int(gamestate)!=3:
@@ -2998,7 +3098,7 @@ async def disforge(ctx):
   cost=int((forglvl*forglvl)*100)
   await ctx.send("Your team's forge is on level {}. The next upgrade costs {}.".format(forglvl,cost))
 
-@bot.command(aliases=["upf"])
+@forge.command(aliases=["upf","upgrade"])
 @commands.has_role("Alive")
 async def upforge(ctx):
   '''Use this to upgrade your team's forge'''
@@ -3028,7 +3128,61 @@ async def upforge(ctx):
   await ctx.send("Upgrade successful.")
   dump()
 
-@bot.command(aliases=["sinv"])
+@bot.group(invoke_without_command=True,aliases=["ofc"])
+async def office(ctx):
+    '''Main command group of office.'''
+    await ctx.send("That is not a valid subcommand. Type `!help ofc` to learn about the possible subcommands.")
+
+
+@office.command(aliases=["dio","view"])
+async def disoffice(ctx):
+  '''Displays your team's office level.'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  team=str(data['players'][ath]['team'])
+  ofclvl=data['building'][team]['office']
+  cost=int(ofclvl*100)
+  await ctx.send("Your team's forge is on level {}. The next upgrade costs {}.".format(ofclvl,cost))
+
+@office.command(aliases=["upo","upgrade"])
+@commands.has_role("Alive")
+async def upoffice(ctx):
+  '''Use this to upgrade your team's office'''
+  global data
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  team=str(data['players'][ath]['team'])
+  ofclvl=data['building'][team]['office']
+  cost=int(ofclvl*100)
+
+  if cost>data['building'][team]['vault']:
+    await ctx.send("You do not have that much cash in your vault.")
+    return
+  leftmoney=data['building'][team]['vault']-data['building'][team]['stash']['smoney']
+  if cost>leftmoney:
+    await ctx.send("The cash you've tried to upgrade your office with is more that what you hold in your vault, after subtracting your tribute and/or previous bidding costs.")
+    return
+
+  data['building'][team]['vault']-=cost
+  team=data['players'][ath]['team']
+  data['building'][team]['office']+=1
+  await ctx.send("Upgrade successful.")
+  dump()
+
+@stockmarket.command(aliases=["sinv","inv"])
 async def stockinventory(ctx):
   '''Use this to check your stock inventory.'''
   global data
@@ -3048,7 +3202,7 @@ async def stockinventory(ctx):
   await ctx.send("You have these stocks- \n {} of :sunglasses: \n {} of :smirk: \n {} of :smiley: \n {} of :joy: \n {} of :pensive: ".format(a,b,c,d,e))
   dump()
 
-@bot.command(aliases=["sbuy","by"])
+@stockmarket.command(aliases=["sbuy","by","buy"])
 async def smbuy(ctx,thing,num:int=1):
   '''Use this to buy any stocks.'''
   if int(gamestate)!=3:
@@ -3127,7 +3281,7 @@ async def smbuy(ctx,thing,num:int=1):
     await ctx.send("Invalid stock id.")
   dump()
 
-@bot.command(aliases=["se"])
+@stockmarket.command(aliases=["se","sell"])
 async def smsell(ctx,thing,num:int=1):
   '''Use this to sell stocks.'''
   if int(gamestate)!=3:
@@ -3196,7 +3350,7 @@ async def smsell(ctx,thing,num:int=1):
     await ctx.send("Invalid stock id.")
   dump()
 
-@bot.command(aliases=["pri"])
+@stockmarket.command(aliases=["pri"])
 async def price(ctx):
   '''Use this to see the price of all stocks.'''
   if data['smarket']['state']==0:
@@ -3209,7 +3363,7 @@ async def price(ctx):
   e=data['smarket']['stocks']['pens']
   await ctx.send("Cost of :sunglasses: is {} \nCost of :smirk: is {} \nCost of :smiley: is {} \nCost of :joy: is {} \nCost of :pensive: is {} \n".format(a,b,c,d,e))
 
-@bot.command(aliases=["alert","notifyme","notif"])
+@stockmarket.command(aliases=["alert","notifyme","notif"])
 async def pingme(ctx):
     '''Use this command if you want to be pinged each time the stock market values change.'''
     if int(gamestate)!=3:
@@ -3359,9 +3513,13 @@ async def joinlottery(ctx,tickets=1):
       data['lottery']+=50
   dump()
 
-
-@bot.command(aliases=["mark"])
+@bot.group(invoke_without_command=True,aliases=["mrkt"])
 async def market(ctx):
+    '''Main command group of market.'''
+    await ctx.send("That is not a valid subcommand. Type `!help mrkt` to learn about the possible subcommands.")
+
+@market.command(aliases=["mark","view"])
+async def viewmarket(ctx):
   '''Use this to display market.'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
@@ -3387,7 +3545,7 @@ async def market(ctx):
   msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   await ctx.send(msg)
 
-@bot.command(aliases=["dim"])
+@market.command(aliases=["dim","level"])
 async def dismarket(ctx):
   '''Displays your team's market level.'''
   if int(gamestate)!=3:
@@ -3416,7 +3574,7 @@ async def dismarket(ctx):
   await ctx.send(f"Your team's market is on level {state}.{text}")
 
 
-@bot.command(aliases=["upm"])
+@market.command(aliases=["upm","upgrade"])
 @commands.has_role("Alive")
 async def upmarket(ctx):
   '''Use this to upgrade market.'''
@@ -3446,7 +3604,7 @@ async def upmarket(ctx):
   data['building'][team]['market']+=1
   await ctx.send("Upgraded!")
 
-@bot.command(aliases=["tbuy"])
+@market.command(aliases=["tbuy","buy"])
 @commands.has_role("Alive")
 async def tmbuy(ctx,num:int):
   '''Use this to buy something from the market. Only use item number to buy.'''
@@ -3554,7 +3712,10 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
     await ctx.send("Cash can't be a negative value or 0.")
     return
   guildd=ctx.message.guild
-  if person in emj.UNICODE_EMOJI["en"]:
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if person in emjlist:
       idd=emjtop(person)
       if idd== None:
         await ctx.send("Invalid Emoji")
@@ -3625,7 +3786,12 @@ async def checktribute(ctx):
     user=discord.utils.get(guildd.members,id=int(who))
     await ctx.send(f"Your team's tribute person is {user.name} and the cash is {data['building'][team]['trihouse']['cash']}")
 
-@bot.command(aliases=["store"])
+@bot.group(invoke_without_command=True,aliases=["sth"])
+async def stash(ctx):
+    '''Main command group of rolelist.'''
+    await ctx.send("That is not a valid subcommand. Type `!help sth` to learn about the possible subcommands.")
+
+@stash.command(aliases=["store"])
 @commands.has_role("Alive")
 async def storeinstash(ctx,item:str):
   '''Use this to store items in your team stash <Alive>'''
@@ -3648,7 +3814,7 @@ async def storeinstash(ctx,item:str):
   await ctx.send(f"Done! Item {l[0]} stored.")
   dump()
 
-@bot.command(aliases=["take","takefromstash"])
+@stash.command(aliases=["take","takefromstash"])
 @commands.has_role("Alive")
 async def removefromstash(ctx,item:str):
   '''Use this to take items from your team stash <Alive>'''
@@ -3671,7 +3837,7 @@ async def removefromstash(ctx,item:str):
   await ctx.send(f"Done! Item {l[0]} taken.")
   dump()
 
-@bot.command(aliases=["stash"])
+@stash.command(aliases=["stash","view"])
 async def viewstash(ctx):
   '''Use this to view items in your team vault <Alive>'''
   if int(gamestate)!=3:
@@ -3785,7 +3951,7 @@ async def change():
 
 
 
-async def score(ath,msg):
+async def score(ath,msg,cate):
     global data
     global earnd
     global lstmsg
@@ -3796,7 +3962,14 @@ async def score(ath,msg):
             data['money'][ath]=0
             dump()
     else:
-          coins=[10,20]
+          if cate.name==data['code']['gamecode']:
+            team=str(data['players'][ath]['team'])
+            a=int(data['building'][team]['office'])*10
+            b=a+10
+            coins=[a,b]
+          else:
+            coins=[10,20]
+          print(coins)
           if not ath in earnd:
             if not str(ath) in lstmsg:
               lstmsg[str(ath)]=" "
