@@ -41,9 +41,9 @@ bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=i
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
-#handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-#handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-#logger.addHandler(handler)
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 
 
@@ -508,7 +508,7 @@ async def nuke(ctx):
     await asyncio.sleep(30)
     await tempc.delete()
     
-@bot.command(aliases=["gs"])
+@bot.command(aliases=["cgs"])
 @commands.has_role("Informer")
 async def cgamestate(ctx,num):
     '''Manually changes gamestate. <Informer>'''
@@ -994,8 +994,14 @@ async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
       return
     data['money'][str(member.id)]+=int(cash)
     await ctx.send("{} has been added to {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
-    
-@bot.command(aliases=["gso"])
+
+@bot.group(invoke_without_command=True,aliases=["gs"])
+async def signups(ctx):
+    '''Main command group of signups.'''
+    await ctx.send("You did not type in any sub command. Type `!help gs` to learn about the possible subcommands.")
+
+
+@signups.command(aliases=["gso"])
 @commands.has_any_role("Helpers","Host")
 async def opensignups(ctx):
     '''Opens signups. <Helpers>'''
@@ -1011,7 +1017,7 @@ async def opensignups(ctx):
     await bot.change_presence(activity=discord.Game(name="Signups open!", type=1))
     dump()
     
-@bot.command(aliases=["gsc"])
+@signups.command(aliases=["gsc"])
 @commands.has_any_role("Helpers","Host")
 async def closesignups(ctx):
     '''Closes signups. <Helpers>'''
@@ -1266,7 +1272,7 @@ async def listallr(ctx):
     for user in data['players']:
         guildd=bot.get_guild(448888674944548874)
         userr=discord.utils.get(guildd.members,id=int(user))
-        temp +="{} has the role `{}` \n".format(userr.mention,data['players'][user]['role'])
+        temp +=f"{userr.mention} ({userr.name},{userr.display_name}) has the role `{data['players'][user]['role']}` \n"
     msg = await ctx.send("​")
     await msg.edit(content=temp)
 
