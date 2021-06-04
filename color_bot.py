@@ -10,7 +10,7 @@ import asyncio
 import random
 import time
 import datetime
-from datetime import date
+from datetime import date,timedelta
 import json
 import dhooks
 from dhooks import Webhook
@@ -1271,6 +1271,8 @@ async def assignroles(ctx,code):
         data['players'][user]['msg']=0
         data['players'][user]['inv']=[]
         data['players'][user]['emoji']=data['signedup'][user]['emoji']
+        data['players'][user]['debt']=0
+        data['players'][user]['depos']={}
         #print(data)
         num+=1
     #print(data)
@@ -1529,6 +1531,13 @@ async def massgive(ctx,cash=100):
   for  ath in data['money']:
     team=str(data['players'][ath]['team'])
     add=cash*data['building'][team]['forge']
+    debt=data['players'][ath]['debt']
+    if debt<1001:
+      intp=10
+    else:
+      intp=10+((debt-1000)//200)
+    intc=(intp/100)*debt
+    add-=intc
     try:
       if ath not in data['smarket']['inv']:
         data['smarket']['inv'][ath]={}
@@ -2963,9 +2972,9 @@ async def vault(ctx):
     '''Main command group of vault.'''
     await ctx.send("That is not a valid subcommand. Type `!help vlt` to learn about the possible subcommands.")
 
-@vault.command(aliases=["de","dep"])
+@vault.command(aliases=["de","dep","deposit"])
 @commands.has_role("Alive")
-async def deposit(ctx,cash:int=0):
+async def vaultdeposit(ctx,cash:int=0):
   '''Helps you to deposit cash to your team's vault. Typing 0 deposits your entire balance.'''
   global data
   if int(gamestate)!=3:
@@ -3879,6 +3888,190 @@ async def viewstash(ctx):
     msg+="{}\n".format(item)
   await ctx.send(msg)
 
+@bot.group(invoke_without_command=True)
+async def bank(ctx):
+    '''Main command group of bank.'''
+    await ctx.send("That is not a valid subcommand. Type `!help bank` to learn about the possible subcommands.")
+
+@bank.group(invoke_without_command=True,aliases=["l"])
+async def loan(ctx):
+    '''Sub-Main command group of bank.'''
+    await ctx.send("That is not a valid subcommand. Type `!help bank l` to learn about the possible subcommands.")
+
+@loan.command(aliases=["take"])
+@commands.has_role("Alive")
+async def takeloan(ctx,cash:int):
+  '''This command allows you to take a loan.'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  if cash<=0:
+    await ctx.send("Cash cannot be negative or zero.")
+    return
+  if cash%200!=0:
+    await ctx.send("Cash can only be a multiple of 200.")
+    return
+  curdebt=data['players'][ath]['debt']
+  newdebt=curdebt+cash
+  if newdebt<1001:
+    intp=10
+  else:
+    intp=10+((newdebt-1000)//200)
+  intc=(intp/100)*newdebt
+  team=str(data['players'][ath]['team'])
+  if intc>(100*data['building'][team]['forge']):
+    await ctx.send("You cannot afford this loan as the interest amount will be greater than your forge income.")
+    return
+  data['money'][ath]+=cash
+  data['players'][ath]['debt']=newdebt
+  await ctx.send(f"Done! You have now taken a loan a loan of {cash}. Your interest amount is now {intc}")
+  dump()
+
+@loan.command(aliases=["debt"])
+async def viewdebt(ctx):
+  '''This command allows you to view your debt.'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  debt=data['players'][ath]['debt']
+  if debt<1001:
+    intp=10
+  else:
+    intp=10+((debt-1000)//200)
+  intc=(intp/100)*debt
+  await ctx.send(f"Your debt is at {debt}. Your interest amount is now {intc}")
+
+@loan.command(aliases=["repay"])
+async def repayloan(ctx,cash:int):
+  '''This command allows you to repay your debt.'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  if cash<=0:
+    await ctx.send("Cash cannot be negative or zero.")
+    return
+  if cash%200!=0:
+    await ctx.send("Cash can only be a multiple of 200.")
+    return
+  curdebt=data['players'][ath]['debt']
+  newdebt=curdebt-cash
+  if newdebt<1001:
+    intp=10
+  else:
+    intp=10+((newdebt-1000)//200)
+  intc=(intp/100)*newdebt
+  team=str(data['players'][ath]['team'])
+  data['money'][ath]-=cash
+  data['players'][ath]['debt']=newdebt
+  await ctx.send(f"Done! You have now repayed {cash}. Your interest amount is now {intc}")
+  dump()
+
+@bank.group(invoke_without_command=True,aliases=["dep","deposit","bd"])
+async def bankdeposit(ctx):
+    '''Sub-Main command group of bank.'''
+    await ctx.send("That is not a valid subcommand. Type `!help bank dep` to learn about the possible subcommands.")
+
+@bankdeposit.command(aliases=["deposit","dep"])
+@commands.has_role("Alive")
+async def makedeposit(ctx,cash:int):
+  '''This command allows you to make a deposit.'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  if cash<10:
+    await ctx.send("Cash cannot be below 10 coins.")
+    return
+  code=chr(random.randint(97, 122))+chr(random.randint(97, 122))+chr(random.randint(97, 122))
+  data['players'][ath]['depos'][code]={}
+  data['players'][ath]['depos'][code]['cash']=cash
+  data['players'][ath]['depos'][code]['time']=datetime.datetime.now()
+
+  data['money'][ath]-=cash
+  await ctx.send(f"Done! You have now deposited {cash}. The code for your deposit is {code}. Your will get a 10% compound interest for every 12 hours you don't take it out/")
+  dump()
+
+@bankdeposit.command(aliases=["view"])
+async def viewdeposits(ctx):
+  '''This command allows you to view your deposits.'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  msg="Your current deposits are-\n"
+  for code in data['players'][ath]['depos']:
+    cash=data['players'][ath]['depos'][code]['cash']
+    stime=data['players'][ath]['depos'][code]['time']
+    phases=int(int((datetime.datetime.now()-stime)/timedelta(hours=1))/12)
+    interest=int(cash*((1.1**phases) - 1))
+    msg+=f"A deposit with {code} and {cash}, it has been {phases} phase(s), you will get a interest of {interest} if you withdrew it right now.\n"
+  await ctx.send(msg)
+
+@bankdeposit.command(aliases=["claim","take","withdraw"])
+@commands.has_role("Alive")
+async def claimdeposit(ctx,code):
+  '''This command allows you to withdraw a deposit.'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  if ath not in data['players']:
+    await ctx.send("You are not in game. This command cannot be executed.")
+    return
+  if code not in data['players'][ath]['depos']:
+    await ctx.send("Invalid code. Type `!bank dep view` to view all your deposits.")
+    return
+  cash=data['players'][ath]['depos'][code]['cash']
+  stime=data['players'][ath]['depos'][code]['time']
+  phases=int(int((datetime.datetime.now()-stime)/timedelta(hours=1))/12)
+  interest=int(cash*((1.1**phases) - 1))
+  earnd=cash+interest
+  data['money'][ath]+=earnd
+
+  del data['players'][ath]['depos'][code]
+  await ctx.send(f"Done! The deposit with code {code} has been deleted. Your money was kept for {phases} phases, and you have recieved a profit of {interest}. Therefore, you have totally recieved {earnd} ({cash}+{int(interest*phases)}) back.")
+  dump()
+
 @bot.command(aliases=["r","i","info"])
 async def role(ctx,*,role="l"):
     '''Returns role info. '''
@@ -3992,7 +4185,6 @@ async def score(ath,msg,cate):
             coins=[a,b]
           else:
             coins=[10,20]
-          print(coins)
           if not ath in earnd:
             if not str(ath) in lstmsg:
               lstmsg[str(ath)]=" "
