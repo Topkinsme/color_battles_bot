@@ -1265,13 +1265,19 @@ async def assignroles(ctx,code):
     countp=len(listoplayers)
     countr=len(rolelist)
     num=0
+    for player in data['players']:
+      if data['signedup'][player]['role']!=None:
+        data['players'][player]['role']=data['signedup'][player]['role']
+        data['players'][player]['team']=data['rt'][role]['team']
+        rolelist.remove(data['signedup'][player]['role'])
     while num<countp:
         user = random.choice(listoplayers)
         listoplayers.remove(user)
-        role= random.choice(rolelist)
-        rolelist.remove(role)
-        data['players'][user]['role']=role
-        data['players'][user]['team']=data['rt'][role]['team']
+        if data['signedup'][user]['role']==None:
+          role= random.choice(rolelist)
+          data['players'][user]['role']=role
+          data['players'][user]['team']=data['rt'][role]['team']
+          rolelist.remove(role)
         data['players'][user]['state']=1
         #state 1 is alive ,0 is dead
         data['players'][user]['msg']=0
@@ -2304,6 +2310,23 @@ async def delay(ctx,timee:int,*,command:str):
   new_ctx = await bot.get_context(msg, cls=type(ctx))
   await bot.invoke(new_ctx)
 
+@bot.command(aliases=["sr"])
+@commands.has_any_role("Helpers","Host")
+async def setrole(ctx,user:discord.Member,role=None):
+  '''Use this to set someone as some role <Hosts>'''
+  global data
+  if role!=None:
+    if role not in data['roles']:
+        await ctx.send(f"`{role}` does not exist. Please try again.")
+        return
+  if str(user.id) not in data['signedup']:
+    await ctx.send("That player is not in game. Please try again.")
+    return
+  data['signedup'][str(user.id)]['role']=role
+  await ctx.send(f"Done! {user.mention} will now be role {role}.")
+  dump()
+
+
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -2364,6 +2387,7 @@ async def signup(ctx,emoji="Emoji"):
             return
         data['signedup'][ath] = {}
         data['signedup'][ath]['emoji'] = emoji
+        data['signedup'][ath]['role'] = None
         guildd=bot.get_guild(448888674944548874)
         role = discord.utils.get(guildd.roles, name="Signed-Up!")
         await ctx.send("You have been signed-up! :thumbsup:")
