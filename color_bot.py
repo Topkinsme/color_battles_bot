@@ -1242,7 +1242,13 @@ async def assignroles(ctx,code):
       data['building'][team]['marketprices'].append(3000)
       data['building'][team]['marketprices'].append(3000)
       data['building'][team]['marketprices'].append(4000)
-
+      data['building'][team]['bmarketprices']=[]
+      data['building'][team]['bmarketprices'].append("Placeholder")
+      data['building'][team]['bmarketprices'].append(250)
+      data['building'][team]['bmarketprices'].append(1000)
+      data['building'][team]['bmarketprices'].append(2000)
+      data['building'][team]['bmarketprices'].append(2000)
+      data['building'][team]['bmarketprices'].append(4000)
       teammsg=discord.Embed(colour=random.randint(0, 0xffffff))
       teammsg.set_author(name="Team info!")
       teammsg.add_field(name="Welcome!",value=f"You are all members of the {team} team! \n Work together and win this game!")
@@ -3564,17 +3570,22 @@ async def viewmarket(ctx):
     await ctx.send("You are not in game. This command cannot be executed.")
     return
   team=data['players'][ath]['team']
-  state=data['building'][team]['market']
-  msg="__**MARKET**__\n"
-  #if state==0:
-    #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
-  #if state>0:
-  msg+=f"\n__**LVL 1 (Free)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
-  #if state>1:
-  msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. (Strong Protection)*- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
-  #if state>2:
-  msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
-  msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
+  mrktlvl=data['building'][team]['market']
+  state=data['players'][ath]['state']
+  if state==1:
+    msg="__**MARKET**__\n"
+    #if mrktlvl==0:
+      #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
+    #if mrktlvl>0:
+    msg+=f"\n__**LVL 1 (Free)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
+    #if mrktlvl>1:
+    msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. (Strong Protection)*- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
+    #if mrktlvl>2:
+    msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
+    msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
+  elif state==0:
+    msg="__**BLACK MARKET**__\n"
+    msg+=f"\n__**Note that all these items can only be used while in the state respawning.**__ \n **1.Inheritance -** Transfer all of your current balance to your team's vault. *- For {data['building'][team]['bmarketprices'][1]},increases by 50 each time.* \n **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {data['building'][team]['bmarketprices'][2]},increases by 500 each time.* \n **3.Haunt -** Use while Respawning to check on one person to see their exact role (does not include their colour faction). *- For {data['building'][team]['bmarketprices'][3]},increases by 1000 each time.* \n **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night. *- For {data['building'][team]['bmarketprices'][4]},increases by 1000 each time.* \n **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you. Cannot be used if you were killed by tribute. *- For {data['building'][team]['bmarketprices'][5]},increases by 96000 each time.*"
   await ctx.send(msg)
 
 @market.command(aliases=["dim","level"])
@@ -3637,78 +3648,56 @@ async def upmarket(ctx):
   await ctx.send("Upgraded!")
 
 @market.command(aliases=["tbuy","buy"])
-@commands.has_role("Alive")
 async def tmbuy(ctx,num:int):
   '''Use this to buy something from the market. Only use item number to buy.'''
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
       return
-  if num>10 or num<1:
-    await ctx.send("Please enter a valid number.")
-    return
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
-  state=data['building'][team]['market']
+  mrktlvl=data['building'][team]['market']
   cost=data['building'][team]['marketprices'][num]
-  if cost>data['money'][ath]:
-    try:
-      await withdraw(ctx,cost)
-    except:  
+  state=data['players'][ath]['state']
+  if state==1:
+    if num>10 or num<1:
+      await ctx.send("Please enter a valid number.")
+      return
+    if cost>data['money'][ath]:
+      try:
+        await withdraw(ctx,cost)
+      except:  
+        await ctx.send("You cannot afford this.")
+        return
+    increases=[0,1000,1000,1000,1000,1000,1000,1000,1000,1000,96000]
+    items=["placeholder","Poison","Antidote","Check Bal","Protection","Respawn Stone","Respawn Totem","Bomb","Role Seeker","Strength Potion","GOD"]
+    if num>0 and num<4 and mrktlvl<1:
+      await ctx.send("You need to upgrade your market to buy this item.")
+      return
+    elif num>3 and num<7 and mrktlvl<2:
+      await ctx.send("You need to upgrade your market to buy this item.")
+      return
+    elif num>6 and num<10 and mrktlvl<3:
+      await ctx.send("You need to upgrade your market to buy this item.")
+      return
+    elif num>9 and num<11 and mrktlvl<4:
+      await ctx.send("You need to upgrade your market to buy this item.")
+      return
+    item=items[num]
+    increase=increases[num]
+    data['building'][team]['marketprices'][num]+=increase
+  elif state==0:
+    if num>5 or num<1:
+      await ctx.send("Please enter a valid number.")
+      return
+    if cost>data['money'][ath]:  
       await ctx.send("You cannot afford this.")
       return
-  if num==1:
-    if state<1:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item= "Poison"
-  elif num==2:
-    if state<1:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Antidote"
-  elif num==3:
-    if state<1:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Check Bal"
-  elif num==4:
-    if state<2:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Protection"
-  elif num==5:
-    if state<2:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Respawn Stone"
-  elif num==6:
-    if state<2:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Respawn Totem"
-  elif num==7:
-    if state<3:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Bomb"
-  elif num==8:
-    if state<3:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Role seeker"
-  elif num==9:
-    if state<3:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="Strength Potion"
-  elif num==10:
-    if state<4:
-      await ctx.send("You need to upgrade your market to buy this item.")
-      return
-    item="GOD"
-    data['building'][team]['marketprices'][num]+=95000
+    increases=[0,50,500,1000,1000,96000]
+    items=["placeholder","[BM] Inheritance","[BM] Time Bender","[BM] Haunt","[BM] Guardian","[BM] PHANTOM'S REVENGE"]
+    item=items[num]
+    increase=increases[num]
+    data['building'][team]['bmarketprices'][num]+=increase
   data['money'][ath]-=cost
-  data['building'][team]['marketprices'][num]+=1000
   data['players'][ath]['inv'].append(item)
   await ctx.send("Transaction successful.")
   dump()
@@ -3722,7 +3711,10 @@ async def inventory(ctx):
   if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
     await ctx.send("You can only use this command in faction channels.")
     return
-  await stockinventory(ctx)
+  try:
+    await stockinventory(ctx)
+  except:
+    pass
   ath=str(ctx.author.id)
   msg="You have these items-\n"
   for item in data['players'][ath]['inv']:
