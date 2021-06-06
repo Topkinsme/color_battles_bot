@@ -1244,11 +1244,11 @@ async def assignroles(ctx,code):
       data['building'][team]['marketprices'].append(4000)
       data['building'][team]['bmarketprices']=[]
       data['building'][team]['bmarketprices'].append("Placeholder")
-      data['building'][team]['bmarketprices'].append(250)
+      data['building'][team]['bmarketprices'].append(150)
       data['building'][team]['bmarketprices'].append(1000)
       data['building'][team]['bmarketprices'].append(2000)
       data['building'][team]['bmarketprices'].append(2000)
-      data['building'][team]['bmarketprices'].append(4000)
+      data['building'][team]['bmarketprices'].append(5000)
       teammsg=discord.Embed(colour=random.randint(0, 0xffffff))
       teammsg.set_author(name="Team info!")
       teammsg.add_field(name="Welcome!",value=f"You are all members of the {team} team! \n Work together and win this game!")
@@ -3609,7 +3609,7 @@ async def viewmarket(ctx):
     msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   elif state==0:
     msg="__**BLACK MARKET**__\n"
-    msg+=f"\n__**Note that all these items can only be used while in the state respawning.**__ \n **1.Inheritance -** Transfer all of your current balance to your team's vault. *- For {data['building'][team]['bmarketprices'][1]},increases by 50 each time.* \n **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {data['building'][team]['bmarketprices'][2]},increases by 500 each time.* \n **3.Haunt -** Use while Respawning to check on one person to see their exact role (does not include their colour faction). *- For {data['building'][team]['bmarketprices'][3]},increases by 1000 each time.* \n **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night. *- For {data['building'][team]['bmarketprices'][4]},increases by 1000 each time.* \n **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you. Cannot be used if you were killed by tribute. *- For {data['building'][team]['bmarketprices'][5]},increases by 96000 each time.*"
+    msg+=f"\n__**Note that all these items can only be used while in the state respawning.**__ \n **1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {data['building'][team]['bmarketprices'][1]}, increases by 50 each time.* \n **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {data['building'][team]['bmarketprices'][2]}, increases by 500 each time.* \n **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {data['building'][team]['bmarketprices'][3]}, increases by 1000 each time.* \n **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {data['building'][team]['bmarketprices'][4]}, increases by 1000 each time.* \n **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you, when the phase ends. If the killer is already dead, this will simply give you the name of the killer. Cannot be used if you were killed by tribute. *- For {data['building'][team]['bmarketprices'][5]}, increases by 96000 each time.*"
   await ctx.send(msg)
 
 @market.command(aliases=["dim","level"])
@@ -3716,7 +3716,7 @@ async def tmbuy(ctx,num:int):
     if cost>data['money'][ath]:  
       await ctx.send("You cannot afford this.")
       return
-    increases=[0,50,500,1000,1000,96000]
+    increases=[0,50,500,1000,1000,95000]
     items=["placeholder","[BM] Inheritance","[BM] Time Bender","[BM] Haunt","[BM] Guardian","[BM] PHANTOM'S REVENGE"]
     item=items[num]
     increase=increases[num]
