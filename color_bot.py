@@ -1037,6 +1037,37 @@ async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
     data['money'][str(member.id)]+=int(cash)
     await ctx.send("{} has been added to {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
 
+@modify.group(invoke_without_command=True,aliases=["vault"])
+async def mvault(ctx):
+    '''Sub-Main command group of modify.'''
+    await ctx.send("That is not a valid subcommand. Type `!help mdy vault` to learn about the possible subcommands.")
+
+@mvault.command(aliases=["ac"])
+@commands.has_any_role("Helpers","Host")
+async def addcashinvault(ctx,team,cash):
+    '''Adds a certain amount of cash to a team's vault. <Helper>'''
+    if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+    guildd=ctx.message.guild
+    if team not in data['teams']:
+      await ctx.send("That is not a valid team.")
+    data['building'][team]['vault']+=int(cash)
+    await ctx.send(f"{cash} has been added to {team}'s vault. Current balance is {data['building'][team]['vault']} .")
+
+@mvault.command(aliases=["rc"])
+@commands.has_any_role("Helpers","Host")
+async def removecashfromvault(ctx,team,cash):
+    '''Removes a certain amount of cash to a team's vault. <Helper>'''
+    if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+    guildd=ctx.message.guild
+    if team not in data['teams']:
+      await ctx.send("That is not a valid team.")
+    data['building'][team]['vault']-=int(cash)
+    await ctx.send(f"{cash} has been removed from {team}'s vault. Current balance is {data['building'][team]['vault']}.")
+
 @bot.group(invoke_without_command=True,aliases=["gs"])
 async def signups(ctx):
     '''Main command group of signups.'''
@@ -1952,6 +1983,43 @@ async def removefrominv(ctx,user:typing.Union[discord.Member,str],*,item):
     return
   await ctx.send(f"Done. Removed {item}.")
 
+@modify.group(invoke_without_command=True,aliases=["stash"])
+async def mstash(ctx):
+    '''Sub-Main command group of modify.'''
+    await ctx.send("That is not a valid subcommand. Type `!help mdy stash` to learn about the possible subcommands.")
+
+@mstash.command(aliases=["addstash","add"])
+@commands.has_any_role("Helpers","Host")
+async def addtostash(ctx,team,*,item):
+  '''Use this to add something to a team's stash <Helpers>'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  guildd=ctx.message.guild
+  if team not in data['teams']:
+    await ctx.send("That's not a valid team.")
+    return
+  data['building'][team]['stash']['items'].append(item)
+  await ctx.send("Done.")
+
+@mstash.command(aliases=["remstash","rem"])
+@commands.has_any_role("Helpers","Host")
+async def removefromstash(ctx,team,*,item):
+  '''Use this to remove something to a team's stash <Helpers>'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  guildd=ctx.message.guild
+  if team not in data['teams']:
+    await ctx.send("That's not a valid team.")
+    return
+  try:
+    data['building'][team]['stash']['items'].remove(item)
+  except ValueError:
+    await ctx.send("That item was not found in their stash.")
+    return
+  await ctx.send("Done.")
+
 @bot.group(invoke_without_command=True,aliases=["tri"])
 async def tribute(ctx):
     '''Main command group of tribute.'''
@@ -1982,7 +2050,7 @@ async def endtribute(ctx):
   print(sort)
   text=""
   for entry in sort:
-	  text+=f"{entry[0]} paid {entry[1]} for {data['building'][entry[0]]['trihouse']['who']}\n"
+	  text+=f"{entry[0]} paid {entry[1]} for <@{data['building'][entry[0]]['trihouse']['who']}>\n"
   
   try:
     who=str(data['building'][lowestteam]['trihouse']['who'])
@@ -2047,7 +2115,7 @@ async def viewalltributes(ctx):
   print(sort)
   text=""
   for entry in sort:
-	  text+=f"{entry[0]} is paying {entry[1]} for {data['building'][entry[0]]['trihouse']['who']}\n"
+	  text+=f"{entry[0]} is paying {entry[1]} for <@{data['building'][entry[0]]['trihouse']['who']}>\n"
   
   try:
     who=str(data['building'][lowestteam]['trihouse']['who'])
@@ -3745,7 +3813,7 @@ async def inventory(ctx):
     msg+="{}\n".format(item)
   await ctx.send(msg)
 
-@tribute.command(aliases=["tri","tribute","pick"])
+@tribute.command(aliases=["tri","tribute","pick","set"])
 @commands.has_role("Alive")
 async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   '''Allows the king of a team to pick the tribute and cash <King Only.>'''
