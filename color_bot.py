@@ -151,20 +151,20 @@ async def my_loop():
           stocks=["sun","smirk","smile","joy","pens"]
           stock=random.choice(stocks)
           if stock=="sun":
-            svari[stock]["mui"]+=0.20
-            svari[stock]["sigi"]+=0.45
+            svari[stock]["mui"]+=0.12
+            svari[stock]["sigi"]+=0.56
           elif stock=="smirk":
-            svari[stock]["mui"]+=0.15
-            svari[stock]["sigi"]+=0.32
-          elif stock=="smile":
             svari[stock]["mui"]+=0.10
-            svari[stock]["sigi"]+=0.20
+            svari[stock]["sigi"]+=0.40
+          elif stock=="smile":
+            svari[stock]["mui"]+=0.08
+            svari[stock]["sigi"]+=0.28
           elif stock=="joy":
             svari[stock]["mui"]+=0.05
-            svari[stock]["sigi"]+=0.12
+            svari[stock]["sigi"]+=0.18
           elif stock=="pens":
             svari[stock]["mui"]+=0.03
-            svari[stock]["sigi"]+=0.07
+            svari[stock]["sigi"]+=0.12
     except Exception as e:
       pass
     earnd=[]
@@ -1809,11 +1809,11 @@ async def resetstockmarket(ctx):
   data['smarket']['state']=1
   data['smarket']['inv']={}
   data['smarket']['stocks']={}
-  data['smarket']['stocks']['sun']=0
-  data['smarket']['stocks']['smirk']=0
-  data['smarket']['stocks']['smile']=0
-  data['smarket']['stocks']['joy']=0
-  data['smarket']['stocks']['pens']=0
+  data['smarket']['stocks']['sun']=500
+  data['smarket']['stocks']['smirk']=300
+  data['smarket']['stocks']['smile']=200
+  data['smarket']['stocks']['joy']=100
+  data['smarket']['stocks']['pens']=50
   data['smarket']['trades']={}
   data['smarket']['trades']['sun']=0
   data['smarket']['trades']['smirk']=0
@@ -1861,9 +1861,9 @@ async def createstockmarket(ctx):
   data['smarket']['state']=1
   data['smarket']['inv']={}
   data['smarket']['stocks']={}
-  data['smarket']['stocks']['sun']=1000
-  data['smarket']['stocks']['smirk']=500
-  data['smarket']['stocks']['smile']=250
+  data['smarket']['stocks']['sun']=500
+  data['smarket']['stocks']['smirk']=300
+  data['smarket']['stocks']['smile']=200
   data['smarket']['stocks']['joy']=100
   data['smarket']['stocks']['pens']=50
   data['smarket']['trades']={}
@@ -1880,7 +1880,7 @@ async def createstockmarket(ctx):
     svari[thing]["sigi"]=0
   guildd=bot.get_guild(448888674944548874)
   mark=discord.utils.get(guildd.channels,name="auction_house")
-  smarket = await mark.send("Cost of :sunglasses: is 1000 \nCost of :smirk: is 500 \nCost of :smiley: is 250 \nCost of :joy: is 100 \nCost of :pensive: is 50 \n")
+  smarket = await mark.send("Cost of :sunglasses: is 500 \nCost of :smirk: is 300 \nCost of :smiley: is 200 \nCost of :joy: is 100 \nCost of :pensive: is 50 \n")
   await smarket.pin()
   data['smarket']['msg']=str(smarket.id)
   data['smarket']['chn']=str(smarket.channel.id)
@@ -4199,20 +4199,20 @@ async def change():
   stocks=["sun","smirk","smile","joy","pens"]
   for stock in stocks:
       if stock=="sun":
-        svari[stock]["mui"]+=5.2
-        svari[stock]["sigi"]+=20
+        svari[stock]["mui"]+=3.2
+        svari[stock]["sigi"]+=35
       elif stock=="smirk":
-        svari[stock]["mui"]+=3.6
-        svari[stock]["sigi"]+=15
-      elif stock=="smile":
         svari[stock]["mui"]+=2.1
-        svari[stock]["sigi"]+=10
+        svari[stock]["sigi"]+=26
+      elif stock=="smile":
+        svari[stock]["mui"]+=1.5
+        svari[stock]["sigi"]+=20
       elif stock=="joy":
         svari[stock]["mui"]+=1
-        svari[stock]["sigi"]+=6
+        svari[stock]["sigi"]+=14
       elif stock=="pens":
         svari[stock]["mui"]+=0.6
-        svari[stock]["sigi"]+=4
+        svari[stock]["sigi"]+=8
 
   sun=int(random.gauss(svari["sun"]["mui"],svari["sun"]["sigi"]))
   smirk=int(random.gauss(svari["smirk"]["mui"],svari["smirk"]["sigi"]))
