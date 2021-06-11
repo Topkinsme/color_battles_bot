@@ -3282,7 +3282,7 @@ async def disoffice(ctx):
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
   cost=int(ofclvl*100)
-  await ctx.send("Your team's forge is on level {}. The next upgrade costs {}.".format(ofclvl,cost))
+  await ctx.send("Your team's office is on level {}. The next upgrade costs {}.".format(ofclvl,cost))
 
 @office.command(aliases=["upo","upgrade"])
 @commands.has_role("Alive")
@@ -4062,8 +4062,14 @@ async def repayloan(ctx,cash:int):
   if cash%200!=0:
     await ctx.send("Cash can only be a multiple of 200.")
     return
+  if data['money'][ath] < int(cash):
+    await ctx.send("You do not have that many coins in your account.")
+    return
   curdebt=data['players'][ath]['debt']
   newdebt=curdebt-cash
+  if newdebt<0:
+    await ctx.send("Do not pay more than you need to.")
+    return
   if newdebt<1001:
     intp=10
   else:
@@ -4083,7 +4089,7 @@ async def bankdeposit(ctx):
 @bankdeposit.command(aliases=["deposit","dep"])
 @commands.has_role("Alive")
 async def makedeposit(ctx,cash:int):
-  '''This command allows you to make a deposit.'''
+  '''This command allows you to make a bank deposit.'''
   global data
   if int(gamestate)!=3:
       await ctx.send("There is no game going on right now.")
@@ -4097,6 +4103,9 @@ async def makedeposit(ctx,cash:int):
     return
   if cash<10:
     await ctx.send("Cash cannot be below 10 coins.")
+    return
+  if data['money'][ath] < int(cash):
+    await ctx.send("You do not have that many coins in your account.")
     return
   code=chr(random.randint(97, 122))+chr(random.randint(97, 122))+chr(random.randint(97, 122))
   data['players'][ath]['depos'][code]={}
