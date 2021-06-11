@@ -691,6 +691,8 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="
   data['players'][athap]['state']=1
   data['players'][athap]['msg']=0
   data['players'][athap]['inv']=[]
+  data['players'][athap]['debt']=data['players'][athiap]['debt']
+  data['players'][athap]['depos']=data['players'][athiap]['depos']
   data['players'][athap]['emoji']=data['signedup'][athap]['emoji']
   for item in data['players'][athiap]['inv']:
       data['players'][athap]['inv'].append(item)
