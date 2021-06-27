@@ -343,7 +343,7 @@ async def on_member_remove(member):
     if str(member.id) in data['players']:
         data['money'].pop(str(member.id))
         data['signedup'].pop(str(member.id))
-        data['players'].pop(str(member.id))
+        data['players'].pop(str(member.id)) 
     
 @bot.event
 async def on_message_delete(message):
@@ -3750,12 +3750,12 @@ async def tmbuy(ctx,num:int):
   ath=str(ctx.author.id)
   team=data['players'][ath]['team']
   mrktlvl=data['building'][team]['market']
-  cost=data['building'][team]['marketprices'][num]
   state=data['players'][ath]['state']
   if state==1:
     if num>10 or num<1:
       await ctx.send("Please enter a valid number.")
       return
+    cost=data['building'][team]['marketprices'][num]
     if cost>data['money'][ath]:
       try:
         await withdraw(ctx,cost)
@@ -3783,6 +3783,7 @@ async def tmbuy(ctx,num:int):
     if num>5 or num<1:
       await ctx.send("Please enter a valid number.")
       return
+    cost=data['building'][team]['bmarketprices'][num]
     if cost>data['money'][ath]:  
       await ctx.send("You cannot afford this.")
       return
@@ -3885,7 +3886,7 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
 @tribute.command(aliases=["tributeinfo","ct","check"])
 @commands.has_role("Alive")
 async def checktribute(ctx):
-  '''Allows the king of a team to pick the tribute and cash <King Only.>'''
+  '''Allows the king of a team to check the tribute and cash <King Only.>'''
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
     return
