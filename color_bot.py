@@ -73,6 +73,8 @@ async def on_ready():
     global lstmsg
     global gifted
     global svari
+    global giftchance
+    global respgiftchance
     spamchannel=bot.get_channel(450698253508542474)
     welcomechannel=bot.get_channel(448889376634830859)
     await spamchannel.send("The bot is online!")
@@ -134,7 +136,8 @@ async def on_ready():
           svari[thing]["sigi"]=0
     except:
       pass
-
+    giftchance=500
+    respgiftchance=200
     my_loop.start()
     my_looptwo.start()
     #my_loopthree.start()
@@ -250,6 +253,8 @@ async def on_message(message):
     global gifted
     global gamestate
     global data
+    global giftchance
+    global respgiftchance
     if message.author.id == 450320950026567692:
         return
     if message.guild==None:
@@ -274,9 +279,10 @@ async def on_message(message):
     guildd=message.guild
     await score(ath,message.content,message.channel.category)
     if message.channel.name=="battlefield":
-      n = random.randint(1,500)
+      n = random.randint(1,giftchance)
       cash = random.randint(300,500)
-      if n ==49:
+      if n ==1:
+        giftchance=500
         if message.author.id in gifted:
           return
         gifted.append(message.author.id)
@@ -288,9 +294,13 @@ async def on_message(message):
         except:
           await message.channel.send("It seems I had trouble accessing your account so I'm just going to have to keep the money with myself....")
         dump()
+      else:
+        if giftchance>11:
+          giftchance-=1
     elif message.channel.name=="respawning":
-      n = random.randint(1,200)
-      if n ==49:
+      n = random.randint(1,respgiftchance)
+      if n ==1:
+        respgiftchance=200
         await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.  You have 60 seconds!")
         def check(mo):
             return mo.content.lower()=='good' or mo.content.lower()=='bad' and mo.channel == message.channel
@@ -318,6 +328,9 @@ async def on_message(message):
               await townc.send("That offer has expired!")
         except:
             await message.channel.send("That offer has expired!")
+      else:
+        if respgiftchance>11:
+          respgiftchance-=1
     dump()
 
     
@@ -344,6 +357,7 @@ async def on_member_remove(member):
         data['money'].pop(str(member.id))
         data['signedup'].pop(str(member.id))
         data['players'].pop(str(member.id)) 
+    dump()
     
 @bot.event
 async def on_message_delete(message):
@@ -690,6 +704,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="
   data['players'][athap]['team']=data['players'][athiap]['team']
   data['players'][athap]['state']=1
   data['players'][athap]['msg']=0
+  data['players'][athap]['phalive']=0
   data['players'][athap]['inv']=[]
   data['players'][athap]['debt']=data['players'][athiap]['debt']
   data['players'][athap]['depos']=data['players'][athiap]['depos']
@@ -823,7 +838,7 @@ async def reroll(ctx):
 async def demote(ctx):
   '''To demote yourself. <Helper>'''
   guildd=bot.get_guild(448888674944548874)
-  role = discord.utils.get(guildd.roles, name="Helper")
+  role = discord.utils.get(guildd.roles, name="Helper-In-Game")
   ath = str(ctx.author.id)
   await ctx.author.add_roles(role)
   role = discord.utils.get(guildd.roles, name="Helpers")
@@ -832,7 +847,7 @@ async def demote(ctx):
 
 
 @bot.command(aliases=["^","pro"])
-@commands.has_role("Helper")
+@commands.has_role("Helper-In-Game")
 async def promote(ctx):
   '''To promote yourself. <Helper>'''
   guildd=bot.get_guild(448888674944548874)
@@ -850,7 +865,43 @@ async def promote(ctx):
       return
   role = discord.utils.get(guildd.roles, name="Helpers")
   await ctx.author.add_roles(role)
-  role = discord.utils.get(guildd.roles, name="Helper")
+  role = discord.utils.get(guildd.roles, name="Helper-In-Game")
+  await ctx.author.remove_roles(role)
+  await ctx.send("You have been promoted , {}".format(ctx.author.mention))
+
+@bot.command(aliases=["vv","adem","sdem"])
+@commands.has_role("Informer")
+async def superdemote(ctx):
+  '''To demote yourself. <Informer>'''
+  guildd=bot.get_guild(448888674944548874)
+  role = discord.utils.get(guildd.roles, name="Informer-In-Game")
+  ath = str(ctx.author.id)
+  await ctx.author.add_roles(role)
+  role = discord.utils.get(guildd.roles, name="Informer")
+  await ctx.author.remove_roles(role)
+  await ctx.send("You have been demoted , {}".format(ctx.author.mention))
+
+
+@bot.command(aliases=["^^","apro","spro"])
+@commands.has_role("Informer-In-Game")
+async def superpromote(ctx):
+  '''To promote yourself. <Informer>'''
+  guildd=bot.get_guild(448888674944548874)
+  ath = str(ctx.author.id)
+  rolz=[]
+  role1 = discord.utils.get(guildd.roles, name="Alive")
+  role2 = discord.utils.get(guildd.roles, name="Respawning")
+  role3 = discord.utils.get(guildd.roles, name="Signed-Up!")
+  rolz.append(role1)
+  rolz.append(role2)
+  rolz.append(role3)
+  for role in rolz:
+    if role in ctx.author.roles:
+      await ctx.send("It seems you might be in a game. Please wait for the game to get over before you can promote.")
+      return
+  role = discord.utils.get(guildd.roles, name="Informer")
+  await ctx.author.add_roles(role)
+  role = discord.utils.get(guildd.roles, name="Informer-In-Game")
   await ctx.author.remove_roles(role)
   await ctx.send("You have been promoted , {}".format(ctx.author.mention))
 
@@ -1216,7 +1267,7 @@ async def assignroles(ctx,code):
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
     await msg.pin()
-    msg = await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)\n\nUse !die !slot !flip and !lottery to gamble for money. Use !help <command> to learn more about any command.")
+    msg = await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)\n\nUse !die !slot !flip and !lottery to gamble for money. \n\nYou can also type !market view to view the black market for useful items to buy.\nUse !help <command> to learn more about any command.")
     await msg.pin()
     #
     rolem1 = discord.utils.get(guildd.roles, name="Host")
@@ -1314,6 +1365,7 @@ async def assignroles(ctx,code):
         data['players'][user]['state']=1
         #state 1 is alive ,0 is dead
         data['players'][user]['msg']=0
+        data['players'][user]['phalive']=0
         data['players'][user]['inv']=[]
         data['players'][user]['emoji']=data['signedup'][user]['emoji']
         data['players'][user]['debt']=0
@@ -1661,6 +1713,20 @@ async def masterinventory(ctx,member:typing.Union[discord.Member,str]):
     msg+=f"{item}\n"
   await ctx.send(msg)
 
+@master.command(aliases=["vault","vltview","vlt","mvlt"])
+@commands.has_any_role("Helpers","Host")
+async def mastervault(ctx,team):
+  '''Displays the amount of cash in a team team's vault'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  ath=str(ctx.author.id)
+  try:
+    money=data['building'][team]['vault']
+  except:
+    money=0
+  await ctx.send(f"That team's vault has {money}, out of which {money-data['building'][team]['stash']['smoney']} can be used.")
+
 @bot.group(invoke_without_command=True,aliases=["a"])
 async def auction(ctx):
     '''Main command group of auction.'''
@@ -1921,7 +1987,7 @@ async def msgcount(ctx):
   msg = await ctx.send("Loading.")
   count="The message count is - \n"
   for ath in data['players']:
-    count+="<@{}> has sent {}.\n".format(ath,data['players'][ath]['msg'])
+    count+=f"<@{ath}> has sent {data['players'][ath]['msg']} messages in {data['players'][ath]['phalive']} alive phase(s).\n"
   await msg.edit(content=count)
 
 @modify.group(invoke_without_command=True,aliases=["inv"])
@@ -2164,6 +2230,9 @@ async def advancephase(ctx,cost=100):
   await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
   await massgive(ctx,cash=cost)
   data['lottery']+=500
+  for ath in data['players']:
+    if data['players'][ath]['state']==1:
+      data['players'][ath]['phalive']+=1
   dump()
 
 @bot.group(invoke_without_command=True,aliases=["peopoll","mpoll"])
@@ -2335,14 +2404,19 @@ async def lockchat(ctx):
     chnl=ctx.message.channel
     await chnl.edit(category=category,overwrites=archive)
     pins=[]
+    msg=commands.Paginator(prefix="",suffix="")
     async for message in chnl.history(limit=10000):
         if message.pinned:
           pins.append(message.content)
-    msg=""
+    #msg=""
     for thing in pins[::-1]:
-      msg+="\n "+thing+"\n"
-    tmsg = await ctx.send("​")
-    await tmsg.edit(content=f"Done, Pins are- {msg}")
+      #msg+="\n "+thing+"\n"
+      msg.add_line(thing)
+    await ctx.send("Done, Pins are-")
+    for page in msg.pages:
+      tmsg = await ctx.send("​")
+      await tmsg.edit(content=f"Done, Pins are- {page}")
+
     dump()
 
 @blind.command(aliases=["vb","allbids"])
@@ -2629,7 +2703,7 @@ async def channel(ctx):
     await ctx.send("That is not a valid subcommand. Type `!help cc` to learn about the possible subcommands.")
 
 @channel.command(aliases=["create"])
-@commands.has_role("Alive")
+@commands.has_any_role("Alive","Helpers","Host")
 async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     '''Used to create a communication channel. Costs 50c.'''
     if (int(gamestate) != 3):
@@ -2753,7 +2827,7 @@ async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     dump()
 
 @channel.command(aliases=["add"])
-@commands.has_role("Alive")
+@commands.has_any_role("Alive","Helpers","Host")
 async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Adds a person to the channel'''
     if (int(gamestate) != 3):
@@ -2791,7 +2865,7 @@ async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("You probably aren't the owner of this cc.")
         
 @channel.command(aliases=["remove"]) 
-@commands.has_role("Alive")
+@commands.has_any_role("Alive","Helpers","Host")
 async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Removes a person from the channel'''
     if (int(gamestate) != 3):
@@ -2826,7 +2900,7 @@ async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
         await ctx.send("You probably aren't the owner of this cc.")
 
 @channel.command(aliases=["rename"])
-@commands.has_role("Alive")
+@commands.has_any_role("Alive","Helpers","Host")
 async def renamechannel(ctx,*,newname):
     '''Renames the channel name. Note that using this multiple times will not work due to rate-limit issues.'''
     if (int(gamestate) != 3):
@@ -3228,7 +3302,7 @@ async def disforge(ctx):
   team=str(data['players'][ath]['team'])
   forglvl=data['building'][team]['forge']
   cost=int((forglvl*forglvl)*100)
-  await ctx.send("Your team's forge is on level {}. The next upgrade costs {}.".format(forglvl,cost))
+  await ctx.send(f"Your team's forge is on level {forglvl}. Each person gets {forglvl*100} coins.  The next upgrade costs {cost}.")
 
 @forge.command(aliases=["upf","upgrade"])
 @commands.has_role("Alive")
@@ -3281,8 +3355,8 @@ async def disoffice(ctx):
     return
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
-  cost=int(ofclvl*100)
-  await ctx.send("Your team's office is on level {}. The next upgrade costs {}.".format(ofclvl,cost))
+  cost=int((ofclvl*200)-100)
+  await ctx.send(f"Your team's office is on level {ofclvl}. Each person gets {ofclvl*10} to {(ofclvl*10)+10} coins.  The next upgrade costs {cost}.")
 
 @office.command(aliases=["upo","upgrade"])
 @commands.has_role("Alive")
@@ -3298,7 +3372,7 @@ async def upoffice(ctx):
   ath=str(ctx.author.id)
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
-  cost=int(ofclvl*100)
+  cost=int((ofclvl*200)-100)
 
   if cost>data['building'][team]['vault']:
     await ctx.send("You do not have that much cash in your vault.")
@@ -3667,7 +3741,7 @@ async def viewmarket(ctx):
   mrktlvl=data['building'][team]['market']
   state=data['players'][ath]['state']
   if state==1:
-    msg="__**MARKET**__\n"
+    msg="__**MARKET**__\n**NOTE THAT THE PRICE OF AN ITEM INCREASES BY 1k AFTER EACH PURCHASE.**\n**Also note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**\n"
     #if mrktlvl==0:
       #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
     #if mrktlvl>0:
@@ -3678,8 +3752,8 @@ async def viewmarket(ctx):
     msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
     msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
   elif state==0:
-    msg="__**BLACK MARKET**__\n"
-    msg+=f"\n__**Note that all these items can only be used while in the state respawning.**__ \n **1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {data['building'][team]['bmarketprices'][1]}, increases by 50 each time.* \n **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {data['building'][team]['bmarketprices'][2]}, increases by 500 each time.* \n **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {data['building'][team]['bmarketprices'][3]}, increases by 1000 each time.* \n **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {data['building'][team]['bmarketprices'][4]}, increases by 1000 each time.* \n **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you, when the phase ends. If the killer is already dead, this will simply give you the name of the killer. Cannot be used if you were killed by tribute. *- For {data['building'][team]['bmarketprices'][5]}, increases by 96000 each time.*"
+    msg="__**BLACK MARKET**__\n**Note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**\n__**Also note that all these items can only be used while in the state respawning.**__ \n"
+    msg+=f"\n **1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {data['building'][team]['bmarketprices'][1]}, increases by 50 each time.* \n **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {data['building'][team]['bmarketprices'][2]}, increases by 500 each time.* \n **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {data['building'][team]['bmarketprices'][3]}, increases by 1000 each time.* \n **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {data['building'][team]['bmarketprices'][4]}, increases by 1000 each time.* \n **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you, when the phase ends. If the killer is already dead, this will simply give you the name of the killer. Cannot be used if you were killed by tribute. *- For {data['building'][team]['bmarketprices'][5]}, increases by 96000 each time.*"
   await ctx.send(msg)
 
 @market.command(aliases=["dim","level"])
@@ -3708,7 +3782,7 @@ async def dismarket(ctx):
     text= "The next upgrade costs 1000."
   else:
     text= "Your market has been maxed out."
-  await ctx.send(f"Your team's market is on level {state}.{text}")
+  await ctx.send(f"Your team's market is on level {state}. {text}")
 
 
 @market.command(aliases=["upm","upgrade"])
@@ -3742,6 +3816,7 @@ async def upmarket(ctx):
   await ctx.send("Upgraded!")
 
 @market.command(aliases=["tbuy","buy"])
+@commands.has_any_role("Alive","Respawning")
 async def tmbuy(ctx,num:int):
   '''Use this to buy something from the market. Only use item number to buy.'''
   if int(gamestate)!=3:
@@ -3907,7 +3982,7 @@ async def checktribute(ctx):
 
 @bot.group(invoke_without_command=True,aliases=["sth"])
 async def stash(ctx):
-    '''Main command group of rolelist.'''
+    '''Main command group of stash.'''
     await ctx.send("That is not a valid subcommand. Type `!help sth` to learn about the possible subcommands.")
 
 @stash.command(aliases=["store"])
@@ -4114,7 +4189,7 @@ async def makedeposit(ctx,cash:int):
   data['players'][ath]['depos'][code]['time']=datetime.datetime.now()
 
   data['money'][ath]-=cash
-  await ctx.send(f"Done! You have now deposited {cash}. The code for your deposit is {code}. Your will get a 10% compound interest for every 12 hours you don't take it out/")
+  await ctx.send(f"Done! You have now deposited {cash}. The code for your deposit is {code}. Your will get a 10% compound interest for every 12 hours you don't take it out.")
   dump()
 
 @bankdeposit.command(aliases=["view"])
@@ -4280,7 +4355,7 @@ async def score(ath,msg,cate):
             b=a+10
             coins=[a,b]
           else:
-            coins=[10,20]
+            return
           if not ath in earnd:
             if not str(ath) in lstmsg:
               lstmsg[str(ath)]=" "
