@@ -1314,25 +1314,8 @@ async def assignroles(ctx,code):
       data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
       data['building'][team]['stash']['smoney']=0
-      data['building'][team]['marketprices']=[]
-      data['building'][team]['marketprices'].append("Placeholder")
-      data['building'][team]['marketprices'].append(1000)
-      data['building'][team]['marketprices'].append(1000)
-      data['building'][team]['marketprices'].append(1000)
-      data['building'][team]['marketprices'].append(2000)
-      data['building'][team]['marketprices'].append(2000)
-      data['building'][team]['marketprices'].append(2000)
-      data['building'][team]['marketprices'].append(3000)
-      data['building'][team]['marketprices'].append(3000)
-      data['building'][team]['marketprices'].append(3000)
-      data['building'][team]['marketprices'].append(4000)
-      data['building'][team]['bmarketprices']=[]
-      data['building'][team]['bmarketprices'].append("Placeholder")
-      data['building'][team]['bmarketprices'].append(150)
-      data['building'][team]['bmarketprices'].append(1000)
-      data['building'][team]['bmarketprices'].append(2000)
-      data['building'][team]['bmarketprices'].append(2000)
-      data['building'][team]['bmarketprices'].append(5000)
+      data['building'][team]['marketprices']=["Placeholder",1000,1000,1000,2000,2000,2000,3000,3000,3000,4000]
+      data['building'][team]['bmarketprices']=["Placeholder",150,1000,2000,2000,5000]
       teammsg=discord.Embed(colour=random.randint(0, 0xffffff))
       teammsg.set_author(name="Team info!")
       teammsg.add_field(name="Welcome!",value=f"You are all members of the {team} team! \n Work together and win this game!")
@@ -3727,34 +3710,66 @@ async def market(ctx):
 @market.command(aliases=["mark","view"])
 async def viewmarket(ctx):
   '''Use this to display market.'''
-  if int(gamestate)!=3:
-      await ctx.send("There is no game going on right now.")
-      return
-  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
-    await ctx.send("You can only use this command in faction channels.")
-    return
-  ath=str(ctx.author.id)
-  if ath not in data['players']:
-    await ctx.send("You are not in game. This command cannot be executed.")
-    return
-  team=data['players'][ath]['team']
-  mrktlvl=data['building'][team]['market']
-  state=data['players'][ath]['state']
-  if state==1:
-    msg="__**MARKET**__\n**NOTE THAT THE PRICE OF AN ITEM INCREASES BY 1k AFTER EACH PURCHASE.**\n**Also note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**\n"
+
+  prices=["Placeholder",1000,1000,1000,2000,2000,2000,3000,3000,3000,4000]
+  bmprices=["Placeholder",150,1000,2000,2000,5000]
+  state=3
+  if int(gamestate)==3:
+    ath=str(ctx.author.id)
+    if ath in data['players']:
+      if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+        await ctx.send("You can only use this command in faction channels.")
+        return
+      else:
+        team=data['players'][ath]['team']
+        prices=[]
+        for x in range(11):
+          prcies.append(data['building'][team]['marketprices'][x])
+        bmprices=[]
+        for x in range(6):
+          bmprcies.append(data['building'][team]['bmarketprices'][x])
+        state=data['players'][ath]['state']
+  
+  #team=data['players'][ath]['team']
+  #mrktlvl=data['building'][team]['market']
+  #msg=""
+  msg=commands.Paginator(prefix="",suffix="")
+  if state==1 or state ==3:
+    msg.add_line("""__**MARKET**__
+    **NOTE THAT THE PRICE OF AN ITEM INCREASES BY 1k AFTER EACH PURCHASE.**
+    **Also note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**\n""")
     #if mrktlvl==0:
       #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
     #if mrktlvl>0:
-    msg+=f"\n__**LVL 1 (Free)**__ \n **1.Poison someone -** They die in 2 phases if they don't buy antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {data['building'][team]['marketprices'][1]}* \n **2.Antidote -** Use this to cure yourself if you're poisoned. *- For {data['building'][team]['marketprices'][2]}* \n **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {data['building'][team]['marketprices'][3]}* \n"
+    msg.add_line(f"""\n__**LVL 1 (Free)**__ 
+    **1.Poison someone -** Use this on a target to poison them. They die in 2 phases if they don't buy the antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {prices[1]}* 
+    **2.Antidote -** Use this on someone to cure them if they're poisoned. (Can only be used on your teamate)*- For {prices[2]}* 
+    **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {prices[3]}* \n""")
     #if mrktlvl>1:
-    msg+=f"\n__**LVL 2 (1k)**__ \n **4.Protection -** Use this to protect yourself from all attacks for one night. (Strong Protection)*- For {data['building'][team]['marketprices'][4]}*\n **5.Respawn stone -** Use this to respawn instantly once (Only works if you are in the respawning state). *- For {data['building'][team]['marketprices'][5]}* \n **6.Respawn Totem -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Solos cannot buy this.) *- For {data['building'][team]['marketprices'][6]}* \n"
+    msg.add_line(f"""\n__**LVL 2 (1k)**__ 
+    **4.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on your teammate) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[4]}*
+    **5.Respawn stone -** Use this to respawn instantly once (Only works if you are already in the respawning state). *- For {prices[5]}*
+    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
-    msg+=f"\n__**LVL 3 (1k)**__ \n **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. *- For {data['building'][team]['marketprices'][7]}* \n **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {data['building'][team]['marketprices'][8]}* \n **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {data['building'][team]['marketprices'][9]}* \n"
-    msg+=f"\n__**LVL 4 (1k)**__ \n **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {data['building'][team]['marketprices'][10]}* \n"
-  elif state==0:
-    msg="__**BLACK MARKET**__\n**Note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**\n__**Also note that all these items can only be used while in the state respawning.**__ \n"
-    msg+=f"\n **1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {data['building'][team]['bmarketprices'][1]}, increases by 50 each time.* \n **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {data['building'][team]['bmarketprices'][2]}, increases by 500 each time.* \n **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {data['building'][team]['bmarketprices'][3]}, increases by 1000 each time.* \n **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {data['building'][team]['bmarketprices'][4]}, increases by 1000 each time.* \n **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you, when the phase ends. If the killer is already dead, this will simply give you the name of the killer. Cannot be used if you were killed by tribute. *- For {data['building'][team]['bmarketprices'][5]}, increases by 96000 each time.*"
-  await ctx.send(msg)
+    msg.add_line(f"""\n__**LVL 3 (1k)**__ 
+    **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb.)*- For {prices[7]}*
+    **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {prices[8]}*
+    **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {prices[9]}* \n""")
+    msg.add_line(f"""\n__**LVL 4 (1k)**__ 
+    **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
+  if state==0 or state==3:
+    msg.add_line("""__**BLACK MARKET**__
+    **Note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**
+    __**Also note that all these items can only be used while in the state respawning.**__ \n""")
+    msg.add_line(f"""\n**   1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {bmprices[1]}, increases by 50 each time.* 
+    **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {bmprices[2]}, increases by 500 each time.* 
+    **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {bmprices[3]}, increases by 1000 each time.* 
+    **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {bmprices[4]}, increases by 1000 each time.* 
+    **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you, when the phase ends. If the killer is already dead, this will simply give you the name of the killer. Cannot be used if you were killed by tribute. *- For {bmprices[5]}, increases by 96000 each time.*""")
+  for page in msg.pages:
+      tmsg = await ctx.send(" ​")
+      await tmsg.edit(content=f"{page}")
+
 
 @market.command(aliases=["dim","level"])
 async def dismarket(ctx):
