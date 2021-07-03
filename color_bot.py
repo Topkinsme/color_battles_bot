@@ -25,6 +25,7 @@ import typing
 import math
 import difflib
 from github import Github
+from ast import literal_eval
 
 
 token = str(os.environ.get("tokeno"))
@@ -1314,7 +1315,7 @@ async def assignroles(ctx,code):
       data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
       data['building'][team]['stash']['smoney']=0
-      data['building'][team]['marketprices']=["Placeholder",1000,1000,1000,2000,2000,2000,3000,3000,3000,4000]
+      data['building'][team]['marketprices']=["Placeholder",1000,1000,1000,3500,2000,3000,4000,3000,4000,4000]
       data['building'][team]['bmarketprices']=["Placeholder",150,1000,2000,2000,5000]
       teammsg=discord.Embed(colour=random.randint(0, 0xffffff))
       teammsg.set_author(name="Team info!")
@@ -1424,6 +1425,19 @@ async def addrole(ctx,role,team,soloq=0,*,litrole):
     # 0 or not solo, 1 for solo
     data['rt'][role]['soloq'] = soloq
     await ctx.send("{} added for the team {}.".format(role,team))
+    dump()
+
+@rolelist.command(aliases=["ars","addm","arm","addmulti","multiadd"])
+@commands.has_any_role("Helpers","Host")
+async def addroles(ctx,*,list_:literal_eval):
+    '''Adds multiple roles at the same time. The parameter is a list, which is of the syntax [role,team,soloq,litrole] <Helpers>'''
+    if (int(gamestate) >= 3):
+        await ctx.send("A game is already going on.")
+        return
+    list_=list(list_)
+    for thing in list_:
+      await addrole(ctx,thing[0],thing[1],thing[2],litrole=thing[3])
+      await asyncio.sleep(1)
     dump()
     
 @rolelist.command(aliases=["rr","remove"])
@@ -3711,7 +3725,7 @@ async def market(ctx):
 async def viewmarket(ctx):
   '''Use this to display market.'''
 
-  prices=["Placeholder",1000,1000,1000,2000,2000,2000,3000,3000,3000,4000]
+  prices=["Placeholder",1000,1000,1000,3500,2000,3000,4000,3000,4000,4000]
   bmprices=["Placeholder",150,1000,2000,2000,5000]
   state=3
   if int(gamestate)==3:
@@ -3736,32 +3750,32 @@ async def viewmarket(ctx):
   msg=commands.Paginator(prefix="",suffix="")
   if state==1 or state ==3:
     msg.add_line("""__**MARKET**__
-    **NOTE THAT THE PRICE OF AN ITEM INCREASES BY 1k AFTER EACH PURCHASE.**
+    **NOTE THAT THE PRICE OF AN ITEM INCREASES BY 1k AFTER EACH PURCHASE (unless something else is mentioned next to the item).**
     **Also note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**\n""")
     #if mrktlvl==0:
       #msg+="You have not unlocked the market yet. Use !upmarket to unlock it for 2.5k"
     #if mrktlvl>0:
     msg.add_line(f"""\n__**LVL 1 (Free)**__ 
     **1.Poison someone -** Use this on a target to poison them. They die in 2 phases if they don't buy the antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {prices[1]}* 
-    **2.Antidote -** Use this on someone to cure them if they're poisoned. (Can only be used on your teamate)*- For {prices[2]}* 
-    **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. *- For {prices[3]}* \n""")
+    **2.Antidote -** Use this on someone to cure them if they're poisoned. (Can only be used on your teammate)*- For {prices[2]}* 
+    **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. (Note that the price of this item only increases by 500 per use.) *- For {prices[3]}* \n""")
     #if mrktlvl>1:
     msg.add_line(f"""\n__**LVL 2 (1k)**__ 
-    **4.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on your teammate) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[4]}*
+    **4.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {prices[4]}*
     **5.Respawn stone -** Use this to respawn instantly once (Only works if you are already in the respawning state). *- For {prices[5]}*
     **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
     **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb.)*- For {prices[7]}*
-    **8.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {prices[8]}*
+    **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on your teammate) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
     **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {prices[9]}* \n""")
     msg.add_line(f"""\n__**LVL 4 (1k)**__ 
-    **10.GOD -** Protect all your teammates for the coming night and make all dead teammates alive instantly. (Using this during the night will only make it protect during next night. Protection is strong protection) (Only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
+    **10.GOD -** Protect all your teammates for the current/next night and make all dead teammates alive instantly. (Using this during the night will make it protect during that night. Protection is strong protection) (Respawns teammates only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
   if state==0 or state==3:
     msg.add_line("""__**BLACK MARKET**__
     **Note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**
     __**Also note that all these items can only be used while in the state respawning.**__ \n""")
-    msg.add_line(f"""\n**   1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {bmprices[1]}, increases by 50 each time.* 
+    msg.add_line(f"""\n**    1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {bmprices[1]}, increases by 50 each time.* 
     **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {bmprices[2]}, increases by 500 each time.* 
     **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {bmprices[3]}, increases by 1000 each time.* 
     **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {bmprices[4]}, increases by 1000 each time.* 
@@ -3852,8 +3866,8 @@ async def tmbuy(ctx,num:int):
       except:  
         await ctx.send("You cannot afford this.")
         return
-    increases=[0,1000,1000,1000,1000,1000,1000,1000,1000,1000,96000]
-    items=["placeholder","Poison","Antidote","Check Bal","Protection","Respawn Stone","Respawn Totem","Bomb","Role Seeker","Strength Potion","GOD"]
+    increases=[0,1000,1000,500,1000,1000,1000,1000,1000,1000,96000]
+    items=["placeholder","Poison","Antidote","Check Bal","Role Seeker","Respawn Stone","Respawn Totem","Bomb","Protection","Strength Potion","GOD"]
     if num>0 and num<4 and mrktlvl<1:
       await ctx.send("You need to upgrade your market to buy this item.")
       return
