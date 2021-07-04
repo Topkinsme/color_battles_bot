@@ -366,12 +366,12 @@ async def on_message_delete(message):
       return
     await spamchannel.send("{}'s message `{}` was deleted in <#{}>".format(message.author.name,message.content,message.channel.id))
     
-'''@bot.event
+@bot.event
 async def on_user_update(before,after):
     if before.name==after.name:
         return
     else:
-        await spamchannel.send("'{}' has changed their name to '{}' .".format(before.name,after.name))'''
+        await spamchannel.send("'{}' has changed their name to '{}' .".format(before.name,after.name))
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -516,7 +516,7 @@ async def nuke(ctx):
     '''Empties the entire channel <Nuke>'''
     chnl=ctx.message.channel
     async for message in chnl.history(limit=10000):
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
         await message.delete()
     tempc = await ctx.send("Cleared.")
     await asyncio.sleep(30)
@@ -946,7 +946,7 @@ async def genroles(ctx):
         if rolen in a[b]:
           folder=b
       msg="** **\n```\n"+repo.get_contents(f"{folder}/{rolen}").decoded_content.decode("utf-8")+"```"
-      await asyncio.sleep(1)
+      await asyncio.sleep(0.5)
       msg = await ctx.send(msg)
 
 #host
@@ -1437,7 +1437,7 @@ async def addroles(ctx,*,list_:literal_eval):
     list_=list(list_)
     for thing in list_:
       await addrole(ctx,thing[0],thing[1],thing[2],litrole=thing[3])
-      await asyncio.sleep(1)
+      await asyncio.sleep(0.5)
     dump()
     
 @rolelist.command(aliases=["rr","remove"])
