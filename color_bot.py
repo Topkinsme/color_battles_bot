@@ -1040,7 +1040,7 @@ async def cash(ctx):
     '''Sub-Main command group of modify.'''
     await ctx.send("That is not a valid subcommand. Type `!help mdy cash` to learn about the possible subcommands.")
 
-@cash.command(aliases=["rc"])
+@cash.command(aliases=["rc","remove","rem"])
 @commands.has_any_role("Helpers","Host")
 async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Removes a certain amount of cash from a person. <Helper>'''
@@ -1066,7 +1066,7 @@ async def removecash(ctx,member:typing.Union[discord.Member,str],cash):
     data['money'][str(member.id)]-=int(cash)
     await ctx.send("{} has been reduced from {}'s account. Current balance is {} .".format(cash,member.mention,data['money'][str(member.id)]))
     
-@cash.command(aliases=["ac"])
+@cash.command(aliases=["ac","add"])
 @commands.has_any_role("Helpers","Host")
 async def addcash(ctx,member:typing.Union[discord.Member,str],cash):
     '''Adds a certain amount of cash to a person's balance. <Helper>'''
@@ -1096,7 +1096,7 @@ async def mvault(ctx):
     '''Sub-Main command group of modify.'''
     await ctx.send("That is not a valid subcommand. Type `!help mdy vault` to learn about the possible subcommands.")
 
-@mvault.command(aliases=["ac"])
+@mvault.command(aliases=["ac","add"])
 @commands.has_any_role("Helpers","Host")
 async def addcashinvault(ctx,team,cash):
     '''Adds a certain amount of cash to a team's vault. <Helper>'''
@@ -1109,7 +1109,7 @@ async def addcashinvault(ctx,team,cash):
     data['building'][team]['vault']+=int(cash)
     await ctx.send(f"{cash} has been added to {team}'s vault. Current balance is {data['building'][team]['vault']} .")
 
-@mvault.command(aliases=["rc"])
+@mvault.command(aliases=["rc","remove","rem"])
 @commands.has_any_role("Helpers","Host")
 async def removecashfromvault(ctx,team,cash):
     '''Removes a certain amount of cash to a team's vault. <Helper>'''
@@ -1440,7 +1440,7 @@ async def addroles(ctx,*,list_:literal_eval):
       await asyncio.sleep(0.5)
     dump()
     
-@rolelist.command(aliases=["rr","remove"])
+@rolelist.command(aliases=["rr","remove","rem"])
 @commands.has_any_role("Helpers","Host")
 async def removerole(ctx,role,team):
     '''Removes a role from the role list. <Helpers>'''
@@ -1453,7 +1453,7 @@ async def removerole(ctx,role,team):
     await ctx.send("{} removed.".format(role))
     dump()
    
-@rolelist.command(aliases=["lr","view"])
+@rolelist.command(aliases=["lr","view","all"])
 @commands.has_any_role("Helpers","Host")
 async def listroles(ctx):
     '''Prints the entire role list. <Helpers>'''
@@ -1539,7 +1539,7 @@ async def kill(ctx,user:typing.Union[discord.Member,str]):
     await ctx.send("Killed {}.".format(user.mention))
     dump()
     
-@bot.command(aliases=["re"])
+@bot.command(aliases=["re","revive"])
 @commands.has_any_role("Helpers","Host")
 async def respawn(ctx,user:typing.Union[discord.Member,str]):
     '''Respawns a person in game <Helpers>'''
@@ -1573,9 +1573,9 @@ async def respawn(ctx,user:typing.Union[discord.Member,str]):
     await ctx.send("Respawned {}.".format(user.mention))
     dump()
 
-@bot.command(aliases=["pk"])
+@bot.command(aliases=["pk","pkill","permk"])
 @commands.has_any_role("Helpers","Host")
-async def pkill(ctx,user:typing.Union[discord.Member,str]):
+async def permakill(ctx,user:typing.Union[discord.Member,str]):
     '''Kills a person permanently in game. <Helpers>'''
     if int(gamestate)!=3:
         await ctx.send("There isn't a game going on.")
@@ -1657,7 +1657,7 @@ async def master(ctx):
     '''Main command group of rolelist.'''
     await ctx.send("That is not a valid subcommand. Type `!help m` to learn about the possible subcommands.")
 
-@master.command(aliases=["mbal","bal"])
+@master.command(aliases=["mbal","bal","balance"])
 @commands.has_any_role("Helpers","Host")
 async def masterbalance(ctx,member:typing.Union[discord.Member,str]):
   '''Allows to see the balance of another player <Helpers>'''
@@ -1724,22 +1724,22 @@ async def mastervault(ctx,team):
     money=0
   await ctx.send(f"That team's vault has {money}, out of which {money-data['building'][team]['stash']['smoney']} can be used.")
 
-@bot.group(invoke_without_command=True,aliases=["a"])
+@bot.group(invoke_without_command=True,aliases=["a","auc"])
 async def auction(ctx):
     '''Main command group of auction.'''
     await ctx.send("That is not a valid subcommand. Type `!help a` to learn about the possible subcommands.")
 
-@auction.group(invoke_without_command=True,aliases=["n"])
+@auction.group(invoke_without_command=True,aliases=["n","norm"])
 async def normal(ctx):
     '''Sub-Main command group of auction.'''
     await ctx.send("That is not a valid subcommand. Type `!help a n` to learn about the possible subcommands.")
 
-@auction.group(invoke_without_command=True,aliases=["b"])
+@auction.group(invoke_without_command=True,aliases=["b","bli"])
 async def blind(ctx):
     '''Sub-Main command group of auction.'''
     await ctx.send("That is not a valid subcommand. Type `!help a b` to learn about the possible subcommands.")
 
-@normal.command(aliases=["ca","create"])
+@normal.command(aliases=["ca","create","make"])
 @commands.has_any_role("Helpers","Host")
 async def createauction(ctx,name,strtbid,*,text):
     '''Allows the user to create a auction <Helpers>'''
@@ -1803,7 +1803,7 @@ async def closeauction(ctx):
   data['auction']['perks']=""
   dump()
 
-@blind.command(aliases=["cba","create"])
+@blind.command(aliases=["cba","create","make"])
 @commands.has_any_role("Helpers","Host")
 async def createblindauction(ctx,name,strtbid,*,text):
     '''Allows the user to create a blind auction <Helpers>'''
@@ -1858,7 +1858,7 @@ async def closeblindauction(ctx,code):
   data['bauction'].pop(code)
   dump()
 
-@bot.group(invoke_without_command=True,aliases=["sm"])
+@bot.group(invoke_without_command=True,aliases=["sm","stock"])
 async def stockmarket(ctx):
     '''Main command group of stockmarket.'''
     await ctx.send("That is not a valid subcommand. Type `!help sm` to learn about the possible subcommands.")
@@ -2067,7 +2067,7 @@ async def addtostash(ctx,team,*,item):
   data['building'][team]['stash']['items'].append(item)
   await ctx.send("Done.")
 
-@mstash.command(aliases=["remstash","rem"])
+@mstash.command(aliases=["remstash","rem","remove"])
 @commands.has_any_role("Helpers","Host")
 async def removefromstash(ctx,team,*,item):
   '''Use this to remove something to a team's stash <Helpers>'''
@@ -2085,7 +2085,7 @@ async def removefromstash(ctx,team,*,item):
     return
   await ctx.send("Done.")
 
-@bot.group(invoke_without_command=True,aliases=["tri"])
+@bot.group(invoke_without_command=True,aliases=["tri","trib"])
 async def tribute(ctx):
     '''Main command group of tribute.'''
     await ctx.send("That is not a valid subcommand. Type `!help tribute` to learn about the possible subcommands.")
@@ -2416,7 +2416,7 @@ async def lockchat(ctx):
 
     dump()
 
-@blind.command(aliases=["vb","allbids"])
+@blind.command(aliases=["vb","allbids","bids"])
 @commands.has_any_role("Helpers","Host")
 async def viewallbids(ctx,code):
   '''Use this to view all bids of a item. <Host>'''
@@ -2544,7 +2544,7 @@ async def signup(ctx,emoji="Emoji"):
         await ctx.author.remove_roles(role)
         dump()
     
-@bot.command(aliases=["sl","list"])
+@bot.command(aliases=["sl","list","players","p"])
 async def slist(ctx):
     '''Shows a list of everyone signed up.'''
     guildd=bot.get_guild(448888674944548874)
@@ -2590,7 +2590,7 @@ async def bal(ctx):
         return
     await ctx.send("{}'s bank balance is {}".format(ctx.author.mention,data['money'][str(ctx.author.id)]))
    
-@bot.command(aliases=["fghs"])
+@bot.command(aliases=["fghs","fgs"])
 @commands.has_role("Respawning")
 async def freeghostsay(ctx,*,fmsg):
     '''Use to send messages into battlefield as a ghost for free!! <Respawning>'''
@@ -2861,7 +2861,7 @@ async def addinchannel(ctx,member:typing.Union[discord.Member,str]):
     else:
         await ctx.send("You probably aren't the owner of this cc.")
         
-@channel.command(aliases=["remove"]) 
+@channel.command(aliases=["remove","rem"]) 
 @commands.has_any_role("Alive","Helpers","Host")
 async def removeinchannel(ctx,member:typing.Union[discord.Member,str]):
     '''Removes a person from the channel'''
@@ -2919,7 +2919,7 @@ async def renamechannel(ctx,*,newname):
         await ctx.send("You probably aren't the owner of this cc.")
 
 
-@bot.command(aliases=["sendm","give"])
+@bot.command(aliases=["sendm","give","pay"])
 @commands.has_role("Alive")
 async def sendmoney(ctx,member:typing.Union[discord.Member,str],cash):
   '''Allows alive players to send money to others.'''
@@ -2977,7 +2977,7 @@ async def alivelist(ctx):
   msg = await ctx.send("​")
   await msg.edit(content=temp)
 
-@bot.command(aliases=["ael"])
+@bot.command(aliases=["ael","opponents","enemies"])
 async def alivenonteamlist(ctx):
   '''Shows all alive players who are not on your team.'''
   if int(gamestate) != 3:
@@ -3257,7 +3257,7 @@ async def withdraw(ctx,cash:int):
   await ctx.send(f"Done! Money transferred. {cash} was withdrawn.")
   dump()
 
-@vault.command(aliases=["va","view"])
+@vault.command(aliases=["va","view","display"])
 async def viewvault(ctx):
   '''Displays the amount of cash in your team's vault'''
   if int(gamestate)!=3:
@@ -3283,7 +3283,7 @@ async def forge(ctx):
     await ctx.send("That is not a valid subcommand. Type `!help frg` to learn about the possible subcommands.")
 
 
-@forge.command(aliases=["dif","view"])
+@forge.command(aliases=["dif","view","display"])
 async def disforge(ctx):
   '''Displays your team's forge level.'''
   if int(gamestate)!=3:
@@ -3301,7 +3301,7 @@ async def disforge(ctx):
   cost=int((forglvl*forglvl)*100)
   await ctx.send(f"Your team's forge is on level {forglvl}. Each person gets {forglvl*100} coins.  The next upgrade costs {cost}.")
 
-@forge.command(aliases=["upf","upgrade"])
+@forge.command(aliases=["upf","upgrade","up"])
 @commands.has_role("Alive")
 async def upforge(ctx):
   '''Use this to upgrade your team's forge'''
@@ -3337,7 +3337,7 @@ async def office(ctx):
     await ctx.send("That is not a valid subcommand. Type `!help ofc` to learn about the possible subcommands.")
 
 
-@office.command(aliases=["dio","view"])
+@office.command(aliases=["dio","view","display"])
 async def disoffice(ctx):
   '''Displays your team's office level.'''
   if int(gamestate)!=3:
@@ -3355,7 +3355,7 @@ async def disoffice(ctx):
   cost=int((ofclvl*200)-100)
   await ctx.send(f"Your team's office is on level {ofclvl}. Each person gets {ofclvl*10} to {(ofclvl*10)+10} coins.  The next upgrade costs {cost}.")
 
-@office.command(aliases=["upo","upgrade"])
+@office.command(aliases=["upo","upgrade","up"])
 @commands.has_role("Alive")
 async def upoffice(ctx):
   '''Use this to upgrade your team's office'''
@@ -3553,7 +3553,7 @@ async def smsell(ctx,thing,num:int=1):
     await ctx.send("Invalid stock id.")
   dump()
 
-@stockmarket.command(aliases=["pri"])
+@stockmarket.command(aliases=["pri","view","display"])
 async def price(ctx):
   '''Use this to see the price of all stocks.'''
   if data['smarket']['state']==0:
@@ -3566,7 +3566,7 @@ async def price(ctx):
   e=data['smarket']['stocks']['pens']
   await ctx.send("Cost of :sunglasses: is {} \nCost of :smirk: is {} \nCost of :smiley: is {} \nCost of :joy: is {} \nCost of :pensive: is {} \n".format(a,b,c,d,e))
 
-@stockmarket.command(aliases=["alert","notifyme","notif"])
+@stockmarket.command(aliases=["alert","notifyme","notif","notify"])
 async def pingme(ctx):
     '''Use this command if you want to be pinged each time the stock market values change.'''
     if int(gamestate)!=3:
@@ -3721,7 +3721,7 @@ async def market(ctx):
     '''Main command group of market.'''
     await ctx.send("That is not a valid subcommand. Type `!help mrkt` to learn about the possible subcommands.")
 
-@market.command(aliases=["mark","view"])
+@market.command(aliases=["mark","view","display"])
 async def viewmarket(ctx):
   '''Use this to display market.'''
 
@@ -3814,7 +3814,7 @@ async def dismarket(ctx):
   await ctx.send(f"Your team's market is on level {state}. {text}")
 
 
-@market.command(aliases=["upm","upgrade"])
+@market.command(aliases=["upm","upgrade","up"])
 @commands.has_role("Alive")
 async def upmarket(ctx):
   '''Use this to upgrade market.'''
@@ -3987,7 +3987,7 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   data['building'][team]['trihouse']['cash']=cash
   await ctx.send(f"Done! {person.mention} was set as your tribute person and {cash} is set as your price.")
 
-@tribute.command(aliases=["tributeinfo","ct","check"])
+@tribute.command(aliases=["tributeinfo","ct","check","view","display"])
 @commands.has_role("Alive")
 async def checktribute(ctx):
   '''Allows the king of a team to check the tribute and cash <King Only.>'''
@@ -4014,7 +4014,7 @@ async def stash(ctx):
     '''Main command group of stash.'''
     await ctx.send("That is not a valid subcommand. Type `!help sth` to learn about the possible subcommands.")
 
-@stash.command(aliases=["store"])
+@stash.command(aliases=["store","keep"])
 @commands.has_role("Alive")
 async def storeinstash(ctx,item:str):
   '''Use this to store items in your team stash <Alive>'''
@@ -4037,9 +4037,9 @@ async def storeinstash(ctx,item:str):
   await ctx.send(f"Done! Item {l[0]} stored.")
   dump()
 
-@stash.command(aliases=["take","takefromstash"])
+@stash.command(aliases=["take","removefromstash","remove","rem"])
 @commands.has_role("Alive")
-async def removefromstash(ctx,item:str):
+async def takefromstash(ctx,item:str):
   '''Use this to take items from your team stash <Alive>'''
   global data
   if int(gamestate)!=3:
@@ -4060,7 +4060,7 @@ async def removefromstash(ctx,item:str):
   await ctx.send(f"Done! Item {l[0]} taken.")
   dump()
 
-@stash.command(aliases=["stash","view"])
+@stash.command(aliases=["stash","view","display"])
 async def viewstash(ctx):
   '''Use this to view items in your team vault <Alive>'''
   if int(gamestate)!=3:
@@ -4089,7 +4089,7 @@ async def loan(ctx):
     '''Sub-Main command group of bank.'''
     await ctx.send("That is not a valid subcommand. Type `!help bank l` to learn about the possible subcommands.")
 
-@loan.command(aliases=["take"])
+@loan.command(aliases=["take","new"])
 @commands.has_role("Alive")
 async def takeloan(ctx,cash:int):
   '''This command allows you to take a loan.'''
@@ -4126,7 +4126,7 @@ async def takeloan(ctx,cash:int):
   await ctx.send(f"Done! You have now taken a loan a loan of {cash}. Your interest amount is now {intc}")
   dump()
 
-@loan.command(aliases=["debt"])
+@loan.command(aliases=["debt","display","view"])
 async def viewdebt(ctx):
   '''This command allows you to view your debt.'''
   if int(gamestate)!=3:
@@ -4147,7 +4147,7 @@ async def viewdebt(ctx):
   intc=(intp/100)*debt
   await ctx.send(f"Your debt is at {debt}. Your interest amount is now {intc}")
 
-@loan.command(aliases=["repay"])
+@loan.command(aliases=["repay","pay"])
 async def repayloan(ctx,cash:int):
   '''This command allows you to repay your debt.'''
   global data
@@ -4191,7 +4191,7 @@ async def bankdeposit(ctx):
     '''Sub-Main command group of bank.'''
     await ctx.send("That is not a valid subcommand. Type `!help bank dep` to learn about the possible subcommands.")
 
-@bankdeposit.command(aliases=["deposit","dep"])
+@bankdeposit.command(aliases=["deposit","dep","new"])
 @commands.has_role("Alive")
 async def makedeposit(ctx,cash:int):
   '''This command allows you to make a bank deposit.'''
@@ -4221,7 +4221,7 @@ async def makedeposit(ctx,cash:int):
   await ctx.send(f"Done! You have now deposited {cash}. The code for your deposit is {code}. Your will get a 10% compound interest for every 12 hours you don't take it out.")
   dump()
 
-@bankdeposit.command(aliases=["view"])
+@bankdeposit.command(aliases=["view","display"])
 async def viewdeposits(ctx):
   '''This command allows you to view your deposits.'''
   if int(gamestate)!=3:
