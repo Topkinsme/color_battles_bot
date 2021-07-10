@@ -3738,10 +3738,10 @@ async def viewmarket(ctx):
         team=data['players'][ath]['team']
         prices=[]
         for x in range(11):
-          prcies.append(data['building'][team]['marketprices'][x])
+          prices.append(data['building'][team]['marketprices'][x])
         bmprices=[]
         for x in range(6):
-          bmprcies.append(data['building'][team]['bmarketprices'][x])
+          bmprices.append(data['building'][team]['bmarketprices'][x])
         state=data['players'][ath]['state']
   
   #team=data['players'][ath]['team']
