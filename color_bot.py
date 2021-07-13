@@ -689,7 +689,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="
     await ctx.send("That person is already in game.")
     return
   #
-  await pkill(ctx,inactivep)
+  await permakill(ctx,inactivep)
   data['players'][athap]={}
   data['players'][athap]['incc']=[]
   guildd=bot.get_guild(448888674944548874)
