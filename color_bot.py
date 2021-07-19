@@ -730,6 +730,7 @@ async def substitute(ctx,inactivep:discord.Member,activep:discord.Member,emoji="
   rolename=data['rt'][roleid]['lirole']
   chnlname = str(data['players'][athap]['team']) + "_" + str(rolename)
   chnlname=chnlname.replace(' ','-')
+  chnlname=chnlname.lower()
   chnl = discord.utils.get(guildd.channels,name=chnlname)
   await chnl.set_permissions(activep, read_messages=True,send_messages=True,add_reactions=True)
   await chnl.set_permissions(inactivep, read_messages=True,send_messages=False,add_reactions=True)
@@ -4218,7 +4219,7 @@ async def makedeposit(ctx,cash:int):
   data['players'][ath]['depos'][code]['time']=datetime.datetime.now()
 
   data['money'][ath]-=cash
-  await ctx.send(f"Done! You have now deposited {cash}. The code for your deposit is {code}. Your will get a 10% compound interest for every 12 hours you don't take it out.")
+  await ctx.send(f"Done! You have now deposited {cash}. The code for your deposit is {code}. You will get a 10% compound interest for every 12 hours you don't take it out.")
   dump()
 
 @bankdeposit.command(aliases=["view","display"])
