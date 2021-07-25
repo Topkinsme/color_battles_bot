@@ -1306,13 +1306,14 @@ async def assignroles(ctx,code):
       data['building'][team]['trihouse']['cash']=0
       if soloq==1:
         data['building'][team]['forge']=7
+        data['building'][team]['office']=7
         data['building'][team]['market']=4
         data['building'][team]['trihouse']['eligible']=0
       else:
         data['building'][team]['forge']=1
+        data['building'][team]['office']=1
         data['building'][team]['market']=1
         data['building'][team]['trihouse']['eligible']=1
-      data['building'][team]['office']=1
       data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
       data['building'][team]['stash']['smoney']=0
@@ -3370,7 +3371,7 @@ async def upoffice(ctx):
   ath=str(ctx.author.id)
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
-  cost=int((ofclvl*200)-100)
+  cost=int(100*(ofclvl**(1.5)))
 
   if cost>data['building'][team]['vault']:
     await ctx.send("You do not have that much cash in your vault.")
@@ -3767,7 +3768,7 @@ async def viewmarket(ctx):
     **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
-    **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb.)*- For {prices[7]}*
+    **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
     **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on your teammate) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
     **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {prices[9]}* \n""")
     msg.add_line(f"""\n__**LVL 4 (1k)**__ 
