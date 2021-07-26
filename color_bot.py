@@ -3763,7 +3763,7 @@ async def viewmarket(ctx):
     **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. (Note that the price of this item only increases by 500 per use.) *- For {prices[3]}* \n""")
     #if mrktlvl>1:
     msg.add_line(f"""\n__**LVL 2 (1k)**__ 
-    **4.Role Seeker -** Get the role and team of a person once and role block them for the coming night. (Using this during the night will only make it take effect during next night) *- For {prices[4]}*
+    **4.Role Seeker -** Get the role and team of any player in game once and role block them for the coming night. (Using this during the night will only make it take effect during next night, it will not roleblock dead people if checked.) *- For {prices[4]}*
     **5.Respawn stone -** Use this to respawn instantly once (Only works if you are already in the respawning state). *- For {prices[5]}*
     **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
