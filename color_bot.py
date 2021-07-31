@@ -353,6 +353,7 @@ async def on_member_join(member):
 @bot.event
 async def on_member_remove(member):
     await spamchannel.send(f"{member.mention} ({member.name}) left the server")
+    await welcomechannel.send(f"{member.mention} ({member.name}) has left the server. :(")
     
     if str(member.id) in data['players']:
         data['money'].pop(str(member.id))
