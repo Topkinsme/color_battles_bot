@@ -78,7 +78,6 @@ async def on_ready():
     global respgiftchance
     spamchannel=bot.get_channel(450698253508542474)
     welcomechannel=bot.get_channel(448889376634830859)
-    await spamchannel.send("The bot is online!")
     lstmsg={}
     try:
         my_collection = db.main
@@ -115,6 +114,7 @@ async def on_ready():
     elif int(gamestate)==2:
         await bot.change_presence(activity=discord.Game(name="Signups are closed.A game will soon begin.", type=1))
     elif int(gamestate)==3:
+        await spamchannel.send("The bot is online!")
         num = data['code']['gamephase']
         if num %2==0:
           text = f"Day {int(num/2)}"
