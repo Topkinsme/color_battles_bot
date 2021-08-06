@@ -141,7 +141,7 @@ async def on_ready():
     respgiftchance=200
     my_loop.start()
     my_looptwo.start()
-    #my_loopthree.start()
+    my_loopthree.start()
 
 
 @tasks.loop(minutes=5)
@@ -214,11 +214,11 @@ async def my_loopthree():
     return 
   datee = datetime.datetime.now()
   #edit date
-  x=bot.get_channel(750580343068688404)
+  x=bot.get_channel(873236362143346698)
   await x.edit(name="📅 " + datee.strftime("%a") + " " + datee.strftime("%b") + " " + datee.strftime("%d"))
   #edit time
   localtime= datetime.datetime.now()
-  x=bot.get_channel(750583960890900542)
+  x=bot.get_channel(873236378022989885)
   await x.edit(name="🕐 "+ localtime.strftime("%I") + ":" + localtime.strftime("%M") + " "+ localtime.strftime("%p") + " UTC")
   guildd=bot.get_guild(448888674944548874)
   peoples = guildd.members
@@ -226,9 +226,9 @@ async def my_loopthree():
   for person in peoples:
     a+=1
   #edit people
-  x=bot.get_channel(750580405102706789)
+  x=bot.get_channel(873236389808980008)
   await x.edit(name="👥 Users: {}".format(a))
-  x=bot.get_channel(750580458957439008)
+  x=bot.get_channel(873236408318443621)
   if int(gamestate)==1:
         people=0
         for person in data['signedup']:
