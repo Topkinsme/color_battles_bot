@@ -1268,6 +1268,11 @@ async def assignroles(ctx,code):
     pollc = await guildd.create_text_channel('voting_booth',overwrites=storymark,category=cate)
     respc = await guildd.create_text_channel('respawning',overwrites=resp,category=cate)      
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
+
+    infostuff=['  Auction', '  Bank', '  Black_market', '  Blind_auction', '  Conspiracy_Channels', '  Forge', '  Gifts','  Market', '  Office', '  Stash', '  Stock_market', '  Tribute', '  Vault']
+    for thing in infostuff:
+      await rolehelp(thing,info)
+
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
     await msg.pin()
     msg = await respc.send("Use !fghs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tghs to send clear messages to your team.(This costs 100c)\n\nUse !die !slot !flip and !lottery to gamble for money. \n\nYou can also type !market view to view the black market for useful items to buy.\nUse !help <command> to learn more about any command.")
