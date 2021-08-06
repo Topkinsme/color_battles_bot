@@ -3217,9 +3217,11 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
   rolet=(data['rt'][role]['lirole']).lower()
-  if rolet!="king" and rolet!="prince": 
-    await ctx.send("You are not a king or a prince. Please only use this command if your role is King or a prince.")
-    return
+  roles=["jack","king","prime_minister","prince","princess","queen"]
+  l=difflib.get_close_matches(rolet,roles)
+  if len(l)==0:
+      await ctx.send("You are not a royalty role. Please only use this command if your role is a royalty role.")
+      return
   if team!=team2:
     await ctx.send("That person is not on your team.")
     return
@@ -3958,9 +3960,11 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
   rolet=(data['rt'][role]['lirole']).lower()
-  if rolet!="king" and rolet!="prince": 
-    await ctx.send("You are not a king or a prince. Please only use this command if your role is King or a prince.")
-    return
+  roles=["jack","king","prime_minister","prince","princess","queen"]
+  l=difflib.get_close_matches(rolet,roles)
+  if len(l)==0:
+      await ctx.send("You are not a royalty role. Please only use this command if your role is a royalty role.")
+      return
   if team!=team2:
     await ctx.send("That person is not on your team.")
     return
