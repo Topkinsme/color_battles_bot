@@ -1271,6 +1271,7 @@ async def assignroles(ctx,code):
 
     infostuff=['  Auction', '  Bank', '  Black_market', '  Blind_auction', '  Conspiracy_Channels', '  Forge', '  Gifts','  Market', '  Office', '  Stash', '  Stock_market', '  Tribute', '  Vault']
     for thing in infostuff:
+      await asyncio.sleep(0.5)
       await rolehelp(thing,info)
 
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
