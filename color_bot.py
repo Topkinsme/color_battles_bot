@@ -2516,7 +2516,7 @@ async def signup(ctx,emoji="Emoji"):
         rolz=[]
         role1 = discord.utils.get(guildd.roles, name="Host")
         role2 = discord.utils.get(guildd.roles, name="Helpers")
-        role3 = discord.utils.get(guildd.roles, name="Signed-Up!")
+        role3 = discord.utils.get(guildd.roles, name="Informer")
         rolz.append(role1)
         rolz.append(role2)
         rolz.append(role3)
