@@ -3363,7 +3363,7 @@ async def disoffice(ctx):
     return
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
-  cost=int((ofclvl*200)-100)
+  cost=int(100*(ofclvl**(1.5)))
   await ctx.send(f"Your team's office is on level {ofclvl}. Each person gets {ofclvl*10} to {(ofclvl*10)+10} coins.  The next upgrade costs {cost}.")
 
 @office.command(aliases=["upo","upgrade","up"])
