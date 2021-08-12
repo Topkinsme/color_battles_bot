@@ -302,7 +302,10 @@ async def on_message(message):
     elif message.channel.name=="respawning":
       n = random.randint(1,respgiftchance)
       if n ==1:
-        respgiftchance=200
+        if ath not in data['money']:
+          return
+        else:
+          respgiftchance=200
         await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.  You have 60 seconds!")
         def check(mo):
             return mo.content.lower()=='good' or mo.content.lower()=='bad' and mo.channel == message.channel
