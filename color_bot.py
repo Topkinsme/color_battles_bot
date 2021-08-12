@@ -283,17 +283,18 @@ async def on_message(message):
       n = random.randint(1,giftchance)
       cash = random.randint(300,500)
       if n ==1:
-        giftchance=500
-        if message.author.id in gifted:
+        if ath not in data['money']:
           return
+        else:
+          if message.author.id in gifted:
+            return
+          else:
+            giftchance=500
         gifted.append(message.author.id)
         emoji = "🎁"
         await message.add_reaction(emoji)
         await message.channel.send(":tada: <@{}> has just won a prize of {}".format(ath,cash))
-        try:
-          data['money'][ath]+=cash
-        except:
-          await message.channel.send("It seems I had trouble accessing your account so I'm just going to have to keep the money with myself....")
+        data['money'][ath]+=cash
         dump()
       else:
         if giftchance>11:
