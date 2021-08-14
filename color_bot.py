@@ -4251,14 +4251,16 @@ async def viewdeposits(ctx):
   if ath not in data['players']:
     await ctx.send("You are not in game. This command cannot be executed.")
     return
-  msg="Your current deposits are-\n"
+  msg=commands.Paginator(prefix="",suffix="")
+  msg.add_line("Your current deposits are-")
   for code in data['players'][ath]['depos']:
     cash=data['players'][ath]['depos'][code]['cash']
     stime=data['players'][ath]['depos'][code]['time']
     phases=int(int((datetime.datetime.now()-stime)/timedelta(hours=1))/12)
     interest=int(cash*((1.1**phases) - 1))
-    msg+=f"A deposit with {code} and {cash}, it has been {phases} phase(s), you will get a interest of {interest} if you withdrew it right now.\n"
-  await ctx.send(msg)
+    msg.add_line(f"• A deposit with {code} and {cash}, it has been {phases} phase(s), you will get a interest of {interest} if you withdrew it right now.")
+  for page in msg.pages:
+    tmsg = await ctx.send(page)
 
 @bankdeposit.command(aliases=["claim","take","withdraw"])
 @commands.has_role("Alive")
