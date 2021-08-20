@@ -6,6 +6,7 @@ from discord.utils import get
 from discord.ext import commands
 from discord.ext import tasks
 from discord.ext.commands import Bot
+from discord.ext import menus
 import asyncio
 import random
 import time
@@ -38,6 +39,78 @@ intents.presences = True
 profanity.load_censor_words(whitelist_words=['damn'])
 
 bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=intents)
+
+class help_menu(menus.Menu):
+
+    
+
+    async def send_initial_message(self, ctx, channel):
+        self.context=ctx
+        self.pagenumber=0
+        return await channel.send(f'{self.context.lcontent[self.pagenumber]}')
+
+    @menus.button('⬅️')
+    async def on_thumbs_up(self, payload):
+        try:
+          self.pagenumber-=1
+          await self.message.edit(content=f'{self.context.lcontent[self.pagenumber]}')
+        except:
+          self.pagenumber+=1
+
+    @menus.button('➡️')
+    async def on_thumbs_down(self, payload):
+      try:
+        self.pagenumber+=1
+        await self.message.edit(content=f"{self.context.lcontent[self.pagenumber]}")
+      except:
+        self.pagenumber-=1
+
+    @menus.button('❎')
+    async def on_stop(self, payload):
+        self.stop()
+        await self.message.delete()
+
+class customHelp(commands.DefaultHelpCommand):
+    #self.add_indented_commands("yo","yo")
+
+    async def send_pages(self):
+        content=self.context.message.content.replace(self.context.prefix,'')
+        print(content)
+        if content =="help":
+          l=bot.commands
+          #msg=commands.Paginator(prefix="```",suffix="```")
+          for thing in l:
+            if isinstance(thing,commands.Group):
+              l_=thing.commands
+              temp_list1=[]
+              for thing_ in l_:
+                if isinstance(thing_,commands.Group):
+                  l__=thing_.commands
+                  temp_list2=[]
+                  for thing__ in l__:
+                    temp_list2.append(thing__)
+                  self.add_indented_commands(temp_list2,heading=str(thing_))
+                    #msg.add_line(str(thing__)) 
+                else:
+                  temp_list1.append(thing_)
+              self.add_indented_commands(temp_list1,heading=str(thing))
+        #for page in msg.pages:
+          #await ctx.send(page)
+        #self.add_indented_commands(bot.commands,heading="yo")
+        if len(self.paginator.pages)<2:
+          destination = self.get_destination()
+          for page in self.paginator.pages:
+            await destination.send(page)
+        else:
+          m = help_menu()
+          self.context.lcontent=self.paginator.pages
+          await m.start(self.context)
+
+      
+#clean the above stuff
+
+
+bot.help_command=customHelp()
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -300,7 +373,7 @@ async def on_message(message):
         if giftchance>11:
           giftchance-=1
     elif message.channel.name=="respawning":
-      n = random.randint(1,respgiftchance)
+      n = random.randint(1,5)#respgiftchance
       if n ==1:
         if ath not in data['money']:
           return
@@ -308,22 +381,31 @@ async def on_message(message):
           respgiftchance=200
         await message.channel.send("You now have the opportunity to send a gift to earth! Respond with 'bad' or 'good' depending on what you want to send! Only the first reply will be considered. If someone opens a bad package, you will get their 100c. If you send a good package and they open it, both of you get 25c.  You have 60 seconds!")
         def check(mo):
-            return mo.content.lower()=='good' or mo.content.lower()=='bad' and mo.channel == message.channel
+            return 'good' in mo.content.lower() or 'bad' in mo.content.lower() and mo.channel == message.channel
         try:
+          
           msg = await bot.wait_for('message', timeout=60 ,check=check)
-          townc=discord.utils.get(guildd.channels,name="battlefield")
-          await townc.send("The dead have sent a package to you! Type 'open' to open it! You have 60 seconds!")
-          def checkk(m):
-              return m.content.lower()=='open' and m.channel == townc
           try:
+            townc=discord.utils.get(guildd.channels,name="battlefield")
+
+            await townc.send("The dead have sent a package to you! Type 'open' to open it! You have 60 seconds!")
+            def checkk(m):
+              try:
+                if str(m.author.id) in data['players']:
+                  alive=True
+                else:
+                  alive=False
+              except:
+                alive=False
+              return 'open' in m.content.lower() and m.channel == townc and alive==True
             msgg = await bot.wait_for('message', timeout=60 ,check=checkk)
             getter=str(msgg.author.id)
-            if msg.content.lower() == 'good':
+            if 'good' in msg.content.lower():
                 await townc.send("It was a good package, you have recieved 25c!")
                 await message.channel.send("Your target opened the package, you've recieved 25 as well!")
                 data['money'][getter]+=25
                 data['money'][str(message.author.id)]+=25
-            elif msg.content.lower() == 'bad':
+            elif 'bad' in msg.content.lower():
                 await townc.send("It was a bad package, you have lost 100c!")
                 await message.channel.send("Your target opened the package, you've recieved 100!")
                 data['money'][getter]-=100

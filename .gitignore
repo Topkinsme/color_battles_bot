@@ -3,3 +3,4 @@ pycache
 poetry.lock
 pyproject.toml
 core
+.breakpoints
