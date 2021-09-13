@@ -160,7 +160,7 @@ async def on_ready():
             data = json.load(f)
             print(data)
             gamestate = data['gamestate']'''
-    except:
+    except Exception as e:
             print("Could not load the data")
             data = {}
             data['signedup']={}
@@ -180,7 +180,7 @@ async def on_ready():
             data['poll']={}
             data['lottery']=0
             dump()
-            await spamchannel.send("Warning! Data.json wasn't found. Please check if anything is wrong.")
+            await spamchannel.send(f"ERROR!- {e}")
     if int(gamestate)==1:
         await bot.change_presence(activity=discord.Game(name="Signups open!", type=1))
     elif int(gamestate)==2:
@@ -3467,7 +3467,7 @@ async def disoffice(ctx):
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
   cost=int(100*(ofclvl**(1.5)))
-  await ctx.send(f"Your team's office is on level {ofclvl}. Each person gets {ofclvl*10} to {(ofclvl*10)+10} coins.  The next upgrade costs {cost}.")
+  await ctx.send(f"Your team's office is on level {ofclvl}. Each person gets {ofclvl*5} to {(ofclvl*5)+10} coins. The next upgrade costs {cost}.")
 
 @office.command(aliases=["upo","upgrade","up"])
 @commands.has_role("Alive")
@@ -3483,6 +3483,9 @@ async def upoffice(ctx):
   ath=str(ctx.author.id)
   team=str(data['players'][ath]['team'])
   ofclvl=data['building'][team]['office']
+  if ofclvl>9:
+    await ctx.send("The maximum level for office is 10. You cannot upgrade it further.")
+    return
   cost=int(100*(ofclvl**(1.5)))
 
   if cost>data['building'][team]['vault']:
@@ -3872,17 +3875,17 @@ async def viewmarket(ctx):
     #if mrktlvl>0:
     msg.add_line(f"""\n__**LVL 1 (Free)**__ 
     **1.Poison someone -** Use this on a target to poison them. They die in 2 phases if they don't buy the antidode.(End phase) (Also note that posion does not stack, poisoning someone while they are already poisoned will have no additional effects. Poison can also bypass protection.) This item can only be used when the phase is about to end (the 2 phases start when the phase changes.) *- For {prices[1]}* 
-    **2.Antidote -** Use this on someone to cure them if they're poisoned. (Can only be used on your teammate)*- For {prices[2]}* 
-    **3.Check Bal -** Use this to check one person/one team's balance/value once respectively. (Note that the price of this item only increases by 500 per use.) *- For {prices[3]}* \n""")
+    **2.Antidote -** Use this on someone to cure them if they're poisoned. (Can only be used on you and your teammates)*- For {prices[2]}* 
+    **3.Check Bal -** Use this to check one person/one team's balance/vault once respectively. (Note that the price of this item only increases by 500 per use.) *- For {prices[3]}* \n""")
     #if mrktlvl>1:
     msg.add_line(f"""\n__**LVL 2 (1k)**__ 
     **4.Role Seeker -** Get the role and team of any player in game once and role block them for the coming night. (Using this during the night will only make it take effect during next night, it will not roleblock dead people if checked.) *- For {prices[4]}*
     **5.Respawn stone -** Use this to respawn instantly once (Only works if you are already in the respawning state). *- For {prices[5]}*
-    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. (Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
+    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. Note that you can only use this once per game.(Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
     **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
-    **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on your teammate) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
+    **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on you and your teammates) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
     **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {prices[9]}* \n""")
     msg.add_line(f"""\n__**LVL 4 (1k)**__ 
     **10.GOD -** Protect all your teammates for the current/next night and make all dead teammates alive instantly. (Using this during the night will make it protect during that night. Protection is strong protection) (Respawns teammates only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
@@ -4502,7 +4505,7 @@ async def score(ath,msg,cate):
     else:
           if cate.name==data['code']['gamecode']:
             team=str(data['players'][ath]['team'])
-            a=int(data['building'][team]['office'])*10
+            a=int(data['building'][team]['office'])*5
             b=a+10
             coins=[a,b]
           else:
