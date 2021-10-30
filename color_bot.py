@@ -372,7 +372,7 @@ async def on_message(message):
         if giftchance>11:
           giftchance-=1
     elif message.channel.name=="respawning":
-      n = random.randint(1,5)#respgiftchance
+      n = random.randint(1,respgiftchance)
       if n ==1:
         if ath not in data['money']:
           return
