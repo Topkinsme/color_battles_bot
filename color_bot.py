@@ -1452,6 +1452,7 @@ async def assignroles(ctx,code):
         data['players'][user]['emoji']=data['signedup'][user]['emoji']
         data['players'][user]['debt']=0
         data['players'][user]['depos']={}
+        data['players'][user]['actions']="-"
         #print(data)
         num+=1
     #print(data)
@@ -1823,6 +1824,46 @@ async def mastervault(ctx,team):
   except:
     money=0
   await ctx.send(f"That team's vault has {money}, out of which {money-data['building'][team]['stash']['smoney']} can be used.")
+
+@master.command(aliases=["ac","acview","act","actv"])
+@commands.has_any_role("Helpers","Host")
+async def masteraction(ctx,member:typing.Union[discord.Member,str]):
+  '''Displays all the actions of the user'''
+  if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+  guildd=ctx.message.guild
+  emjlist=[]
+  for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+  if member in emjlist:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+  elif isinstance(member,discord.member.Member):
+      pass
+  else:
+      await ctx.send("Invalid User")
+      return
+  await ctx.send(f"Actions are- \n {data['players'][str(member.id)]['actions']}")
+
+@master.command(aliases=["aca","acall","acaview"])
+@commands.has_any_role("Helpers","Host")
+async def masteractionsall(ctx):
+  '''Displays all the actions of all users'''
+  if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+  guildd=ctx.message.guild
+  msg=commands.Paginator(prefix="",suffix="")
+  for player in data['players']:
+    msg.add_line(f"<@{player}>-\n{data['players'][player]['actions']}")
+  for page in msg.pages:
+      tmsg = await ctx.send(" ​")
+      await tmsg.edit(content=f"{page}")
+  
 
 @bot.group(invoke_without_command=True,aliases=["a","auc"])
 async def auction(ctx):
@@ -2337,6 +2378,7 @@ async def advancephase(ctx,cost=100):
   for ath in data['players']:
     if data['players'][ath]['state']>=0:
       data['players'][ath]['phalive']+=1
+    data['players'][ath]['actions']="-"
   dump()
 
 @bot.group(invoke_without_command=True,aliases=["peopoll","mpoll"])
@@ -4395,6 +4437,54 @@ async def claimdeposit(ctx,code):
 
   del data['players'][ath]['depos'][code]
   await ctx.send(f"Done! The deposit with code {code} has been deleted. Your money was kept for {phases} phases, and you have recieved a profit of {interest}. Therefore, you have totally recieved {earnd} ({cash}+{int(interest*phases)}) back.")
+  dump()
+
+@bot.group(invoke_without_command=True,aliases=["ac","act"])
+async def actions(ctx):
+    '''Main command group of actions.'''
+    await ctx.send("That is not a valid subcommand. These are the valid sub commands.")
+    await ctx.send_help(ctx.invoked_with)
+
+@actions.command(aliases=["cls","c"])
+async def clear(ctx):
+  '''Use this to clear your action log.'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  await ctx.send(f"Your action log was cleared. It's contents were \n {data['players'][ath]['actions']}")
+  data['players'][ath]['actions']="-"
+  dump()
+
+@actions.command(aliases=["s","display","view"])
+async def show(ctx):
+  '''Use this to view your action log.'''
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  await ctx.send(f"Your action log's contents are \n {data['players'][ath]['actions']}")
+  
+@actions.command(aliases=["a","append","write"])
+async def add(ctx,*,content:str):
+  '''Use this to add strings your action log.'''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if str(ctx.message.channel.category)!=str(data['code']['gamecode']) + ' factions':
+    await ctx.send("You can only use this command in faction channels.")
+    return
+  ath=str(ctx.author.id)
+  data['players'][ath]['actions']+="\n"+content
+  await ctx.send(f"{content} has been added to your action log. It's contents now are \n {data['players'][ath]['actions']}")
   dump()
 
 @bot.command(aliases=["r","i","info"])
