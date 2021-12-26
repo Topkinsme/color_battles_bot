@@ -343,7 +343,8 @@ async def on_message(message):
       return'''
     user=str(message.author.id)
     try:
-      data['players'][user]['msg']+=1
+      if data['players'][ath]['state']>=0:
+        data['players'][user]['msg']+=1
     except:
       pass
     ath=str(message.author.id)
@@ -3928,7 +3929,7 @@ async def viewmarket(ctx):
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
     **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
     **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on you and your teammates) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
-    **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. *- For {prices[9]}* \n""")
+    **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. (This only works on role kills and not on items.)*- For {prices[9]}* \n""")
     msg.add_line(f"""\n__**LVL 4 (1k)**__ 
     **10.GOD -** Protect all your teammates for the current/next night and make all dead teammates alive instantly. (Using this during the night will make it protect during that night. Protection is strong protection) (Respawns teammates only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
   if state==0 or state==3:
@@ -4287,7 +4288,7 @@ async def takeloan(ctx,cash:int):
     return
   data['money'][ath]+=cash
   data['players'][ath]['debt']=newdebt
-  await ctx.send(f"Done! You have now taken a loan a loan of {cash}. Your interest amount is now {intc}")
+  await ctx.send(f"Done! You have now taken a loan a loan of {cash}. Your interest amount is now {int(intc)}")
   dump()
 
 @loan.command(aliases=["debt","display","view"])
@@ -4309,7 +4310,7 @@ async def viewdebt(ctx):
   else:
     intp=10+((debt-1000)//200)
   intc=(intp/100)*debt
-  await ctx.send(f"Your debt is at {debt}. Your interest amount is now {intc}")
+  await ctx.send(f"Your debt is at {debt}. Your interest amount is now {int(intc)}")
 
 @loan.command(aliases=["repay","pay"])
 async def repayloan(ctx,cash:int):
@@ -4456,7 +4457,7 @@ async def clear(ctx):
     await ctx.send("You can only use this command in faction channels.")
     return
   ath=str(ctx.author.id)
-  await ctx.send(f"Your action log was cleared. It's contents were \n {data['players'][ath]['actions']}")
+  await ctx.send(f"Your action log was cleared. its contents were \n {data['players'][ath]['actions']}")
   data['players'][ath]['actions']="-"
   dump()
 
@@ -4484,7 +4485,7 @@ async def add(ctx,*,content:str):
     return
   ath=str(ctx.author.id)
   data['players'][ath]['actions']+="\n"+content
-  await ctx.send(f"{content} has been added to your action log. It's contents now are \n {data['players'][ath]['actions']}")
+  await ctx.send(f"{content} has been added to your action log. its contents now are \n {data['players'][ath]['actions']}")
   dump()
 
 @bot.command(aliases=["r","i","info"])
