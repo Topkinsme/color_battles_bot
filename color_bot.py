@@ -1359,15 +1359,17 @@ async def assignroles(ctx,code):
     respc = await guildd.create_text_channel('respawning',overwrites=resp,category=cate)      
     deadsc = await guildd.create_text_channel('dead-spec',overwrites=deads,category=cate) 
 
-    infostuff=['  Auction', '  Bank', '  Black_market', '  Blind_auction', '  Conspiracy_Channels', '  Forge', '  Gifts','  Market', '  Office', '  Stash', '  Stock_market', '  Tribute', '  Vault']
-    for thing in infostuff:
-      await asyncio.sleep(0.5)
-      await rolehelp(thing,info)
+    
 
     msg = await batlec.send("This is the battlefield! Where warriors fight to death! \nOr sometimes like to chill out and chat.")
     await msg.pin()
     msg = await respc.send("Use !fgs to send messages in the battlefield for free.\nUse !ghs if you want to send clear messages in battlefield (This costs 25c)\nUse !tgs to send clear messages to your team.(This costs 100c)\n\nUse !die !slot !flip and !lottery to gamble for money. \n\nYou can also type !market view to view the black market for useful items to buy.\nUse !help <command> to learn more about any command.")
     await msg.pin()
+
+    infostuff=[' List','  Auction', '  Bank', '  Black_market', '  Blind_auction', '  Conspiracy_Channels', '  Forge', '  Gifts','  Market', '  Office', '  Stash', '  Stock_market', '  Tribute', '  Vault',]
+    for thing in infostuff:
+      await asyncio.sleep(0.5)
+      await rolehelp(thing,info)
     #
     rolem1 = discord.utils.get(guildd.roles, name="Host")
     role0 = discord.utils.get(guildd.roles, name="Helpers")
