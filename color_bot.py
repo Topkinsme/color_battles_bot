@@ -27,6 +27,7 @@ import math
 import difflib
 from github import Github
 from ast import literal_eval
+import re
 
 
 token = str(os.environ.get("tokeno"))
@@ -328,6 +329,7 @@ async def on_message(message):
     global data
     global giftchance
     global respgiftchance
+    guildd=message.guild
     if message.author.id == 450320950026567692:
         return
     if message.guild==None:
@@ -341,16 +343,22 @@ async def on_message(message):
       await message.channel.send(f"Hey {message.author.mention}! Do not swear!")
       await message.delete()
       return'''
+    result = re.search("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*(),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+", message.content)
+    if result != None:
+      role = discord.utils.get(guildd.roles, name="Players")
+      if role in message.author.roles:
+        await message.delete()
+        await message.channel.send(f"Hey {message.author.name}! Links are banned! Contact an host if you wish to post something.")
     user=str(message.author.id)
+    context_= await bot.get_context(message)
     try:
-      if data['players'][ath]['state']>=0:
+      if data['players'][ath]['state']>=0 and not context_.valid:
         data['players'][user]['msg']+=1
     except:
       pass
     ath=str(message.author.id)
     fath=message.author
     channel = message.channel
-    guildd=message.guild
     await score(ath,message.content,message.channel.category)
     if message.channel.name=="battlefield":
       n = random.randint(1,giftchance)
@@ -583,15 +591,33 @@ async def pdata(ctx):
     
 @bot.command(hidden=True)
 @commands.has_role("Informer")
-async def sudo(ctx,who: discord.Member, *, command: str):
+async def sudo(ctx,who:typing.Union[discord.Member,str], *, command: str):
         """Run a command as another user optionally in another channel."""
         if "evall" in command:
           await ctx.send("You cannot use evall this way.")
           return
+        guildd=bot.get_guild(448888674944548874)
         msg = copy.copy(ctx.message)
         channel = ctx.channel
         msg.channel = channel
-        msg.author = channel.guild.get_member(who.id) or who
+        if (int(gamestate) > 2):
+          emjlist=[]
+          for player in data['players']:
+              emjlist.append(data['players'][player]['emoji'])
+          if who in emjlist:
+              idd=emjtop(who)
+              if idd== None:
+                await ctx.send("Invalid Emoji")
+                return
+              who = discord.utils.get(guildd.members,id=int(idd))
+          elif isinstance(who,discord.member.Member):
+              pass
+          else:
+              await ctx.send("Invalid User")
+              return
+          msg.author=who
+        else:
+          msg.author = channel.guild.get_member(who.id) or who
         msg.content = ctx.prefix + command
         new_ctx = await bot.get_context(msg, cls=type(ctx))
         #new_ctx._db = ctx._db
@@ -663,6 +689,7 @@ async def reset(ctx):
         await userr.remove_roles(role)
         role = discord.utils.get(guildd.roles, name="Players")
         await userr.remove_roles(role)
+        await userr.edit(nick=None)
     for user in data['specters']:
         guildd=bot.get_guild(448888674944548874)
         userr=discord.utils.get(guildd.members,id=int(user))
@@ -1323,7 +1350,7 @@ async def assignroles(ctx,code):
     guildd.me: discord.PermissionOverwrite(read_messages=True),
     rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
-    role1: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True),
+    role1: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True,embed_links=False,attach_files=False),
     role2: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role3: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role4: discord.PermissionOverwrite(read_messages=True,send_messages=False)
@@ -1333,8 +1360,8 @@ async def assignroles(ctx,code):
     guildd.me: discord.PermissionOverwrite(read_messages=True),
     rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
     role0: discord.PermissionOverwrite(read_messages=True,send_messages=True),
-    role1: discord.PermissionOverwrite(read_messages=False,send_messages=False,add_reactions=True),
-    role2: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True),
+    role1: discord.PermissionOverwrite(read_messages=False,send_messages=False),
+    role2: discord.PermissionOverwrite(read_messages=True,send_messages=True,add_reactions=True,embed_links=False,attach_files=False),
     role3: discord.PermissionOverwrite(read_messages=True,send_messages=False),
     role4: discord.PermissionOverwrite(read_messages=True,send_messages=False)
                  }
@@ -1821,12 +1848,23 @@ async def mastervault(ctx,team):
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
     return
-  ath=str(ctx.author.id)
   try:
     money=data['building'][team]['vault']
   except:
     money=0
   await ctx.send(f"That team's vault has {money}, out of which {money-data['building'][team]['stash']['smoney']} can be used.")
+
+@master.command(aliases=["stash","sthview","sth","msth"])
+@commands.has_any_role("Helpers","Host")
+async def masterstash(ctx,team):
+  '''Displays the items in a team's vault'''
+  if int(gamestate)!=3:
+    await ctx.send("There is no game going on.")
+    return
+  msg="That team has, in its team stash-\n"
+  for item in data['building'][team]['stash']['items']:
+    msg+="{}\n".format(item)
+  await ctx.send(msg)
 
 @master.command(aliases=["ac","acview","act","actv"])
 @commands.has_any_role("Helpers","Host")
@@ -2129,11 +2167,16 @@ async def changestockmarket(ctx):
 @commands.has_any_role("Helpers","Host")
 async def msgcount(ctx):
   '''Used to check how many messages were sent by who during the duration of the game.'''
-  msg = await ctx.send("Loading.")
-  count="The message count is - \n"
+  msg=commands.Paginator(prefix="",suffix="")
+  msg.add_line("The message count is - ")
   for ath in data['players']:
-    count+=f"<@{ath}> has sent {data['players'][ath]['msg']} messages in {data['players'][ath]['phalive']} alive phase(s).\n"
-  await msg.edit(content=count)
+    try:
+      msg.add_line(f"<@{ath}> has sent {data['players'][ath]['msg']} messages in {data['players'][ath]['phalive']} alive phase(s). Messages per phases is = {data['players'][ath]['msg']/data['players'][ath]['phalive']}")
+    except:
+      msg.add_line(f"<@{ath}> has sent {data['players'][ath]['msg']} messages in {data['players'][ath]['phalive']} alive phase(s).")
+  for page in msg.pages:
+    temp=await ctx.send("Loading.")
+  await temp.edit(content=page)
 
 @modify.group(invoke_without_command=True,aliases=["inv"])
 async def inventory(ctx):
@@ -2373,7 +2416,8 @@ async def advancephase(ctx,cost=100):
       msg = await channel.send(f"**__          {text}          __**")
       await msg.pin()
   townc=discord.utils.get(guildd.channels,name="battlefield")
-  msg = await townc.send(f"**__          {text}          __**\n<@&748375810498625597>")
+  phasechange=int(datetime.datetime.timestamp(datetime.datetime.now()+timedelta(hours=12)))
+  msg = await townc.send(f"**__          {text}          __**\nThe next phase change will be approximately <t:{phasechange}:R> (at <t:{phasechange}:F>)")
   await msg.pin()
   await bot.change_presence(activity=discord.Game(name=f"A game. It's {text} now.", type=1))
   await massgive(ctx,cash=cost)
@@ -2828,7 +2872,7 @@ async def teamsay(ctx,*,msg):
       try:
         team=data['players'][str(ctx.author.id)]['team'] 
         teamc=discord.utils.get(guildd.channels,name=team)
-        await webhookcustom(teamc,str(ctx.author.id),msg)
+        await webhookcustom(teamc,str(ctx.author.name),msg)
       except:
         print("There was some error.")
     dump()
@@ -3834,6 +3878,334 @@ async def dicerolls(ctx,cash:int,dicen:int):
     data['money'][ath]-=cash
   dump()
 
+@bot.command(aliases=["bja","bj"])
+@commands.has_role("Respawning")
+async def blackjack(ctx,cash:int):
+  '''Use this to play black jack with the bot. The fast-forward option indicates a hit and the arrow down points a stand. <Respawning>'''
+  await ctx.send("This command has been disabled.")
+  return
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if cash<0:
+    await ctx.send("Number cannot be negative .")
+    return
+  if cash>1000:
+    await ctx.send("You cannot gamble over 1000c.") #change
+    return
+  ath=str(ctx.author.id)
+  if cash>data['money'][ath]:
+    await ctx.send("You can only gamble what you have.")
+    return
+  og_message=await ctx.send("LOADING.....")
+  cards=[]
+  for suite in ["spades♠️","clubs♣️","hearts♥️","diamonds♦️"]:
+      for x in list(range(2,11))+["A","J","Q","K"]:
+          cards.append(str(x)+" of "+suite)
+  dealer=[]
+  dealernum=0
+  player=[]
+  playernum=0
+  dni=0
+  
+  async def clean_card(card,who):
+    for x in ["spades♠️","clubs♣️","hearts♥️","diamonds♦️"]:
+        card=card.replace(x,"")
+    card=card.replace(" of ","")
+    #card=card.replace("A","1")
+    card=card.replace("J","10")
+    card=card.replace("Q","10")
+    card=card.replace("K","10")
+    if "A" in card:
+      if who=="house":
+        if dealernum<11:
+          card=card.replace("A","11")
+        else:
+          card=card.replace("A","1")
+      else:
+        await og_message.edit(content=(og_message.content)+f"You've drawn a ace! 1 or 11? (The clock is 11) (Your hand is {player})")
+        one="1️⃣"
+        ele="🕚"
+        await og_message.clear_reactions()
+        await og_message.add_reaction(one)
+        await og_message.add_reaction(ele)
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in [one,ele]
+        try:
+            await bot.wait_for('reaction_add', timeout=60.0, check=check)
+        except:
+            pass
+        channel=og_message.channel
+        msgid = og_message.id
+        msg = await channel.fetch_message(msgid)
+        o=e=0
+        for reaction in msg.reactions:
+          if str(reaction)==one:
+            o+=reaction.count
+          elif str(reaction)==ele:
+            e+=reaction.count
+        if e>o:
+            card=card.replace("A","11")
+        else:
+            card=card.replace("A","1")
+
+    return card
+
+  for x in range(2):
+    card=random.choice(cards)
+    cards.remove(card)
+    dealer.append(card)
+    dealernum+=int(await clean_card(card,"house"))
+    if x==0:
+      dni=dealernum
+    card=random.choice(cards)
+    cards.remove(card)
+    player.append(card)
+    playernum+=int(await clean_card(card,"player"))
+  await og_message.edit(content=f"""DEALERS CARDS {",".join([dealer[0]])}+???\nYOUR CARDS {",".join(player)}\nDealer's Points-{dni}+???\nYour points-{playernum}""")
+  output=""
+  while output=="":
+        await og_message.edit(content=f"""DEALERS CARDS {",".join([dealer[0]])}+???\nYOUR CARDS {",".join(player)}\nDealer's Points-{dni}+???\nYour points-{playernum}""")
+        stand="⏬"
+        hit="⏩"
+        await og_message.clear_reactions()
+        await og_message.add_reaction(stand)
+        await og_message.add_reaction(hit)
+        def check(reaction, user):
+            return user == ctx.author and str(reaction.emoji) in [stand,hit]
+        try:
+            await bot.wait_for('reaction_add', timeout=60.0, check=check)
+        except Exception as e:
+            print(e)
+        channel=og_message.channel
+        msgid = og_message.id
+        msg = await channel.fetch_message(msgid)
+        s=h=0
+        for reaction in msg.reactions:
+          if str(reaction)==stand:
+            s+=reaction.count
+          elif str(reaction)==hit:
+            h+=reaction.count
+        await asyncio.sleep(1)
+        if s>h:
+            await og_message.edit(content=f"""DEALERS CARDS {",".join(dealer)}\nYOUR CARDS {",".join(player)}\nDealer's Points-{dealernum}\nYour points-{playernum}""")
+            while True:
+              if dealernum>playernum:
+                output="do"
+                break
+              card=random.choice(cards)
+              cards.remove(card)
+              dealer.append(card)
+              dealernum+=int(await clean_card(card,"house"))
+              await og_message.edit(content=f"""DEALERS CARDS {",".join(dealer)}\nYOUR CARDS {",".join(player)}\nDealer's Points-{dealernum}\nYour points-{playernum}""")
+              if playernum==21:
+                output="pa"
+                break
+              elif dealernum>21:
+                output="db"
+                break
+        else:
+            card=random.choice(cards)
+            cards.remove(card)
+            player.append(card)
+            playernum+=int(await clean_card(card,"player"))
+            await og_message.edit(content=f"""DEALERS CARDS {",".join([dealer[0]])}+???\nYOUR CARDS {",".join(player)}\nDealer's Points-{dni}+???\nYour points-{playernum}""")
+            if playernum>21:
+              output="pb"
+              break
+            elif playernum==21:
+              output="pa"
+              break
+  await og_message.edit(content=f"""DEALERS CARDS {",".join(dealer)}\nYOUR CARDS {",".join(player)}\nDealer's Points-{dealernum}\nYour points-{playernum}""")
+  if output=="db":
+    await ctx.send(f"The dealer bust! So you've won {cash*2}!")
+    data['money'][ath]+=cash
+  elif output=="do":
+    await ctx.send("The dealer beat your hand! You've lost.")
+    data['money'][ath]-=cash
+  elif output=="pb":
+    await ctx.send("You've busted! So, you've lost.")
+    data['money'][ath]-=cash
+  elif output=="da":
+    await ctx.send("Dealer got a blackjack! You've lost.")  
+    data['money'][ath]-=cash
+  elif output=="pa":
+    await ctx.send(f"You got a blackjack! So you've won {cash*4}!")
+    data['money'][ath]+=cash*3
+
+
+@bot.command(aliases=["roul","rt"])
+@commands.has_role("Respawning")
+async def roulette(ctx,bet:str,cash:int):
+  '''Allows a player to play roulette.
+  Straight-(35:1)- Pick one number to bet on. Syntax - [x]
+  Split-(17:1) - Pick 2 numbers adjacent in a column. Syntax - [x,y]
+  Street-(11:1) - Pick 3 numbers adjacent in a column. Syntax - [x,y,z]
+  Corner-(8:1) - Pick 4 numbers that make a square box. Syntax - [a,b,x,y]
+  Six Line-(5:1) - Pick 6 numbers that make a 2x3 box. Syntax - [a,b,c,x,y,z]
+  
+  Red/Black-(1:1)- Pick Red or Black. Syntax - r or b
+  Odd/Even-(1:1)- Pick Odd or Even. Syntax - e or o
+  High/Low-(1:1)- Pick high or low. High is over 18 and low is below 19. Syntax - h or l
+  Dozens-(2:1)- Pick [1-12]/[13-24]/[25-36]. Syntax - 1d or 2d or 3d
+  Colums-(2:1)- Pick the entire first/second/third column. Syntax - 1c or 2c or 3c
+  '''
+  global data
+  if int(gamestate)!=3:
+      await ctx.send("There is no game going on right now.")
+      return
+  if cash<0:
+    await ctx.send("Number cannot be negative .")
+    return
+  if cash>1000:
+    await ctx.send("You cannot gamble over 1000c.") #change
+    return
+  ath=str(ctx.author.id)
+  if cash>data['money'][ath]:
+    await ctx.send("You can only gamble what you have.")
+    return
+  ans=random.randint(1,36)
+  try:
+    if "." in bet:
+      await ctx.send("Illegal Bet.")
+      return
+    bet=list(eval(bet))
+    bet.sort()
+    if len(bet)==1:
+      #straight
+      if bet[0]==ans:
+        data['money'][ath]+=cash*35
+        await ctx.send(f"You Won! The ball landed on {ans}. You won {cash*36}!")
+        return
+    elif len(bet)==2:
+      #split
+      if bet[0]+1 not in bet and bet[0]+3 not in bet:
+        await ctx.send("Illegal Bet.")
+        return
+      else:
+        if ans in bet:
+          data['money'][ath]+=cash*17
+          await ctx.send(f"You Won! The ball landed on {ans}. You won {cash*18}!")
+          return
+    elif len(bet)==3:
+      #strett
+      if bet[1]+3 not in bet or bet[1]-3 not in bet:
+        await ctx.send("Illegal Bet.")
+        return
+      else:
+        if ans in bet:
+          data['money'][ath]+=cash*11
+          await ctx.send(f"You Won! The ball landed on {ans}. You won {cash*12}!")
+          return
+    elif len(bet)==4:
+      if bet[0] not in list(range(1,35,3))+list(range(2,36,3)) or bet[0]+1 not in bet or bet[0]+3 not in bet or bet[0]+4 not in bet:
+        await ctx.send("Illegal Bet.")
+        return
+      else:
+        if ans in bet:
+          data['money'][ath]+=cash*8
+          await ctx.send(f"You Won! The ball landed on {ans}. You won {cash*9}!")
+          return
+    elif len(bet)==6:
+      if bet[0] not in list(range(1,35,3)) or sorted(bet)!=sorted([bet[0]+x for x in range(0,6)]):
+        await ctx.send("Illegal Bet.")
+        return
+      else:
+        if ans in bet:
+          data['money'][ath]+=cash*5
+          await ctx.send(f"You Won! The ball landed on {ans}. You won {cash*6}!")  
+          return
+  except:
+    if "r" in bet or "b" in bet:
+      #rb
+      r=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]
+      b=[x for x in range(1,37) if x not in r]
+      if "r" in bet:
+        if ans in r:
+          data['money'][ath]+=cash
+          await ctx.send(f"You Won! The ball landed on {ans} which is red. You won {cash*2}!")  
+          return
+      elif "b" in bet:
+        if ans in b:
+          data['money'][ath]+=cash
+          await ctx.send(f"You Won! The ball landed on {ans} which is black. You won {cash*2}!")  
+          return
+    elif "e" in bet or "o" in bet:
+      #oe
+      if "e" in bet:
+        if ans%2==0:
+          data['money'][ath]+=cash
+          await ctx.send(f"You Won! The ball landed on {ans} which is even. You won {cash*2}!")  
+          return
+      elif "o" in bet:
+        if ans%2!=0:
+          data['money'][ath]+=cash
+          await ctx.send(f"You Won! The ball landed on {ans} which is odd. You won {cash*2}!")  
+          return
+    elif "h" in bet or "l" in bet:
+      #hl
+      if "h" in bet:
+        if ans<19:
+          data['money'][ath]+=cash
+          await ctx.send(f"You Won! The ball landed on {ans} which is low. You won {cash*2}!")  
+          return
+      elif "l" in bet:
+        if ans>18:
+          data['money'][ath]+=cash
+          await ctx.send(f"You Won! The ball landed on {ans} which is high. You won {cash*2}!")  
+          return
+    elif "d" in bet:
+      #dozens
+      bet=int(bet.replace("d",""))
+      if bet not in [1,2,3]:
+        await ctx.send("Illegal Bet.")
+        return
+      else:
+        if bet==1:
+          if ans<13:
+            data['money'][ath]+=cash*2
+            await ctx.send(f"You Won! The ball landed on {ans} which is in the first dozen. You won {cash*3}!")  
+            return
+        elif bet==2:
+          if ans>12 and ans<25:
+            data['money'][ath]+=cash*2
+            await ctx.send(f"You Won! The ball landed on {ans} which is in the second dozen. You won {cash*3}!")  
+            return
+        elif bet==3:
+          if ans>24:
+            data['money'][ath]+=cash*2
+            await ctx.send(f"You Won! The ball landed on {ans} which is in the third dozen. You won {cash*3}!")  
+            return
+    elif "c" in bet:
+      #colums
+      bet=int(bet.replace("c",""))
+      if bet not in [1,2,3]:
+        await ctx.send("Illegal Bet.")
+        return
+      else:
+        c1=list(range(1,35,3))
+        c2=list(range(2,36,3))
+        c3=list(range(3,37,3))
+        if bet==1:
+          if ans in c1:
+            data['money'][ath]+=cash*2
+            await ctx.send(f"You Won! The ball landed on {ans} which is in the first column. You won {cash*3}!")  
+            return
+        elif bet==2:
+          if ans in c2:
+            data['money'][ath]+=cash*2
+            await ctx.send(f"You Won! The ball landed on {ans} which is in the second column. You won {cash*3}!")  
+            return
+        elif bet==3:
+          if ans in c3:
+            data['money'][ath]+=cash*2
+            await ctx.send(f"You Won! The ball landed on {ans} which is in the third column. You won {cash*3}!")  
+            return
+  await ctx.send(f"Oops! You lost {cash}! The ball landed on {ans}.")
+  data['money'][ath]-=cash
+  dump()
+  
 @bot.command(aliases=["lottery","jl"])
 @commands.has_role("Respawning")
 async def joinlottery(ctx,tickets=1):
@@ -3915,7 +4287,7 @@ async def viewmarket(ctx):
     **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. Note that you can only use this once per game.(Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
-    **7.Bomb -** Set a bomb in someone's house to kill them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
+    **7.Bomb -** Set a bomb in someone's house to weak attack them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
     **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on you and your teammates) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
     **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. (This only works on role kills and not on items.)*- For {prices[9]}* \n""")
     msg.add_line(f"""\n__**LVL 4 (1k)**__ 
