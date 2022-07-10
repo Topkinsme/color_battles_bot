@@ -4284,7 +4284,7 @@ async def viewmarket(ctx):
     msg.add_line(f"""\n__**LVL 2 (1k)**__ 
     **4.Role Seeker -** Get the role and team of any player in game once and role block them for the coming night. (Using this during the night will only make it take effect during next night, it will not roleblock dead people if checked.) *- For {prices[4]}*
     **5.Respawn stone -** Use this to respawn instantly once (Only works if you are already in the respawning state). *- For {prices[5]}*
-    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. Note that you still will need to wait out your respawn time. Note that you can only use this once per game.(Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
+    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. This will automatically activate if you were about to die permanently. Note that it does not activate if you're in the respawning state and your royalty roles all die. Also note that you still will need to wait out your respawn time and that you can only use this once per game.(Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
     **7.Bomb -** Set a bomb in someone's house to weak attack them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
@@ -4297,7 +4297,7 @@ async def viewmarket(ctx):
     **Note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**
     __**Also note that all these items can only be used while in the state respawning.**__ \n""")
     msg.add_line(f"""\n**    1.Inheritance -** Transfer all of your current balance to your team's vault, or withdraw a certain amount of money from your team vault, if the king approves. *- For {bmprices[1]}, increases by 50 each time.* 
-    **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase. *- For {bmprices[2]}, increases by 500 each time.* 
+    **2.Time Bender -** Can be used to decrease your/your teammates' respawning time or increase someone else's respawning time by 2 phases. The item cannot be used to decrease player respawn times lower than 1 phase and cannot be used to raise respawn times above 6 phases. The item will still be consumed however. *- For {bmprices[2]}, increases by 500 each time.* 
     **3.Haunt -** Use while Respawning to check on one alive person to see their exact role (does not include their colour faction). This informs the user that you now know their role.*- For {bmprices[3]}, increases by 1000 each time.* 
     **4.Guardian -** Use while Respawning to give a specific player Basic (Weak) Protection for the following night, in exchange for increasing your respawn time by a phase. *- For {bmprices[4]}, increases by 1000 each time.* 
     **5.PHANTOM'S REVENGE -** Usable only once per game. Perform an **Unstoppable Attack** on the player who killed you, when the phase ends. If the killer is already dead, this will simply give you the name of the killer. Cannot be used if you were killed by tribute. *- For {bmprices[5]}, increases by 96000 each time.*""")
