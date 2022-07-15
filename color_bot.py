@@ -3399,7 +3399,7 @@ async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
   rolet=(data['rt'][role]['lirole']).lower()
-  roles=["jack","king","prime_minister","prince","princess","queen"]
+  roles=["jack","king","prime_minister","prince","princess","queen","monarch","senator"]
   l=difflib.get_close_matches(rolet,roles)
   if len(l)==0:
       await ctx.send("You are not a royalty role. Please only use this command if your role is a royalty role.")
@@ -4476,7 +4476,7 @@ async def picktribute(ctx,person:typing.Union[discord.Member,str],cash:int):
   team2=data['players'][ath2]['team']
   role = data['players'][ath]['role']
   rolet=(data['rt'][role]['lirole']).lower()
-  roles=["jack","king","prime_minister","prince","princess","queen"]
+  roles=["jack","king","prime_minister","prince","princess","queen","monarch","senator"]
   l=difflib.get_close_matches(rolet,roles)
   if len(l)==0:
       await ctx.send("You are not a royalty role. Please only use this command if your role is a royalty role.")
