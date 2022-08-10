@@ -43,8 +43,6 @@ bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=i
 
 class help_menu(menus.Menu):
 
-    
-
     async def send_initial_message(self, ctx, channel):
         self.context=ctx
         self.pagenumber=0
@@ -180,6 +178,7 @@ async def on_ready():
             data['marketalert']=[]
             data['poll']={}
             data['lottery']=0
+            data['privateccs']={}
             dump()
             await spamchannel.send(f"ERROR!- {e}")
     if int(gamestate)==1:
@@ -362,7 +361,7 @@ async def on_message(message):
     await score(ath,message.content,message.channel.category)
     if message.channel.name=="battlefield":
       n = random.randint(1,giftchance)
-      cash = random.randint(300,500)
+      cash = random.randint(100,300)
       if n ==1:
         if ath not in data['money']:
           return
@@ -426,12 +425,22 @@ async def on_message(message):
       else:
         if respgiftchance>11:
           respgiftchance-=1
+    else:
+      if str(message.channel.name).replace("-master","") in data['privateccs']:
+        privateacc=data['privateccs'][message.channel.name.replace("-master","")]
+        if message.channel.id==int(privateacc['masterchn']) and str(message.author.id)==privateacc['masterid']:
+          victimchannel=discord.utils.get(guildd.channels,id=int(privateacc["victimchn"]))
+          await webhookcustom(victimchannel,"Anonymous",message.content)
+        elif message.channel.id==int(privateacc['victimchn']) and str(message.author.id)==privateacc['victimid']:
+          masterchannel=discord.utils.get(guildd.channels,id=int(privateacc["masterchn"]))
+          await webhookcustom(masterchannel,message.author.display_name,message.content)
+      
     dump()
 
     
-@bot.event
+'''@bot.event
 async def on_command_error(ctx,error):
-    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')
+    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')'''
 
 @bot.event
 async def on_command(ctx):
@@ -579,6 +588,7 @@ async def compreset(ctx):
     data['marketalert']=[]
     data['poll']={}
     data['lottery']=0
+    data['privateccs']={}
     await ctx.send("A complete erasure of all data has been done.")
     dump()
     
@@ -689,7 +699,10 @@ async def reset(ctx):
         await userr.remove_roles(role)
         role = discord.utils.get(guildd.roles, name="Players")
         await userr.remove_roles(role)
-        await userr.edit(nick=None)
+        try:
+          await userr.edit(nick=None)
+        except:
+          pass
     for user in data['specters']:
         guildd=bot.get_guild(448888674944548874)
         userr=discord.utils.get(guildd.members,id=int(user))
@@ -771,6 +784,7 @@ async def reset(ctx):
     data['marketalert']=[]
     data['poll']={}
     data['lottery']=0
+    data['privateccs']={}
     dump()
     await ctx.send("Reset complete!")
     dump()   
@@ -1463,9 +1477,10 @@ async def assignroles(ctx,code):
     num=0
     for player in data['players']:
       if data['signedup'][player]['role']!=None:
-        data['players'][player]['role']=data['signedup'][player]['role']
-        data['players'][player]['team']=data['rt'][role]['team']
-        rolelist.remove(data['signedup'][player]['role'])
+        customrole=data['signedup'][player]['role']
+        data['players'][player]['role']=customrole
+        data['players'][player]['team']=data['rt'][customrole]['team']
+        rolelist.remove(customrole)
     while num<countp:
         user = random.choice(listoplayers)
         listoplayers.remove(user)
@@ -1955,17 +1970,18 @@ async def closeauction(ctx):
         await ctx.send("There is no game going on.")
         return
   global data
+  guildd=bot.get_guild(448888674944548874)
+  mark=discord.utils.get(guildd.channels,name="auction_house")
   if data['auction']['state']==0:
     await ctx.send("There is no auction going on right now.")
     return
-  await ctx.send("The market is closing!")
+  await mark.send("The auction is closing!")
   while True:
     a=data['auction']['bid']
     await asyncio.sleep(30)
     if a==data['auction']['bid']:
       break
-  guildd=bot.get_guild(448888674944548874)
-  mark=discord.utils.get(guildd.channels,name="auction_house")
+  
   if data['auction']['bider'] == "":
     await mark.send("There were no bids, as such this item has been sold to no one.")
   else:
@@ -2035,8 +2051,9 @@ async def closeblindauction(ctx,code):
   if whop=="" and cost==0:
     await mark.send(f"There were no bids on the item with code {code}, as such this item has been sold to no one.")
   else:
-    await mark.send(f"Congrats! The item auctioned for {cost} ! (Code was {code})")
     team=str(whop)
+    await mark.send(f"Congrats! The item auctioned for {cost} to {whop}! (Code was {code}).")
+    
     data['building'][team]['vault']-=cost
     
     data['building'][team]['stash']['items'].append(data['bauction'][code]['item'])
@@ -2404,6 +2421,7 @@ async def advancephase(ctx,cost=100):
   if int(gamestate)!=3:
         await ctx.send("There isn't a game going on.")
         return
+  await ctx.send("Advancing phase.")
   data['code']['gamephase']+=1
   num = data['code']['gamephase']
   if num %2==0:
@@ -2664,7 +2682,16 @@ async def setrole(ctx,user:discord.Member,role=None):
   await ctx.send(f"Done! {user.mention} will now be role {role}.")
   dump()
 
-
+@bot.command(aliases=["srm"])
+@commands.has_any_role("Helpers","Host")
+async def setrolemultiple(ctx,*,roledict:literal_eval):
+  '''Use this to set someone as some role <Hosts>'''
+  roledict=list(roledict)
+  guildd=bot.get_guild(448888674944548874)
+  for thing in roledict:
+    who = discord.utils.get(guildd.members,id=int(thing[0]))
+    await setrole(ctx,who,thing[1])
+  dump()
 
 #\:sunglasses:\:smirk:\:smiley:\:joy:\:pensive:
 #all
@@ -2887,9 +2914,6 @@ async def channel(ctx):
 @commands.has_any_role("Alive","Helpers","Host")
 async def createchannel(ctx,ccname,*member:typing.Union[discord.Member,str]):
     '''Used to create a communication channel. Costs 50c.'''
-    if (int(gamestate) != 3):
-        await ctx.send("There is no game going on.")
-        return
     global data
     guildd=ctx.message.guild
     if int(gamestate)!=3:
@@ -3102,6 +3126,149 @@ async def renamechannel(ctx,*,newname):
     else:
         await ctx.send("You probably aren't the owner of this cc.")
 
+@bot.command(aliases=["dm"])
+@commands.has_role("Alive")
+async def direct_message(ctx,member:typing.Union[discord.Member,str],*,message:str):
+    '''Allows alive people to send a direct message to someone.'''
+    if (int(gamestate) != 3):
+        await ctx.send("There is no game going on.")
+        return
+    guildd=ctx.message.guild
+    emjlist=[]
+    if data['money'][str(ctx.author.id)] <10:
+        await ctx.send("You cannot afford to do this.")
+        return
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    if member in emjlist:
+      idd=emjtop(member)
+      if idd== None:
+        await ctx.send("Invalid Emoji")
+        return
+      member = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(member,discord.member.Member):
+      pass
+    else:
+      await ctx.send("Invalid User")
+      return
+    if data['players'][str(member.id)]['state']<1:
+        await ctx.send("You cannot direct message a dead person.")
+        return
+    roleid= data['players'][str(member.id)]['role']
+    rolename=data['rt'][roleid]['lirole']
+    chnlname = str(data['players'][str(member.id)]['team']) + "_" + str(rolename)
+    dmchat=discord.utils.get(guildd.channels,name=chnlname)
+    await webhookcustom(dmchat,str(ctx.author.display_name),message)
+    data['money'][str(ctx.author.id)]-=10
+    await ctx.send("Message sent.")
+    
+@bot.command(aliases=["connect","ccanon","cca"])
+@commands.has_any_role("Helpers","Host")
+async def createprivatechannel(ctx,ccname,master:typing.Union[discord.Member,str],victim:typing.Union[discord.Member,str]):
+    '''Used to create a communication channel. Costs 50c.'''
+    global data
+    guildd=ctx.message.guild
+    if int(gamestate)!=3:
+        await ctx.send("There isn't a game going on.")
+        return
+    emjlist=[]
+    for player in data['players']:
+      emjlist.append(data['players'][player]['emoji'])
+    
+    if master in emjlist:
+        idd=emjtop(master)
+        if idd== None:
+          await ctx.send(f"Invalid Emoji {master}.")
+          return
+        master = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(master,discord.member.Member):
+        pass
+    else:
+        await ctx.send(f"Invalid Input {master}.")
+        return
+    if victim in emjlist:
+        idd=emjtop(victim)
+        if idd== None:
+          await ctx.send(f"Invalid Emoji {victim}.")
+          return
+        victim = discord.utils.get(guildd.members,id=int(idd))
+    elif isinstance(victim,discord.member.Member):
+        pass
+    else:
+        await ctx.send(f"Invalid Input {victim}.")
+        return
+      
+    if str(victim.id) not in data['signedup']:
+        await ctx.send("That person is not in this game.")
+        return
+    if ccname=="battlefield" or ccname=="respawning" or ccname=="auction_house":
+      await ctx.send("You cannot name a cc that.")
+      return
+      
+    if data['code']['ccno'] ==0:
+      name=data['code']['gamecode'] +' cc1'
+      await guildd.create_category(name)
+    elif data['code']['ccno']==49:
+      name=data['code']['gamecode'] +' cc2'
+      await guildd.create_category(name)
+    elif data['code']['ccno']==99:
+      name=data['code']['gamecode'] +' cc3'
+      await guildd.create_category(name)
+    elif data['code']['ccno']==149:
+      name=data['code']['gamecode'] +' cc4'
+      await guildd.create_category(name)
+    elif data['code']['ccno']==199:
+      name=data['code']['gamecode'] +' cc5'
+      await guildd.create_category(name)
+      
+    author = ctx.message.author
+    role0 = discord.utils.get(guildd.roles, name="Helpers")
+    rolem1 = discord.utils.get(guildd.roles, name="Host")
+    role3 = discord.utils.get(guildd.roles, name="Dead")
+    role4 = discord.utils.get(guildd.roles, name="Spectator")
+    #
+    if data['code']['ccno']<49:
+      name=data['code']['gamecode'] +' cc1'
+      cate = discord.utils.get(ctx.message.guild.categories, name=name)
+    elif data['code']['ccno']<99:
+      name=data['code']['gamecode'] +' cc2'
+      cate = discord.utils.get(ctx.message.guild.categories, name=name)
+    elif data['code']['ccno']<149:
+      name=data['code']['gamecode'] +' cc3'
+      cate = discord.utils.get(ctx.message.guild.categories, name=name)
+    elif data['code']['ccno']<199:
+      name=data['code']['gamecode'] +' cc4'
+      cate = discord.utils.get(ctx.message.guild.categories, name=name)
+    elif data['code']['ccno']<249:
+      name=data['code']['gamecode'] +' cc5'
+      cate = discord.utils.get(ctx.message.guild.categories, name=name)
+    data['code']['ccno']+=2
+    overwrites = {
+    guildd.default_role: discord.PermissionOverwrite(read_messages=False),
+    guildd.me: discord.PermissionOverwrite(read_messages=True),
+    author:discord.PermissionOverwrite(read_messages=True,add_reactions=True),
+    rolem1: discord.PermissionOverwrite(read_messages=True,send_messages=True),
+    role0:discord.PermissionOverwrite(read_messages=True,send_messages=True),
+    role3:discord.PermissionOverwrite(read_messages=True,send_messages=False),
+    role4:discord.PermissionOverwrite(read_messages=True,send_messages=False)
+                 }
+    a = await guildd.create_text_channel(str(ccname+"-master"),overwrites=overwrites,category=cate)
+    b = await guildd.create_text_channel(str(ccname),overwrites=overwrites,category=cate)
+    data['privateccs']={}
+    data['privateccs'][ccname]={'masterid':str(master.id),'victimid':str(victim.id),'masterchn':str(a.id),'victimchn':str(b.id)}
+  
+    await a.set_permissions(master, read_messages=True,send_messages=True)
+    await b.set_permissions(victim, read_messages=True,send_messages=True)
+    data['players'][str(master.id)]['incc'].append(a.id)
+    data['players'][str(victim.id)]['incc'].append(b.id)
+    
+    mastermsg = await a.send(f"This is a new private connected cc that is connected to {victim.mention}. You can talk to them anonymously here.")
+    victimmsg = await b.send("This is a new private connected cc that is connected to an anonymous user. You can talk to them but you can't see who they are.")
+    await mastermsg.pin()
+    await victimmsg.pin()
+    await ctx.send("Channel created.")
+    dump()    
+      
 
 @bot.command(aliases=["sendm","give","pay"])
 @commands.has_role("Alive")
@@ -3362,7 +3529,7 @@ async def vaultdeposit(ctx,cash:int=0):
 @vault.command(aliases=["forcedep","fdep"])
 @commands.has_role("Alive")
 async def forcedeposit(ctx,person:typing.Union[discord.Member,str],cash:int=0):
-  '''Allows the king of a team to force a teammate to deposit cash.'''
+  '''Allows the king of a team to force a teammate to deposit cash. Typing cash=0 (or nothing) will dep their entire balance.'''
   global data
   if int(gamestate)!=3:
     await ctx.send("There is no game going on.")
@@ -4284,14 +4451,14 @@ async def viewmarket(ctx):
     msg.add_line(f"""\n__**LVL 2 (1k)**__ 
     **4.Role Seeker -** Get the role and team of any player in game once and role block them for the coming night. (Using this during the night will only make it take effect during next night, it will not roleblock dead people if checked.) *- For {prices[4]}*
     **5.Respawn stone -** Use this to respawn instantly once (Only works if you are already in the respawning state). *- For {prices[5]}*
-    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. This will automatically activate if you were about to die permanently. Note that it does not activate if you're in the respawning state and your royalty roles all die. Also note that you still will need to wait out your respawn time and that you can only use this once per game.(Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
+    **6.Respawn Totem  -** Allows you to respawn once even if your king is dead. This will automatically activate if you were about to die permanently. Note that it does not activate if you're in the respawning state and your royalty roles all die. Also note that you still will need to wait out your respawn time and that you can only use this once per game. Solos using this item will respawn in 4 phases. (Non Solo Roles with no defined respawn time cannot use this.) *- For {prices[6]}* \n""")
     #if mrktlvl>2:
     msg.add_line(f"""\n__**LVL 3 (1k)**__ 
     **7.Bomb -** Set a bomb in someone's house to weak attack them and everyone who visits them for 1 night. (Note that the bomb attack is phase end, and counts as a visiting action. Also you cannot be killed by your own bomb. You can change your target till the phase ends.)*- For {prices[7]}*
     **8.Protection -** Use this on someone to protect them from all attacks for one night. (Strong Protection, Can only be used on you and your teammates) (Note that using this on someone is a phase end action, and it counts as a visiting action.)*- For {prices[8]}*
     **9.Strength Potion -** Use this to make all of your attacks into strong attacks for 1 night. (This only works on role kills and not on items.)*- For {prices[9]}* \n""")
     msg.add_line(f"""\n__**LVL 4 (1k)**__ 
-    **10.GOD -** Protect all your teammates for the current/next night and make all dead teammates alive instantly. (Using this during the night will make it protect during that night. Protection is strong protection) (Respawns teammates only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
+    **10.GOD -** Protect all your teammates for the current/next night and make all respawning teammates alive instantly. (Using this during the night will make it protect during that night. Protection is strong protection) (Respawns teammates only if they're in the state respawning.) (This can be only be bought once during the game) *- For {prices[10]}* \n\n""")
   if state==0 or state==3:
     msg.add_line("""__**BLACK MARKET**__
     **Note that none of these items will be used automatically, and if you ever wish to use them, ping a host and inform them.**
@@ -4797,7 +4964,7 @@ async def claimdeposit(ctx,code):
   data['money'][ath]+=earnd
 
   del data['players'][ath]['depos'][code]
-  await ctx.send(f"Done! The deposit with code {code} has been deleted. Your money was kept for {phases} phases, and you have recieved a profit of {interest}. Therefore, you have totally recieved {earnd} ({cash}+{int(interest*phases)}) back.")
+  await ctx.send(f"Done! The deposit with code {code} has been deleted. Your money was kept for {phases} phases, and you have recieved a profit of {interest}. Therefore, you have totally recieved {earnd} ({cash}+{interest}) back.")
   dump()
 
 @bot.group(invoke_without_command=True,aliases=["ac","act"])
