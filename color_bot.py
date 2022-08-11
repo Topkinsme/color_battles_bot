@@ -438,9 +438,9 @@ async def on_message(message):
     dump()
 
     
-'''@bot.event
+@bot.event
 async def on_command_error(ctx,error):
-    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')'''
+    await ctx.send(f'```py\n{error.__class__.__name__}: {error}\n```')
 
 @bot.event
 async def on_command(ctx):
