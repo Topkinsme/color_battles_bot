@@ -1295,8 +1295,8 @@ async def closesignups(ctx):
     
 @bot.command(aliases=["s"])
 @commands.has_any_role("Helpers","Host")
-async def start(ctx,code:str,num=0):
-    '''Starts the game (Type a number after s to run the assignroles command automatically) <Helpers>'''
+async def start(ctx,code:str,marketsize:int,assignrolesconfirm:bool=True):
+    '''Starts the game (Type False at the end to stop the assignroles command from running) <Helpers>'''
     global gamestate
     global data
     if int(gamestate)!=2:
@@ -1326,13 +1326,13 @@ async def start(ctx,code:str,num=0):
         await userr.add_roles(role)
         role = discord.utils.get(guildd.roles, name="Alive")
         await userr.add_roles(role)
-    if num !=0:
-        await assignroles(ctx,code)
+    if assignrolesconfirm:
+        await assignroles(ctx,code,marketsize)
     dump()
         
 @bot.command(aliases=["as"])
 @commands.has_any_role("Helpers","Host")
-async def assignroles(ctx,code):
+async def assignroles(ctx,code:str,marketsize:int):
     '''Assigns roles and makes all channels. <Helpers>'''
     global data
     if int(gamestate) != 3:
@@ -1457,8 +1457,9 @@ async def assignroles(ctx,code):
       data['building'][team]['stash']={}
       data['building'][team]['stash']['items']=[]
       data['building'][team]['stash']['smoney']=0
-      data['building'][team]['marketprices']=["Placeholder",1000,1000,1000,3500,2000,3000,4000,3000,4000,4000]
-      data['building'][team]['bmarketprices']=["Placeholder",150,1000,2000,2000,5000]
+      baseprice=250*marketsize
+      data['building'][team]['marketprices']=["Placeholder"]+[baseprice+x*100 for x in [0,0,0,25,10,20,30,20,30,30]]
+      data['building'][team]['bmarketprices']=["Placeholder"]+[baseprice+x*100 for x in [-8.5,0,10,10,40]]
       teammsg=discord.Embed(colour=random.randint(0, 0xffffff))
       teammsg.set_author(name="Team info!")
       teammsg.add_field(name="Welcome!",value=f"You are all members of the {team} team! \n Work together and win this game!")
@@ -4410,11 +4411,12 @@ async def market(ctx):
     await ctx.send_help(ctx.invoked_with)
 
 @market.command(aliases=["mark","view","display"])
-async def viewmarket(ctx):
+async def viewmarket(ctx,marketsize=5):
   '''Use this to display market.'''
-
-  prices=["Placeholder",1000,1000,1000,3500,2000,3000,4000,3000,4000,4000]
-  bmprices=["Placeholder",150,1000,2000,2000,5000]
+    
+  baseprice=250*marketsize
+  prices=["Placeholder"]+[baseprice+x*100 for x in [0,0,0,25,10,20,30,20,30,30]]
+  bmprices=["Placeholder"]+[baseprice+x*100 for x in [-8.5,0,10,10,40]]
   state=3
   if int(gamestate)==3:
     ath=str(ctx.author.id)
