@@ -33,13 +33,12 @@ import re
 token = str(os.environ.get("tokeno"))
 dbpass=str(os.environ.get("dbpass"))
 
-intents = discord.Intents.default()
-intents.members = True
-intents.presences = True
+intents = discord.Intents.all()
 
 profanity.load_censor_words(whitelist_words=['damn'])
 
 bot = commands.Bot(command_prefix =commands.when_mentioned_or('!','$'),intents=intents)
+logging.basicConfig(level=logging.INFO)
 
 class help_menu(menus.Menu):
 
@@ -110,11 +109,11 @@ class customHelp(commands.DefaultHelpCommand):
 
 bot.help_command=customHelp()
 
-logger = logging.getLogger('discord')
+'''logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
-logger.addHandler(handler)
+logger.addHandler(handler)'''
 
 
 
@@ -553,7 +552,7 @@ async def on_raw_reaction_remove(payload):
 async def logout(ctx):
     '''Shuts down the bot <Informer>'''
     await ctx.send("Logging out.")
-    await bot.logout()
+    await bot.close()
     dump()
     
 @bot.command()
@@ -5160,6 +5159,12 @@ def dump():
     '''with open('data.json', 'w+') as f:
         json.dump(data, f)'''
 
-keep_alive.keep_alive()
-bot.run(token)
+
+async def main():
+      keep_alive.keep_alive()
+      await bot.start(str(os.environ.get("tokeno")))
+      
+
+if __name__=="__main__":
+  asyncio.run(main())
  
